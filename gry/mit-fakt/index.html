@@ -1,0 +1,2552 @@
+<!DOCTYPE html>
+<html lang="pl" data-gm-motyw="jasny">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="generator" content="gry-moodle 0.9.0">
+<title>Mit czy fakt: sprawdź, co naprawdę wiemy</title>
+<style>
+/* ——— rdzen.css ——— */
+/* gry-moodle 0.2.0 — NIE EDYTUJ W KURSIE, poprawiaj w PLUGIN/gry-moodle (~/.claude/local-marketplace-maciek/plugins/gry-moodle) */
+/* rdzen.css — warstwa wspólna: tokeny motywu, [hidden], klasy pomocnicze, fokus, tryby systemowe.
+   Paleta domyślna = paleta zmierzona kursu ZZR (13/13 par WCAG AA, `ZZR/_produkcja/scorm/kontrast.py`).
+   Kurs nadpisuje tokeny polem `motyw` banku (generator dopisuje własny arkusz po tym). */
+
+:root {
+  --tlo:            #F7F4EF;
+  --tlo-karta:      #FFFFFF;
+  --tlo-glebia:     #0E4F63;
+  --tekst:          #1C2B33;
+  --tekst-slaby:    #4A5C66;
+  --glowny:         #0E4F63;
+  --akcent:         #B8432A;
+  --akcent-ciemny:  #8F3320;
+  --pozytyw:        #1F6B55;
+  --uwaga:          #8A5A00;
+  --ramka:          #D8D0C4;   /* separatory dekoracyjne */
+  --ramka-kontrolka:#8A8175;   /* granice pól i przycisków — 1.4.11 */
+  --na-glebi:       #DCE9EE;   /* tekst i linie na tle sceny */
+  --na-glownym:     #FFFFFF;   /* tekst na wypełnieniu --glowny / --akcent */
+  --tlo-ok:         #F1F8F5;
+  --tlo-zle:        #FDF3F1;
+  --gm-nakladka:    rgba(14, 79, 99, .84);
+  --promien: 10px;
+}
+
+/* Motyw ciemny — tylko gdy strona go zamówi (data-gm-motyw="ciemny" albo "auto" + ustawienie systemu).
+   Paczka ZZR-owa i pilot jadą w jasnym, jak oryginał. */
+:root[data-gm-motyw="ciemny"] {
+  --tlo: #121A1F; --tlo-karta: #1B262D; --tlo-glebia: #0B2E3A; --tekst: #E8EEF1; --tekst-slaby: #B4C2CA;
+  --glowny: #8FD0E3; --akcent: #F0997F; --akcent-ciemny: #F6B6A2; --pozytyw: #7FD1B4; --uwaga: #E8C26A;
+  --ramka: #33434D; --ramka-kontrolka: #8C9DA7; --na-glebi: #DCE9EE; --na-glownym: #0B1B22;
+  --tlo-ok: #16302A; --tlo-zle: #3A2019; --gm-nakladka: rgba(6, 22, 28, .86);
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-gm-motyw="auto"] {
+    --tlo: #121A1F; --tlo-karta: #1B262D; --tlo-glebia: #0B2E3A; --tekst: #E8EEF1; --tekst-slaby: #B4C2CA;
+    --glowny: #8FD0E3; --akcent: #F0997F; --akcent-ciemny: #F6B6A2; --pozytyw: #7FD1B4; --uwaga: #E8C26A;
+    --ramka: #33434D; --ramka-kontrolka: #8C9DA7; --na-glebi: #DCE9EE; --na-glownym: #0B1B22;
+    --tlo-ok: #16302A; --tlo-zle: #3A2019; --gm-nakladka: rgba(6, 22, 28, .86);
+  }
+}
+
+/* Atrybut hidden chowa ZAWSZE. Reguła przeglądarki [hidden]{display:none} przegrywa z każdą regułą autora,
+   która ustawia display (decyduje pochodzenie reguły, nie swoistość) — TOP 15 #7, MK REGULA_HIDDEN.
+   Wariant .gm [hidden] jest dla formatu Strona, gdzie arkusz siedzi w cudzej stronie. */
+[hidden], .gm [hidden] { display: none !important; }
+
+/* tylko dla czytnika ekranu */
+.gm-sr {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+}
+
+/* ——— klasy, których używa silnik (dawniej klasy strony-gospodarza ZZR: przycisk, reakcja, slaby,
+   tylko-czytnik). Z prefiksem gm-, żeby nie zderzały się z komponentami kursu (L13). ——— */
+.gm-przycisk {
+  display: inline-flex; align-items: center; gap: .5em;
+  min-height: 44px; padding: .7em 1.3em;           /* 2.5.8 */
+  background: var(--akcent); color: var(--na-glownym);
+  border: 2px solid var(--akcent);
+  border-radius: var(--promien);
+  font: inherit; font-weight: 600; cursor: pointer;
+  text-decoration: none;
+}
+.gm-przycisk:hover { background: var(--akcent-ciemny); border-color: var(--akcent-ciemny); }
+.gm-przycisk[aria-disabled="true"], .gm-przycisk:disabled {
+  background: var(--tlo); color: var(--tekst-slaby);
+  border-color: var(--ramka-kontrolka); cursor: not-allowed;
+}
+.gm-przycisk--cichy { background: transparent; color: var(--akcent); border-color: var(--ramka-kontrolka); }
+.gm-przycisk--cichy:hover { background: var(--tlo); color: var(--akcent-ciemny); }
+
+.gm-reakcja {
+  border-left: 4px solid var(--glowny);
+  background: var(--tlo);
+  padding: .9em 1.1em; border-radius: 0 var(--promien) var(--promien) 0;
+  margin: .8em 0 0;
+}
+.gm-reakcja--ok  { border-left-color: var(--pozytyw); }
+.gm-reakcja--zle { border-left-color: var(--akcent); }
+.gm-reakcja--uwaga { border-left-color: var(--uwaga); }
+.gm-reakcja p:first-child { margin-top: 0; }
+.gm-reakcja p:last-child  { margin-bottom: 0; }
+
+.gm-slaby { color: var(--tekst-slaby); font-size: .92em; }
+
+/* ——— widoczny fokus (2.4.7, 2.4.11). Nigdy bez zamiennika. ——— */
+.gm-przycisk:focus-visible, .gra :focus-visible {
+  outline: 3px solid var(--akcent-ciemny);
+  outline-offset: 2px;
+}
+
+/* ——— tryby systemowe ——— */
+@media (prefers-reduced-motion: reduce) {
+  .gra *, .gra *::before, .gra *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+@media (forced-colors: active) {
+  .gm-przycisk, .gm-reakcja { border: 2px solid ButtonText; }
+  .gm-przycisk:focus-visible, .gra :focus-visible { outline-color: Highlight; }
+}
+
+/* ——— strona.css ——— */
+/* gry-moodle 0.2.0 — NIE EDYTUJ W KURSIE, poprawiaj w PLUGIN/gry-moodle (~/.claude/local-marketplace-maciek/plugins/gry-moodle) */
+/* formaty/wspolne/strona.css — strona wokół gry w formatach SCORM (paczka) i samodzielny HTML:
+   nagłówek, karty, wersja tekstowa z pytaniami, lista źródeł. Wzór: ZZR `szablon/zasoby/styl.css` (paleta 13/13 AA).
+   Klasy z prefiksem gm- (L13). Tokeny kolorów — z rdzen.css. W formacie Strona ten arkusz NIE jest używany. */
+
+:root {
+  --cien: 0 1px 3px rgba(28, 43, 51, .10), 0 6px 16px rgba(28, 43, 51, .06);
+  --odstep: clamp(16px, 4vw, 32px);
+  --szerokosc: 62rem;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+
+body.gm-strona {
+  margin: 0;
+  background: var(--tlo);
+  color: var(--tekst);
+  font: 400 clamp(16px, 1rem + .2vw, 18px)/1.65 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  letter-spacing: normal;   /* 1.4.12 — odstępy nie mogą być zablokowane */
+  word-spacing: normal;
+}
+
+.gm-strona :focus-visible { outline: 3px solid var(--akcent-ciemny); outline-offset: 2px; border-radius: 4px; }
+.gm-strona :focus:not(:focus-visible) { outline: none; }
+
+/* pomijanie nawigacji (2.4.1) */
+.gm-pomin {
+  position: absolute; left: -9999px;
+  background: var(--tlo-karta); color: var(--akcent-ciemny);
+  padding: 12px 20px; border-radius: var(--promien); font-weight: 600;
+  border: 2px solid var(--ramka-kontrolka);
+}
+.gm-pomin:focus { left: var(--odstep); top: 12px; z-index: 50; }
+
+/* szkielet */
+.gm-pas { background: var(--tlo-glebia); color: var(--tlo-karta); padding: var(--odstep); }
+.gm-pas h1 { margin: 0; font-size: clamp(1.35rem, 1.1rem + 1.4vw, 2rem); line-height: 1.25; }
+.gm-pas p  { margin: .4em 0 0; color: var(--na-glebi); }
+.gm-stopka { margin-top: 3rem; }
+.gm-stopka p { margin: 0; font-size: .92em; }
+
+.gm-strona main { max-width: var(--szerokosc); margin: 0 auto; padding: var(--odstep); }
+.gm-strona h2 { color: var(--glowny); font-size: clamp(1.2rem, 1rem + 1vw, 1.6rem); line-height: 1.3; margin: 2em 0 .6em; }
+.gm-strona h3 { color: var(--glowny); font-size: clamp(1.05rem, .95rem + .6vw, 1.3rem); margin: 1.6em 0 .5em; }
+.gm-strona h2:first-child, .gm-strona h3:first-child { margin-top: 0; }
+.gm-strona p, .gm-strona li { max-width: 68ch; }
+.gm-strona a { color: var(--akcent); text-underline-offset: 3px; overflow-wrap: anywhere; }
+.gm-strona a:hover { color: var(--akcent-ciemny); }
+
+.gm-karta {
+  background: var(--tlo-karta);
+  border: 1px solid var(--ramka);
+  border-radius: var(--promien);
+  box-shadow: var(--cien);
+  padding: var(--odstep);
+  margin: 1.5em 0;
+}
+/* „scena pierwsza” (ARCH §4.2, L43): karta z grą bez górnego marginesu — w ramce SCORM 500 px liczy się każdy piksel */
+.gm-karta--gra { margin-top: 0; }
+.gm-karta--gra > h2 { margin-bottom: .3em; }
+
+/* pytania wersji tekstowej */
+.gm-pytanie-blok { margin: 1.8em 0 0; padding-top: 1.2em; border-top: 1px solid var(--ramka); }
+fieldset.gm-pytanie { border: 0; margin: 0; padding: 0; min-width: 0; }   /* min-width:0 — 320 px bez przewijania */
+.gm-pytanie legend { font-weight: 600; color: var(--glowny); padding: 0; }
+.gm-pytanie__sprawdz { margin-top: .6em; }
+.gm-odpowiedz {
+  display: flex; align-items: flex-start; flex-wrap: wrap; gap: .7em;
+  min-height: 44px; padding: .7em .9em;
+  border: 2px solid var(--ramka-kontrolka);
+  border-radius: var(--promien);
+  margin: .5em 0; cursor: pointer; background: var(--tlo-karta);
+}
+.gm-odpowiedz > span:not(.gm-odpowiedz__znak) { flex: 1 1 12ch; min-width: 0; }
+.gm-odpowiedz:hover { background: var(--tlo); }
+.gm-odpowiedz input { margin: .25em 0 0; width: 1.15em; height: 1.15em; accent-color: var(--akcent); flex: none; }
+.gm-odpowiedz--ok  { border-color: var(--pozytyw); background: var(--tlo-ok); }
+.gm-odpowiedz--zle { border-color: var(--akcent);  background: var(--tlo-zle); }
+.gm-odpowiedz:has(input:checked:not(:disabled)) { border-color: var(--glowny); }
+@supports selector(:has(*)) {
+  .gm-odpowiedz:has(input:focus-visible) { outline: 3px solid var(--akcent-ciemny); outline-offset: 2px; }
+  .gm-odpowiedz input:focus-visible { outline: none; }
+}
+/* stan odpowiedzi nie samym kolorem (1.4.1) — znacznik tekstowy */
+.gm-odpowiedz__znak { font-weight: 700; margin-left: auto; flex: none; }
+.gm-odpowiedz--ok  .gm-odpowiedz__znak { color: var(--pozytyw); }
+.gm-odpowiedz--zle .gm-odpowiedz__znak { color: var(--akcent); }
+.gm-postep { margin-bottom: 0; }
+
+/* pełna lista elementów gry w wersji tekstowej */
+.gm-lista-elementow { margin-top: 1.8em; }
+.gm-lista-elementow > summary { cursor: pointer; font-weight: 600; color: var(--glowny); min-height: 44px; padding: .5em 0; }
+.gm-lista-elementow ol { padding-left: 1.4em; }
+.gm-lista-elementow li { margin: .6em 0; }
+
+/* źródła */
+.gm-zrodla { margin: 0; padding: 0; list-style: none; }
+.gm-zrodla li { padding: .6em 0; border-top: 1px solid var(--ramka); max-width: 68ch; }
+.gm-zrodla li:first-child { border-top: 0; }
+
+/* 1.4.10 Reflow: 320 px bez poziomego przewijania */
+@media (max-width: 26rem) {
+  :root { --odstep: 16px; }
+  .gm-strona .gm-przycisk { width: 100%; justify-content: center; }
+  .gm-odpowiedz__znak { width: 100%; margin-left: 0; text-align: right; }
+}
+
+/* ——— gra.css ——— */
+/* gry-moodle 0.5.0 — NIE EDYTUJ W KURSIE, poprawiaj w PLUGIN/gry-moodle (~/.claude/local-marketplace-maciek/plugins/gry-moodle) */
+/* gra.css — wygląd warstwy gier. Baza: ZZR `wspolne/gra.css` 202 l. (SHA bff50175…; cienie przewijania
+   panelu i przyklejone przyciski z 23.09.2026). Kolory WYŁĄCZNIE z tokenów rdzen.css (+ motyw kursu);
+   zapisy #RRGGBB tylko tam, gdzie token nie istnieje (cienie). Zmiany względem bazy: dziennik etapu 2A, C1–C7. */
+
+:root {
+  --gra-wysokosc: clamp(380px, 66vh, 640px);
+}
+
+.gra { margin: 1.5em 0; }
+
+/* polecenie stale nad planszą (L21) */
+.gra__polecenie { margin: 0 0 .5rem; font-weight: 600; color: var(--glowny); max-width: none; }
+
+/* ——— pasek nad sceną ——— */
+.gra__pasek { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-bottom: .6rem; }
+.gra__stan {
+  display: flex; flex-wrap: wrap; align-items: center; gap: .3rem 1.1rem;
+  margin-right: auto; min-height: 44px;
+  color: var(--glowny); font-variant-numeric: tabular-nums;
+}
+.gra__stan-etykieta { color: var(--tekst-slaby); font-size: .9em; }
+.gra__stan b { font-size: 1.1em; }
+.gra__stan:empty { display: none; }
+.gra__przelacznik {
+  min-height: 44px; padding: .45em .95em;
+  background: var(--tlo-karta); color: var(--tekst);
+  border: 2px solid var(--ramka-kontrolka); border-radius: 999px;
+  font: inherit; font-size: .9em; font-weight: 600; cursor: pointer;
+}
+.gra__przelacznik:hover { border-color: var(--glowny); }
+.gra__przelacznik[aria-pressed="true"] { background: var(--glowny); border-color: var(--glowny); color: var(--na-glownym); }
+
+/* ——— scena ——— */
+.gra__scena {
+  position: relative; width: 100%; height: var(--gra-wysokosc);
+  overflow: hidden; border-radius: var(--promien);
+  background: var(--tlo-glebia); color: var(--na-glownym);
+  touch-action: manipulation; -webkit-user-select: none; user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.gra__scena:focus-visible { outline: 3px solid var(--akcent-ciemny); outline-offset: 3px; }
+.gra__plotno, .gra__duszki, .gra__komunikaty, .gra__nakladka, .gra__blysk { position: absolute; inset: 0; }
+.gra__plotno { width: 100%; height: 100%; display: block; }
+.gra__duszki { pointer-events: none; }
+.gra__duszek { position: absolute; left: 0; top: 0; will-change: transform; transform-origin: 50% 50%; }
+.gra__duszek--klik { pointer-events: auto; cursor: pointer; }
+
+/* ——— klocki do budowania duszków ——— */
+.gra-karta {
+  background: var(--tlo-karta); color: var(--tekst);
+  border: 2px solid var(--tlo-karta); border-radius: 8px;
+  padding: .5em .75em; line-height: 1.35;
+  font-size: clamp(13px, .78rem + .35vw, 16px);
+  box-shadow: 0 4px 14px rgba(28, 43, 51, .30);
+}
+.gra-karta--piasek   { background: var(--tlo); border-color: var(--tlo); }
+.gra-karta--ok       { background: var(--tlo-ok); border-color: var(--pozytyw); }
+.gra-karta--zle      { background: var(--tlo-zle); border-color: var(--akcent); }
+.gra-karta--uwaga    { border-color: var(--uwaga); }
+.gra-karta--wybrana  { border-color: var(--akcent); box-shadow: 0 0 0 3px var(--tlo-karta), 0 6px 18px rgba(28, 43, 51, .40); }
+.gra-karta__meta     { display: block; font-size: .82em; color: var(--tekst-slaby); margin-bottom: .15em; }
+.gra-etykieta {
+  color: var(--na-glebi); font-weight: 700; letter-spacing: .02em;
+  font-size: clamp(12px, .72rem + .3vw, 14px); line-height: 1.25;
+}
+.gra-plakietka {
+  display: inline-block; padding: .15em .55em; border-radius: 999px;
+  background: var(--tlo-karta); color: var(--glowny); font-weight: 700; font-size: .8em;
+}
+
+/* ——— komunikaty na scenie ——— */
+.gra__komunikaty {
+  pointer-events: none; display: flex; flex-direction: column; align-items: center;
+  justify-content: flex-end; gap: .4rem; padding: .8rem;
+}
+.gra__komunikat {
+  max-width: min(92%, 32rem); padding: .5em .9em;
+  background: var(--tlo-karta); color: var(--tekst);
+  border-left: 5px solid var(--glowny); border-radius: 8px;
+  font-size: clamp(13px, .8rem + .3vw, 16px); line-height: 1.35;
+  box-shadow: 0 6px 18px rgba(28, 43, 51, .35);
+  transition: transform .35s ease;
+}
+.gra__komunikat--ok    { border-left-color: var(--pozytyw); }
+.gra__komunikat--zle   { border-left-color: var(--akcent); }
+.gra__komunikat--uwaga { border-left-color: var(--uwaga); }
+/* 0.5.0 — bez `opacity` (B8 formatu Strona; MK silnik.py: przezroczystość znosi wyjątek kontrastu 1.4.3): dymek NIE blednie
+   (tekst ma pełny kontrast do końca), tylko zsuwa się o 8 px i znika po 0,35 s (visibility z opóźnieniem); błysk to tło
+   z kanałem alfa (kolor dekoracyjny bez tekstu), które wygasa do przezroczystego. */
+.gra__komunikat--znika { visibility: hidden; transform: translateY(8px); transition: transform .35s ease, visibility 0s linear .35s; }
+
+.gra__blysk { pointer-events: none; background-color: transparent; transition: background-color .3s ease-out; }
+.gra__blysk--ok.gra__blysk--pokaz  { background-color: rgba(31, 107, 85, .26); background-color: color-mix(in srgb, var(--pozytyw) 26%, transparent); transition: none; }
+.gra__blysk--zle.gra__blysk--pokaz { background-color: rgba(184, 67, 42, .26); background-color: color-mix(in srgb, var(--akcent) 26%, transparent); transition: none; }
+
+/* ——— panele (dialogi) ——— */
+.gra__nakladka {
+  z-index: 5; display: flex; align-items: center; justify-content: center;
+  padding: clamp(8px, 3vw, 24px); overflow: auto;
+  background: var(--gm-nakladka);
+}
+/* .gra__nakladka[hidden] — usunięte: globalna reguła [hidden]{display:none!important} w rdzen.css */
+.gra__panel {
+  width: min(100%, 34rem); max-height: 100%; overflow: auto;
+  padding: clamp(16px, 3.5vw, 28px);
+  color: var(--tekst);
+  /* Cienie przewijania: pojawiają się SAME, gdy treść nie mieści się w panelu, i znikają
+     po dojechaniu do końca. Bez nich panel wyższy niż okno wygląda na kompletny —
+     w grze „Sprint na odległość” lista wyboru etapu miała 1018 px treści w oknie 453 px. */
+  background:
+    linear-gradient(var(--tlo-karta) 30%, rgba(255, 255, 255, 0)) top / 100% 28px no-repeat local,
+    linear-gradient(rgba(255, 255, 255, 0), var(--tlo-karta) 70%) bottom / 100% 28px no-repeat local,
+    radial-gradient(farthest-side at 50% 0, rgba(28, 43, 51, .28), rgba(28, 43, 51, 0)) top / 100% 12px no-repeat scroll,
+    radial-gradient(farthest-side at 50% 100%, rgba(28, 43, 51, .28), rgba(28, 43, 51, 0)) bottom / 100% 12px no-repeat scroll,
+    var(--tlo-karta);
+  border-top: 6px solid var(--glowny); border-radius: var(--promien);
+  box-shadow: 0 12px 32px rgba(28, 43, 51, .45);
+  -webkit-user-select: text; user-select: text;
+}
+.gra__panel--szeroki { width: min(100%, 46rem); }
+.gra__panel--ok    { border-top-color: var(--pozytyw); }
+.gra__panel--zle   { border-top-color: var(--akcent); }
+.gra__panel--uwaga { border-top-color: var(--uwaga); }
+.gra__panel-tytul:focus { outline: none; } /* nieinteraktywny nagłówek dostaje fokus tylko programowo */
+.gra__panel-tytul { margin: 0 0 .5em; color: var(--glowny); font-size: clamp(1.1rem, 1rem + .6vw, 1.4rem); line-height: 1.25; }
+.gra__panel-tresc h4 { margin: 1em 0 .3em; color: var(--glowny); font-size: 1rem; }
+.gra__panel-tresc p, .gra__panel-tresc li { max-width: none; }
+.gra__panel-tresc > :first-child { margin-top: 0; }
+.gra__panel-przyciski { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1.1rem; }
+/* Przyciski panelu MUSZĄ być widoczne bez przewijania: panel przewija treść, a przycisk
+   „Zaczynamy” potrafił wypaść 127 px poniżej krawędzi i gracz go nie widział
+   (zmierzone w grze „Skrzynka pod ostrzałem”, 23.09.2026). Przyklejamy je do dołu. */
+.gra__panel-przyciski:not(.gra__panel-przyciski--opcje) {
+  position: sticky; bottom: calc(-1 * clamp(16px, 3.5vw, 28px));
+  margin-bottom: calc(-1 * clamp(16px, 3.5vw, 28px));
+  padding: .7rem 0 clamp(16px, 3.5vw, 28px);
+  background: var(--tlo-karta);
+  box-shadow: 0 -10px 12px -10px rgba(28, 43, 51, .35);
+}
+.gra__panel-przyciski--opcje { flex-direction: column; }
+.gra__opcja {
+  display: flex; align-items: flex-start; gap: .65em; width: 100%;
+  min-height: 44px; padding: .65em .9em; text-align: left;
+  background: var(--tlo-karta); color: var(--tekst);
+  border: 2px solid var(--ramka-kontrolka); border-radius: var(--promien);
+  font: inherit; line-height: 1.4; cursor: pointer;
+}
+.gra__opcja:hover { background: var(--tlo); border-color: var(--glowny); }
+.gra__klawisz {
+  display: inline-flex; align-items: center; justify-content: center; flex: none;
+  min-width: 1.8em; height: 1.8em; border-radius: 6px;
+  background: var(--glowny); color: var(--na-glownym); font-weight: 700; font-size: .85em;
+}
+.gra__czas { height: 8px; margin-top: .9rem; overflow: hidden; border-radius: 999px; background: var(--ramka); }
+.gra__czas-pasek { height: 100%; background: var(--akcent); transform-origin: 0 50%; }
+.gra__sterowanie li { margin: .2em 0; }
+.gra__panel kbd {
+  display: inline-block; min-width: 1.6em; padding: 0 .35em; text-align: center;
+  border: 1px solid var(--ramka-kontrolka); border-bottom-width: 2px; border-radius: 4px;
+  background: var(--tlo); font: inherit; font-size: .88em; font-weight: 600;
+}
+
+/* ——— omówienie ——— */
+.gra__wynik { font-size: 1.15rem; font-weight: 700; color: var(--glowny); }
+.gra__omowienie { list-style: none; padding: 0; margin: .8em 0; display: grid; gap: .5rem; }
+.gra__omowienie li {
+  display: flex; align-items: flex-start; gap: .6em; max-width: none;
+  padding: .55em .75em; border-radius: 8px; background: var(--tlo);
+}
+.gra__omowienie li.gra__omowienie-ok  { background: var(--tlo-ok); }
+.gra__omowienie li.gra__omowienie-zle { background: var(--tlo-zle); }
+.gra__znak { flex: none; font-weight: 700; }
+.gra__omowienie-ok  .gra__znak { color: var(--pozytyw); }
+.gra__omowienie-zle .gra__znak { color: var(--akcent); }
+
+/* ——— pad pod sceną ——— */
+.gra__pad { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem; margin-top: .6rem; }
+.gra__pad:empty { display: none; }
+.gra__pad-przycisk {
+  min-width: 56px; min-height: 56px; padding: .4em .9em;
+  background: var(--tlo-karta); color: var(--glowny);
+  border: 2px solid var(--ramka-kontrolka); border-radius: 14px;
+  font: inherit; font-size: 1.15rem; font-weight: 700; cursor: pointer; touch-action: none;
+}
+.gra__pad-przycisk:active { background: var(--glowny); border-color: var(--glowny); color: var(--na-glownym); }
+/* Pad przy otwartym panelu nic nie robi (L17) — wygląda na nieczynny bez przezroczystości
+   (opacity znosi wyjątek kontrastu): przerywana ramka, tło strony, przygaszony tekst nadal ≥ 4,5:1. */
+.gra__pad--wygaszony .gra__pad-przycisk[aria-disabled="true"] {
+  background: var(--tlo); color: var(--tekst-slaby); border-style: dashed; cursor: default;
+}
+.gra__pad--wygaszony .gra__pad-przycisk[aria-disabled="true"]:active {
+  background: var(--tlo); color: var(--tekst-slaby); border-color: var(--ramka-kontrolka);
+}
+.gra__pad-przycisk--szeroki { flex: 1 1 6rem; font-size: 1rem; }
+
+/* ——— pełny ekran ——— */
+.gra:fullscreen { display: flex; flex-direction: column; padding: 12px; background: var(--tlo); }
+.gra:fullscreen .gra__scena { flex: 1 1 auto; height: auto; }
+
+/* ——— wąski ekran ——— */
+@media (max-width: 26rem) {
+  :root { --gra-wysokosc: clamp(420px, 72vh, 640px); }
+  .gra__stan { width: 100%; min-height: 0; }
+  .gra__przelacznik { flex: 1 1 auto; padding: .35em .55em; font-size: .82em; }
+  /* pięć przycisków padu (np. tory) mieści się w jednym rzędzie na scenie szerokiej na 254 px */
+  .gra__pad { gap: .4rem; }
+  .gra__pad-przycisk { min-width: 44px; min-height: 52px; padding: .3em .5em; }
+  .gra__pad-przycisk--szeroki { flex: 1 1 4rem; }
+}
+
+@media (forced-colors: active) {
+  .gra__scena, .gra__panel, .gra-karta, .gra__komunikat { border: 1px solid CanvasText; }
+}
+
+</style>
+</head>
+<body class="gm-strona">
+
+<a class="gm-pomin" href="#tresc">Przejdź do treści</a>
+
+<header class="gm-pas">
+  <h1>Mit czy fakt: sprawdź, co naprawdę wiemy</h1>
+  <p>Twierdzenia z komentarzy pod postami kursu HoldUp: powielane przekonania i to, co potwierdza materiał.</p>
+</header>
+
+<main id="tresc" tabindex="-1">
+<div class="gm-karta gm-karta--gra">
+  <h2>Mit czy fakt: sprawdź, co naprawdę wiemy</h2>
+  <div data-gra data-gra-id="mit-fakt" data-gra-przestrzen="kurs" data-gm-ukonczenie="brak" data-gm-mechanika="klasyfikacja" data-gm-widok="gra-tor"></div>
+  <noscript><div class="gm-reakcja gm-reakcja--uwaga"><p>Gra wymaga JavaScriptu. Te same rozstrzygnięcia bez gry znajdziesz niżej, w części „Wersja tekstowa”.</p></div></noscript>
+  <p>Dwadzieścia siedem twierdzeń z różnych postów kursu. Część to powielane przekonania z komentarzy, część to ustalenia z postów.</p>
+  <p class="gm-slaby">Do dziennika ocen idzie tylko informacja o ukończeniu — bez punktów.</p>
+</div>
+
+<section class="gm-karta" id="wersja-tekstowa" data-gm-wersja-tekstowa data-gra-id="mit-fakt">
+  <h2>Wersja tekstowa</h2>
+  <p>Te same decyzje co w grze: sześć twierdzeń do oceny.</p>
+  <div class="gm-pytanie-blok" data-gm-pytanie>
+    <fieldset class="gm-pytanie">
+      <legend>Czy to mit czy fakt? „Mam tryb nocny i filtr światła niebieskiego, więc mogę scrollować do drugiej w nocy i nic mi się nie dzieje.”</legend>
+      <label class="gm-odpowiedz" data-reakcja="Nie. W jednym badaniu na młodych dorosłych taki tryb nie poprawił snu. Tryb nocny zmienia kolor ekranu, a problemem jest przede wszystkim to, że nie kładziesz się spać, i to, co oglądasz."><input type="radio" name="mit-fakt-p01"><span>To fakt</span></label>
+      <label class="gm-odpowiedz" data-poprawna="tak" data-reakcja="Tak. W jednym badaniu na młodych dorosłych taki tryb nie poprawił snu. Tryb nocny zmienia kolor ekranu, a problemem jest przede wszystkim to, że nie kładziesz się spać, i to, co oglądasz."><input type="radio" name="mit-fakt-p01"><span>To mit</span></label>
+    </fieldset>
+    <div class="gm-reakcja" hidden></div>
+  </div>
+  <div class="gm-pytanie-blok" data-gm-pytanie>
+    <fieldset class="gm-pytanie">
+      <legend>Czy to mit czy fakt? „W ankiecie 844 dorosłych wysyłanie wiadomości i rozmowy telefoniczne po zgaszeniu światła wiązały się z gorszym snem i większym zmęczeniem w ciągu dnia.”</legend>
+      <label class="gm-odpowiedz" data-reakcja="Nie. To wynik Exelmansa i Van den Bulcka (Social Science &amp; Medicine, 2016). Jest to związek, nie dowód przyczyny, a wzór różnił się zależnie od wieku."><input type="radio" name="mit-fakt-p02"><span>To mit</span></label>
+      <label class="gm-odpowiedz" data-poprawna="tak" data-reakcja="Tak. To wynik Exelmansa i Van den Bulcka (Social Science &amp; Medicine, 2016). Jest to związek, nie dowód przyczyny, a wzór różnił się zależnie od wieku."><input type="radio" name="mit-fakt-p02"><span>To fakt</span></label>
+    </fieldset>
+    <div class="gm-reakcja" hidden></div>
+  </div>
+  <div class="gm-pytanie-blok" data-gm-pytanie>
+    <fieldset class="gm-pytanie">
+      <legend>Czy to mit czy fakt? „Hasło trzeba zmieniać co 30 dni, bo inaczej hakerzy mają czas je złamać.”</legend>
+      <label class="gm-odpowiedz" data-reakcja="Nie. Wymuszone, częste zmiany prowadzą do przewidywalnych wzorów (hasło1, hasło2), a NIST od 2017 roku odradza taką praktykę. Hasło zmieniasz po wycieku lub podejrzeniu, nie według kalendarza."><input type="radio" name="mit-fakt-p03"><span>To fakt</span></label>
+      <label class="gm-odpowiedz" data-poprawna="tak" data-reakcja="Tak. Wymuszone, częste zmiany prowadzą do przewidywalnych wzorów (hasło1, hasło2), a NIST od 2017 roku odradza taką praktykę. Hasło zmieniasz po wycieku lub podejrzeniu, nie według kalendarza."><input type="radio" name="mit-fakt-p03"><span>To mit</span></label>
+    </fieldset>
+    <div class="gm-reakcja" hidden></div>
+  </div>
+  <div class="gm-pytanie-blok" data-gm-pytanie>
+    <fieldset class="gm-pytanie">
+      <legend>Czy to mit czy fakt? „Drugi składnik logowania (2FA) zmniejsza ryzyko przejęcia konta o ok. 99%, choć SMS można wyłudzić.”</legend>
+      <label class="gm-odpowiedz" data-poprawna="tak" data-reakcja="Tak. Tak wynika z analizy Microsoftu z 2023 r. (preprint, konta firmowe). Passkeys idą dalej: eliminują hasło i są związane z prawdziwą stroną."><input type="radio" name="mit-fakt-p04"><span>To fakt</span></label>
+      <label class="gm-odpowiedz" data-reakcja="Nie. Tak wynika z analizy Microsoftu z 2023 r. (preprint, konta firmowe). Passkeys idą dalej: eliminują hasło i są związane z prawdziwą stroną."><input type="radio" name="mit-fakt-p04"><span>To mit</span></label>
+    </fieldset>
+    <div class="gm-reakcja" hidden></div>
+  </div>
+  <div class="gm-pytanie-blok" data-gm-pytanie>
+    <fieldset class="gm-pytanie">
+      <legend>Czy to mit czy fakt? „Mam jedno hasło do wszystkiego, ale bardzo długie i skomplikowane, więc nic mi nie grozi.”</legend>
+      <label class="gm-odpowiedz" data-reakcja="Nie. Gdy hasło wycieknie z jednego serwisu, atakujący wypróbują je gdzie indziej. Liczy się unikalność hasła, a nie tylko jego siła; w wycieku z CKE (2025) użyto konta pracownika, który tego samego hasła używał prywatnie."><input type="radio" name="mit-fakt-p05"><span>To fakt</span></label>
+      <label class="gm-odpowiedz" data-poprawna="tak" data-reakcja="Tak. Gdy hasło wycieknie z jednego serwisu, atakujący wypróbują je gdzie indziej. Liczy się unikalność hasła, a nie tylko jego siła; w wycieku z CKE (2025) użyto konta pracownika, który tego samego hasła używał prywatnie."><input type="radio" name="mit-fakt-p05"><span>To mit</span></label>
+    </fieldset>
+    <div class="gm-reakcja" hidden></div>
+  </div>
+  <div class="gm-pytanie-blok" data-gm-pytanie>
+    <fieldset class="gm-pytanie">
+      <legend>Czy to mit czy fakt? „Ja się nie nabiorę na phishing, bo jestem informatykiem. To problem starszych osób.”</legend>
+      <label class="gm-odpowiedz" data-reakcja="Nie. Podatność nie zależy od wiedzy technicznej, tylko od chwili: zmęczony, spieszący się informatyk też klika. Kluczowy jest kontekst (Williams i in. 2017), a ani wykształcenie, ani sława nie chronią."><input type="radio" name="mit-fakt-p06"><span>To fakt</span></label>
+      <label class="gm-odpowiedz" data-poprawna="tak" data-reakcja="Tak. Podatność nie zależy od wiedzy technicznej, tylko od chwili: zmęczony, spieszący się informatyk też klika. Kluczowy jest kontekst (Williams i in. 2017), a ani wykształcenie, ani sława nie chronią."><input type="radio" name="mit-fakt-p06"><span>To mit</span></label>
+    </fieldset>
+    <div class="gm-reakcja" hidden></div>
+  </div>
+  <p class="gm-slaby gm-postep">Odpowiedzi: <span data-gm-postep>0 z 6</span></p>
+  <details class="gm-lista-elementow">
+    <summary>Wszystkie elementy gry z rozstrzygnięciem (27)</summary>
+    <ol>
+      <li><strong>Mam tryb nocny i filtr światła niebieskiego, więc mogę scrollować do drugiej w nocy i nic mi się nie dzieje.</strong> — mit. W jednym badaniu na młodych dorosłych taki tryb nie poprawił snu. Tryb nocny zmienia kolor ekranu, a problemem jest przede wszystkim to, że nie kładziesz się spać, i to, co oglądasz. Źródło: HoldUp, post „Scrollowanie, uwaga i sen”, komentarz Karoliny_ZUT, uwaga.</li>
+      <li><strong>W ankiecie 844 dorosłych wysyłanie wiadomości i rozmowy telefoniczne po zgaszeniu światła wiązały się z gorszym snem i większym zmęczeniem w ciągu dnia.</strong> — fakt. To wynik Exelmansa i Van den Bulcka (Social Science &amp; Medicine, 2016). Jest to związek, nie dowód przyczyny, a wzór różnił się zależnie od wieku. Źródło: HoldUp, post „Scrollowanie, uwaga i sen”, sekcja „Co mówią badania”.</li>
+      <li><strong>Hasło trzeba zmieniać co 30 dni, bo inaczej hakerzy mają czas je złamać.</strong> — mit. Wymuszone, częste zmiany prowadzą do przewidywalnych wzorów (hasło1, hasło2), a NIST od 2017 roku odradza taką praktykę. Hasło zmieniasz po wycieku lub podejrzeniu, nie według kalendarza. Źródło: HoldUp, post „Hasła, 2FA, passkeys”, komentarz Piotra, uwaga.</li>
+      <li><strong>Drugi składnik logowania (2FA) zmniejsza ryzyko przejęcia konta o ok. 99%, choć SMS można wyłudzić.</strong> — fakt. Tak wynika z analizy Microsoftu z 2023 r. (preprint, konta firmowe). Passkeys idą dalej: eliminują hasło i są związane z prawdziwą stroną. Źródło: HoldUp, post „Hasła, 2FA, passkeys”, sekcja „Co mówią badania”.</li>
+      <li><strong>Mam jedno hasło do wszystkiego, ale bardzo długie i skomplikowane, więc nic mi nie grozi.</strong> — mit. Gdy hasło wycieknie z jednego serwisu, atakujący wypróbują je gdzie indziej. Liczy się unikalność hasła, a nie tylko jego siła; w wycieku z CKE (2025) użyto konta pracownika, który tego samego hasła używał prywatnie. Źródło: HoldUp, post „Wycieki danych i PESEL”, komentarz Bartka_P, uwaga; sekcja „Co mówią badania”.</li>
+      <li><strong>Ja się nie nabiorę na phishing, bo jestem informatykiem. To problem starszych osób.</strong> — mit. Podatność nie zależy od wiedzy technicznej, tylko od chwili: zmęczony, spieszący się informatyk też klika. Kluczowy jest kontekst (Williams i in. 2017), a ani wykształcenie, ani sława nie chronią. Źródło: HoldUp, post „Phishing, BLIK i fałszywy kurier”, komentarz Piotra, uwaga.</li>
+      <li><strong>Ofiarami romance scamu są osoby naiwne i samotne.</strong> — mit. To upraszczenie. Wielu poszkodowanych to osoby ostrożne i wykształcone, a oszustwo działa dzięki procesowi emocjonalnemu, nie brakowi inteligencji. Samotność zwiększa ryzyko, ale nie jest warunkiem. Źródło: HoldUp, post „Oszustwa uczuciowe”, komentarz Magdy_Samotnej, uwaga.</li>
+      <li><strong>Udostępnianie lokalizacji w związku ma sens tylko wtedy, gdy jest dobrowolne, wzajemne i odwoływalne bez kary.</strong> — fakt. Zasada „kto nie ma nic do ukrycia” jest fałszywa. Jeśli wyłączenie lokalizacji wywołuje awanturę, to nie jest troska, tylko kontrola. Źródło: HoldUp, post „Lokalizacja i cyfrowy stalking”, komentarz Kuby_w_Związku, uwaga.</li>
+      <li><strong>Jak intymne zdjęcie wyciekło, to wina osoby, która je wysłała.</strong> — mit. Wysłanie zdjęcia za zgodą i zaufaniem nie jest zgodą na rozpowszechnianie. Winny jest ten, kto je rozsyła bez zgody, a obwinianie ofiary sprawia, że ofiary milczą (Citron 2014). Źródło: HoldUp, post „Intymne zdjęcia”, komentarz Sebastiana_Trenera, uwaga.</li>
+      <li><strong>Większość serwerów Discorda to kółka znajomych i hobby; ostrzegać powinny konkretne wzorce, a nie sama platforma.</strong> — fakt. Wzorce to prośba o prywatny kontakt, nagrody za posłuszeństwo i groźby. Warto je znać, a nie bać się całej platformy. Źródło: HoldUp, post „Wciąganie w grupy skrajne”, komentarz Marka_Informatyka, uwaga.</li>
+      <li><strong>Skrzynki w grach nie mają nic wspólnego z hazardem, bo przedmiot nie ma wartości w prawdziwych pieniądzach.</strong> — mit. Prawnie w Polsce skrzynki, według stanowiska Ministerstwa Finansów, nie są hazardem, ale mechanizm psychologicznie go przypomina (Drummond i Sauer: 10 z 22 gier spełniało wszystkie kryteria). W niektórych grach przedmioty można wypłacić jako pieniądze. Źródło: HoldUp, post „Skrzynki w grach i gacha”, komentarz Maksa_IT, uwaga; sekcja „Co mówią badania”.</li>
+      <li><strong>Bitcoin już kilka razy spadał o 80% i się odbijał, więc wystarczy przeczekać.</strong> — mit. Odrobienie strat po szczycie z 2021 r. zajęło ponad dwa lata, a część tokenów (Luna, SQUID) nie wróciła wcale. Nie ma gwarancji, że przyszłość powtórzy przeszłość. Źródło: HoldUp, post „Kryptowaluty”, komentarz Wojtka_S, uwaga.</li>
+      <li><strong>Kryptowaluty są anonimowe, więc policja i tak nic nie znajdzie.</strong> — mit. Wiele kryptowalut działa na publicznym rejestrze transakcji, a firmy analityczne łączą adresy w grupy. Przy Hydrze niemieckie służby przejęły ok. 23 mln EUR w bitcoinach; „nie do wyśledzenia” to mit. Źródło: HoldUp, post „Czarne rynki dark netu”, komentarz Michała_K, uwaga.</li>
+      <li><strong>Tor jest ogólnodostępnym programem i nie wymaga umiejętności hakerskich, więc trafiają do niego także nastolatki.</strong> — fakt. Barierą nie jest wiedza techniczna, tylko świadomość ryzyka. Źródło: HoldUp, post „Dark net”, komentarz Marka_Informatyka, uwaga.</li>
+      <li><strong>Samo natknięcie się na niedozwoloną treść nie jest przestępstwem, ale po jej znalezieniu nie wolno jej zapisywać ani wysyłać dalej.</strong> — fakt. Przestępstwa dotyczą celowego działania: szukania, przechowywania, uzyskiwania dostępu, zapisywania, przesyłania dalej. Adres zgłaszasz do Dyżurnet.pl lub na policję. Źródło: HoldUp, post „Dark net a krzywdzenie dzieci”, komentarz Marka_Taty, uwaga.</li>
+      <li><strong>Ja zawsze poznam obraz z AI po dziwnych dłoniach i oczach. Mnie nie oszuka.</strong> — mit. Dłonie i oczy były typowymi błędami starszych generatorów, a nowe modele poprawiają je lepiej. W quizie Microsoftu ponad 12 tys. osób oceniło ok. 287 tys. obrazów i trafiło w 62% przypadków, czyli niewiele lepiej niż rzut monetą (preprint z 2025 r.). Źródło: HoldUp, post „Prawda czy AI”, komentarz Anity_N, uwaga.</li>
+      <li><strong>Chatbot odpowiedział, że jest pewien, iż artykuł istnieje, i podał stronę, więc to wystarczy.</strong> — mit. Pytanie „czy jesteś pewien?” nie uruchamia sprawdzania w bazie. Model generuje kolejną prawdopodobną odpowiedź, więc zapewnienie bywa tak samo zmyślone jak pierwsza odpowiedź. Weryfikacją jest dopiero znalezienie źródła poza czatem. Źródło: HoldUp, post „Halucynacje AI”, komentarz Marka_W, uwaga.</li>
+      <li><strong>Gdy deepfake przedstawia Ciebie, nadal możesz dochodzić ochrony dóbr osobistych, zgłosić podszywanie się lub zniesławienie.</strong> — fakt. Zakres jednego przepisu wobec obrazów wygenerowanych jest sporny, ale to nie znaczy, że nic nie można zrobić. Platformy mają też procedury usuwania treści. Źródło: HoldUp, post „Deepfake”, komentarz Piotra, uwaga.</li>
+      <li><strong>Rozmowy z chatbotem mogą być przechowywane, przeglądane przez firmę lub wykorzystywane do poprawy usługi, zależnie od ustawień.</strong> — fakt. Czat nie jest „prywatny” jak notatnik. Dane klienta wklejone bez zgody mogą naruszać umowę praktyk lub przepisy o ochronie danych. Źródło: HoldUp, post „Co wklejasz do chatbota”, komentarz Piotra, uwaga.</li>
+      <li><strong>W publicznym Wi-Fi haker w kawiarni widzi moje hasła i przelewy.</strong> — mit. To opis sprzed lat. Treść stron i formularzy przez HTTPS jest szyfrowana (CERT Polska, grudzień 2025). Prawdziwe ryzyko to fałszywa sieć i fałszywa strona logowania, w którą wpisujesz dane sam. Źródło: HoldUp, post „Wi-Fi, router i kamerka”, komentarz Tomasza_W, uwaga.</li>
+      <li><strong>Mam antywirusa z automatycznymi aktualizacjami, więc złośliwe programy do mnie nie dotrą.</strong> — mit. Antywirus zmniejsza ryzyko, ale go nie usuwa; CERT Polska zaznacza, że może nie wykryć zagrożenia. Często to Ty uruchamiasz plik, jak w kampanii opisanej przez Mandiant (2025). Źródło: HoldUp, post „Złośliwe programy”, komentarz Marka_S, uwaga.</li>
+      <li><strong>Opisane w kursie włamania opierały się na prostych metodach, a chronią przed nimi unikalne hasła, drugi składnik logowania i aktualizacje.</strong> — fakt. Raport CSRB (2023) o Lapsus$ wskazuje przejmowanie numerów telefonów i phishing; Uber opisał wejście przez hasło wykonawcy. Obrona jest nudna, ale istnieje. Źródło: HoldUp, post „Hakerzy”, komentarz Krzysztofa_M, uwaga.</li>
+      <li><strong>Są osoby, które radzą sobie z wielozadaniowością lepiej, ale to rzadki wyjątek: 5 z około 200 osób w jednym badaniu.</strong> — fakt. To wynik Watsona i Strayera (2010). Koszty przełączania mierzy się w ułamkach sekundy i w błędach, których zwykle się nie zauważa (Rubinstein i in. 2001). Źródło: HoldUp, post „Wielozadaniowość”, komentarz Anny_Księgowej, uwaga.</li>
+      <li><strong>Część pracodawców sprawdza kandydatów w sieci; w sondażu CareerBuilder z 2018 r. (USA) było to 70%.</strong> — fakt. Kompetencje liczą się najbardziej, ale profil bywa pierwszą informacją, jaką widzi rekruter. Pusty lub sprzeczny z CV profil rodzi pytania. Źródło: HoldUp, post „Wizerunek w sieci”, komentarz Roberta_Inżyniera, uwaga.</li>
+      <li><strong>Ochrona praw autorskich powstaje z chwilą ustalenia pracy, bez rejestracji i bez znaczka ©.</strong> — fakt. Znaczek © tylko informuje. W sprawie „Cordoba” (TSUE 2018) zdjęcie było w sieci bez zabezpieczeń, a ponowna publikacja i tak wymagała zgody fotografa. Źródło: HoldUp, post „Ktoś ukradł Twoje zdjęcie”, komentarz Jacka_M, uwaga.</li>
+      <li><strong>Dieta i zaburzenie odżywiania to nie to samo: w zaburzeniu jedzenie i waga zaczynają organizować dzień, myśli i nastrój.</strong> — fakt. Osoba nie zyskuje kontroli, tylko ją traci. Czekanie, aż „samo przejdzie”, bywa ryzykowne, bo WHO wiąże jadłowstręt z przedwczesną śmiercią. Źródło: HoldUp, post „Pro-ana i „motylki””, komentarz Maksa_G, uwaga.</li>
+      <li><strong>Nikt uczciwy nie prosi o dane logowania do banku ani o zaliczkę za odzyskanie pieniędzy z oszustwa.</strong> — fakt. To druga fala oszustwa, „odzyskiwanie pieniędzy”. Sprawę zgłaszasz do banku i na policję. Źródło: HoldUp, post „Gdzie szukać pomocy”, komentarz Szybka_Pomoc_Online, uwaga.</li>
+    </ol>
+  </details>
+</section>
+
+<div class="gm-karta">
+  <h2>Źródła</h2>
+  <p>Każde twierdzenie ma podane źródło przy wyjaśnieniu. Poniżej lista postów kursu HoldUp, z których pochodzą karty.</p>
+  <ul class="gm-zrodla">
+    <li>Kurs HoldUp, post „Scrollowanie, uwaga i sen” (treść posta, sekcja komentarzy i uwag) — materiał kursu HoldUp (dostęp: 22.10.2026).</li>
+    <li>Kurs HoldUp, post „Hasła, 2FA, passkeys” (treść posta, sekcja komentarzy i uwag) — materiał kursu HoldUp (dostęp: 22.10.2026).</li>
+    <li>Kurs HoldUp, post „Wycieki danych i PESEL” (treść posta, sekcja komentarzy i uwag) — materiał kursu HoldUp (dostęp: 22.10.2026).</li>
+    <li>Kurs HoldUp, post „Phishing, BLIK i fałszywy kurier” (treść posta, sekcja komentarzy i uwag) — materiał kursu HoldUp (dostęp: 22.10.2026).</li>
+    <li>Kurs HoldUp, post „Oszustwa uczuciowe” (treść posta, sekcja komentarzy i uwag) — materiał kursu HoldUp (dostęp: 22.10.2026).</li>
+    <li>Kurs HoldUp, post „Lokalizacja i cyfrowy stalking” (treść posta, sekcja komentarzy i uwag) — materiał kursu HoldUp (dostęp: 22.10.2026).</li>
+    <li>Kurs HoldUp, post „Intymne zdjęcia” (treść posta, sekcja komentarzy i uwag) — materiał kursu HoldUp (dostęp: 22.10.2026).</li>
+    <li>Kurs HoldUp, post „Wciąganie w grupy skrajne” (treść posta, sekcja komentarzy i uwag) — materiał kursu HoldUp (dostęp: 22.10.2026).</li>
+    <li>Kurs HoldUp, post „Skrzynki w grach i gacha” (treść posta, sekcja komentarzy i uwag) — materiał kursu HoldUp (dostęp: 22.10.2026).</li>
+    <li>Kurs HoldUp, post „Kryptowaluty” (treść posta, sekcja komentarzy i uwag) — materiał kursu HoldUp (dostęp: 22.10.2026).</li>
+    <li>Kurs HoldUp, post „Czarne rynki dark netu” (treść posta, sekcja komentarzy i uwag) — materiał kursu HoldUp (dostęp: 22.10.2026).</li>
+    <li>Kurs HoldUp, post „Dark net” (treść posta, sekcja komentarzy i uwag) — materiał kursu HoldUp (dostęp: 22.10.2026).</li>
+    <li>Kurs HoldUp, post „Dark net a krzywdzenie dzieci” (treść posta, sekcja komentarzy i uwag) — materiał kursu HoldUp (dostęp: 22.10.2026).</li>
+    <li>Kurs HoldUp, post „Prawda czy AI” (treść posta, sekcja komentarzy i uwag) — materiał kursu HoldUp (dostęp: 22.10.2026).</li>
+    <li>Kurs HoldUp, post „Halucynacje AI” (treść posta, sekcja komentarzy i uwag) — materiał kursu HoldUp (dostęp: 22.10.2026).</li>
+    <li>Kurs HoldUp, post „Deepfake” (treść posta, sekcja komentarzy i uwag) — materiał kursu HoldUp (dostęp: 22.10.2026).</li>
+    <li>Kurs HoldUp, post „Co wklejasz do chatbota” (treść posta, sekcja komentarzy i uwag) — materiał kursu HoldUp (dostęp: 22.10.2026).</li>
+    <li>Kurs HoldUp, post „Wi-Fi, router i kamerka” (treść posta, sekcja komentarzy i uwag) — materiał kursu HoldUp (dostęp: 22.10.2026).</li>
+    <li>Kurs HoldUp, post „Złośliwe programy” (treść posta, sekcja komentarzy i uwag) — materiał kursu HoldUp (dostęp: 22.10.2026).</li>
+    <li>Kurs HoldUp, post „Hakerzy” (treść posta, sekcja komentarzy i uwag) — materiał kursu HoldUp (dostęp: 22.10.2026).</li>
+    <li>Kurs HoldUp, post „Wielozadaniowość” (treść posta, sekcja komentarzy i uwag) — materiał kursu HoldUp (dostęp: 22.10.2026).</li>
+    <li>Kurs HoldUp, post „Wizerunek w sieci” (treść posta, sekcja komentarzy i uwag) — materiał kursu HoldUp (dostęp: 22.10.2026).</li>
+    <li>Kurs HoldUp, post „Ktoś ukradł Twoje zdjęcie” (treść posta, sekcja komentarzy i uwag) — materiał kursu HoldUp (dostęp: 22.10.2026).</li>
+    <li>Kurs HoldUp, post „Pro-ana i „motylki”” (treść posta, sekcja komentarzy i uwag) — materiał kursu HoldUp (dostęp: 22.10.2026).</li>
+    <li>Kurs HoldUp, post „Gdzie szukać pomocy” (treść posta, sekcja komentarzy i uwag) — materiał kursu HoldUp (dostęp: 22.10.2026).</li>
+  </ul>
+</div>
+</main>
+
+<footer class="gm-pas gm-stopka">
+  <p>Kurs HoldUp · edukacja cyfrowa dla dorosłych</p>
+</footer>
+
+<script data-gm-plik="rdzen.js">
+/* gry-moodle 0.2.0 — NIE EDYTUJ W KURSIE, poprawiaj w PLUGIN/gry-moodle (~/.claude/local-marketplace-maciek/plugins/gry-moodle) */
+/* rdzen.js — WARSTWA WSPÓLNA gier i ćwiczeń. Ładowana zawsze, przed gra.js / cwiczenie.js.
+ *
+ * Rdzeń nie zna gier ani mechanik. Daje przestrzeń globalną `Gm`:
+ *   Gm.bezpieczny(t), Gm.tekstZHtml(h), Gm.gotowe(fn)
+ *   Gm.losowanie(ziarno) → funkcja 0..1 (powtarzalna, gdy ziarno podane; bez ziarna Math.random)
+ *   Gm.tasuj(a, ziarnoAlboLos), Gm.losuj(a, los), Gm.ogranicz, Gm.lerp, Gm.wygladz, Gm.rgba
+ *   Gm.ogloszenia(kontener) → {powiedz(tekst), el}   region aria-live TWORZONY PRZY STARCIE (przed pierwszym
+ *                           komunikatem — region dodany w chwili mówienia czytnik często pomija)
+ *   Gm.dzwiek(ustawienia)  → {graj, muzyka, odblokuj}   Web Audio, odzywa się dopiero PO GEŚCIE gracza
+ *   Gm.klucz(przestrzen, …czesci) → "<przestrzen>-…"; Gm.magazyn.czytaj/zapisz (localStorage w try/catch)
+ *   Gm.ustawienia(przestrzen, domyslne) → {wartosci, zapisz()}   klucz "<przestrzen>-gry-ustawienia"
+ *   Gm.rekord(przestrzen, id, punkty) → {rekord, nowy}           klucz "<przestrzen>-gra-<id>-rekord"
+ *   Gm.tempo.{TEMPO, ustaw(konf), czasZeSlow(tekst) → ms, domyslneTempo(konf) → "spokojne"|"normalne"}
+ *   Gm.ukoncz({tryb:"gra"|"modul"|"brak", przestrzen, id, korzen})  — raz na wczytanie strony na grę
+ *   Gm.lms.{start(), zakoncz()}  — globalny `Scorm` (most z paczki), a gdy go brak — własne szukanie API SCORM 1.2
+ *   Gm.wersjaTekstowa.{przejdz(), uruchom(kontener, naKoniec)}  — odsyłacz i zaliczenie z wersji tekstowej
+ *   Gm.wstrzyknijCss(nazwa, css)  — element style do head raz na nazwę i wersję rdzenia (format Strona, widoki mechanik)
+ *   Gm.konfiguracja(korzen) → {id, przestrzen, ukonczenie, dane}   dane = window.GM_DANE[data-gra-id] (lekcja L12)
+ *
+ * Do Moodle idzie wyłącznie „ukończone” (decyzja 9). Wyniku punktowego rdzeń nie wysyła i nie umie wysłać.
+ */
+(function (global) {
+  "use strict";
+
+  var WERSJA = "0.2.0";
+  if (global.Gm && global.Gm.wersja === WERSJA) return;   /* dwie gry na jednej stronie — rdzeń raz */
+
+  var doc = global.document;
+
+  /* ——— drobne narzędzia ——— */
+
+  function bezpieczny(t) {
+    /* [<] zamiast samego < : ciąg „</” (np. w /</g) generator formatu Strona zamienia na „<\/” — w wyrażeniu regularnym to błąd */
+    return String(t == null ? "" : t).replace(/&/g, "&amp;").replace(/[<]/g, "&lt;")
+      .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+  function tekstZHtml(h) {
+    var d = doc.createElement("div");
+    d.innerHTML = h;
+    return (d.textContent || "").replace(/\s+/g, " ").trim();
+  }
+  function gotowe(fn) {
+    if (doc.readyState === "loading") doc.addEventListener("DOMContentLoaded", fn);
+    else fn();
+  }
+  function ogranicz(v, a, b) { return Math.max(a, Math.min(b, v)); }
+  function lerp(a, b, t) { return a + (b - a) * t; }
+  function wygladz(t) { t = ogranicz(t, 0, 1); return 1 - Math.pow(1 - t, 3); }
+  function rgba(hex, alfa) {
+    var h = String(hex).replace("#", "").trim();
+    if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+    var n = parseInt(h, 16);
+    if (isNaN(n)) return String(hex);   /* token w innym zapisie niż #hex — oddajemy bez przezroczystości */
+    return "rgba(" + ((n >> 16) & 255) + "," + ((n >> 8) & 255) + "," + (n & 255) + "," + alfa + ")";
+  }
+
+  /* ——— losowanie z ziarnem ———
+     Ziarno (tekst albo liczba) daje powtarzalną kolejność: generator i testy losują to samo przy każdym
+     uruchomieniu. Bez ziarna — Math.random (runda w grze ma być za każdym razem inna). */
+  function hasz(tekst) {
+    var h = 2166136261 >>> 0, s = String(tekst);
+    for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+    return h >>> 0;
+  }
+  function losowanie(ziarno) {
+    if (ziarno == null || ziarno === "") return Math.random;
+    var a = typeof ziarno === "number" ? (ziarno >>> 0) : hasz(ziarno);
+    return function () {   /* mulberry32 */
+      a = (a + 0x6D2B79F5) >>> 0;
+      var t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function jakoLos(z) { return typeof z === "function" ? z : losowanie(z); }
+  /* Fisher–Yates; zwraca NOWĄ tablicę. */
+  function tasuj(a, ziarnoAlboLos) {
+    var los = jakoLos(ziarnoAlboLos), b = a.slice();
+    for (var i = b.length - 1; i > 0; i--) {
+      var j = Math.floor(los() * (i + 1));
+      var t = b[i]; b[i] = b[j]; b[j] = t;
+    }
+    return b;
+  }
+  function losuj(a, ziarnoAlboLos) { return a[Math.floor(jakoLos(ziarnoAlboLos)() * a.length)]; }
+
+  /* ——— magazyn i klucze ———
+     Wszystkie paczki SCORM na jednym Moodle dzielą origin, a więc i localStorage (L15, TOP 15 #11):
+     każdy klucz ma przestrzeń kursu i identyfikator gry. */
+  function klucz(przestrzen) {
+    var czesci = [przestrzen || "gm"];
+    for (var i = 1; i < arguments.length; i++) czesci.push(arguments[i]);
+    return czesci.join("-");
+  }
+  var magazyn = {
+    czytaj: function (k) {
+      try { return global.localStorage.getItem(k); } catch (e) { return null; }   /* prywatne okno, blokada */
+    },
+    zapisz: function (k, v) {
+      try { global.localStorage.setItem(k, String(v)); return true; } catch (e) { return false; }
+    }
+  };
+
+  /* Ustawienia gracza wspólne dla wszystkich gier kursu (tempo, dźwięk, muzyka).
+     Tempo z magazynu liczy się TYLKO wtedy, gdy gracz sam je wybrał (tempoWybrane) — inaczej obowiązuje
+     domyślne tempo pluginu „bez pośpiechu” (decyzja 10). Stare zapisy gier ZZR nie mają tej flagi,
+     więc ich „normalne” (zapisane przy okazji przełączenia dźwięku) nie przykrywa nowego domyślnego. */
+  function ustawienia(przestrzen, domyslne) {
+    var k = klucz(przestrzen, "gry", "ustawienia");
+    var u = {
+      tempo: domyslne && domyslne.tempo === "normalne" ? "normalne" : "spokojne",
+      tempoWybrane: false,
+      dzwiek: !(domyslne && domyslne.dzwiek === false),
+      muzyka: !!(domyslne && domyslne.muzyka)
+    };
+    try {
+      var z = JSON.parse(magazyn.czytaj(k) || "null");
+      if (z && typeof z === "object") {
+        if (z.tempoWybrane === true && (z.tempo === "spokojne" || z.tempo === "normalne")) {
+          u.tempo = z.tempo; u.tempoWybrane = true;
+        }
+        if (typeof z.dzwiek === "boolean") u.dzwiek = z.dzwiek;
+        if (typeof z.muzyka === "boolean") u.muzyka = z.muzyka;
+      }
+    } catch (e) { /* uszkodzony zapis — domyślne */ }
+    return {
+      wartosci: u,
+      zapisz: function () { magazyn.zapisz(k, JSON.stringify(u)); }
+    };
+  }
+
+  function rekord(przestrzen, id, punkty) {
+    var k = klucz(przestrzen, "gra", id, "rekord");
+    var stary = Number(magazyn.czytaj(k)) || 0;
+    if (punkty > stary) magazyn.zapisz(k, punkty);
+    return { rekord: Math.max(stary, punkty), nowy: punkty > stary && stary > 0 };
+  }
+
+  /* ——— tempo ———
+     TOP 15 #4: domyślnie BEZ limitu; czas na przeczytanie liczony ze słów, jedna stała TEMPO
+     (większa = wolniej). Konfiguracja przychodzi z banku: tempo {domyslne, TEMPO, bazowo_s, na_slowo_s, min_s}. */
+  var tempo = {
+    TEMPO: 1.0, bazowo_s: 6, na_slowo_s: 0.45, min_s: 4.5,
+    ustaw: function (konf) {
+      konf = konf || {};
+      ["TEMPO", "bazowo_s", "na_slowo_s", "min_s"].forEach(function (p) {
+        if (typeof konf[p] === "number" && konf[p] > 0) tempo[p] = konf[p];
+      });
+      return tempo;
+    },
+    slowa: function (t) {
+      var s = String(t == null ? "" : t).replace(/<[^>]*>/g, " ").trim();
+      return s ? s.split(/\s+/).length : 0;
+    },
+    czasZeSlow: function (t) {
+      var s = Math.max(tempo.min_s, tempo.bazowo_s + tempo.na_slowo_s * tempo.slowa(t));
+      return Math.round(s * tempo.TEMPO * 1000);
+    },
+    /* "bez-limitu" (domyślne pluginu) → silnik startuje w tempie spokojnym; "normalne" tylko świadomie */
+    domyslneTempo: function (konf) {
+      return konf && konf.domyslne === "normalne" ? "normalne" : "spokojne";
+    }
+  };
+
+  /* ——— ogłoszenia dla czytnika ——— */
+  function ogloszenia(kontener) {
+    var p = doc.createElement("p");
+    p.className = "gm-sr";
+    p.setAttribute("aria-live", "polite");
+    p.setAttribute("aria-atomic", "true");
+    (kontener || doc.body).appendChild(p);
+    var zegar = 0;
+    return {
+      el: p,
+      powiedz: function (tekst) {
+        p.textContent = "";
+        global.clearTimeout(zegar);
+        /* pusty → treść: czytnik odczyta także to samo zdanie powtórzone drugi raz */
+        zegar = global.setTimeout(function () { p.textContent = tekst; }, 60);
+      }
+    };
+  }
+
+  /* ——— dźwięk: syntezowany, bez plików, dopiero po geście ———
+     AudioContext tworzony przed gestem gracza jest wstrzymany przez przeglądarkę i sypie ostrzeżeniami.
+     Dlatego graj()/muzyka() milczą, dopóki gra nie zawoła odblokuj() z obsługi kliknięcia. */
+  function dzwiek(ust) {
+    var ctx = null, glowny = null, muzykaWzmocnienie = null, poGescie = false;
+    var planista = null, nastepnaNuta = 0, krok = 0, konf = { tempo: 96, podstawa: 0 };
+
+    function gotowy() {
+      if (!poGescie) return false;
+      if (ctx) {
+        if (ctx.state === "suspended" && ctx.resume) ctx.resume();
+        return true;
+      }
+      var AC = global.AudioContext || global.webkitAudioContext;
+      if (!AC) return false;
+      try { ctx = new AC(); } catch (e) { return false; }
+      glowny = ctx.createGain();
+      glowny.gain.value = 0.22;
+      glowny.connect(ctx.destination);
+      muzykaWzmocnienie = ctx.createGain();
+      muzykaWzmocnienie.gain.value = 0;
+      muzykaWzmocnienie.connect(glowny);
+      return true;
+    }
+    function odblokuj() { poGescie = true; return gotowy(); }
+
+    function nuta(hz, start, dlugosc, typ, glosnosc, doHz, cel) {
+      var o = ctx.createOscillator(), w = ctx.createGain();
+      o.type = typ || "sine";
+      o.frequency.setValueAtTime(hz, start);
+      if (doHz) o.frequency.exponentialRampToValueAtTime(doHz, start + dlugosc);
+      w.gain.setValueAtTime(0.0001, start);
+      w.gain.exponentialRampToValueAtTime(glosnosc || 0.4, start + Math.min(0.02, dlugosc / 3));
+      w.gain.exponentialRampToValueAtTime(0.0001, start + dlugosc);
+      o.connect(w);
+      w.connect(cel || glowny);
+      o.start(start);
+      o.stop(start + dlugosc + 0.03);
+    }
+
+    /* [Hz, przesunięcie s, długość s, kształt, głośność, glissando do Hz] */
+    var EFEKTY = {
+      klik: [[880, 0, 0.05, "square", 0.1]],
+      tik: [[1250, 0, 0.03, "sine", 0.14]],
+      ok: [[660, 0, 0.09, "triangle", 0.42], [990, 0.08, 0.15, "triangle", 0.42]],
+      zbierz: [[784, 0, 0.07, "sine", 0.38], [1175, 0.06, 0.13, "sine", 0.34]],
+      blad: [[208, 0, 0.2, "sawtooth", 0.2, 139]],
+      zdarzenie: [[523, 0, 0.08, "triangle", 0.34], [659, 0.09, 0.08, "triangle", 0.34], [784, 0.18, 0.15, "triangle", 0.34]],
+      alarm: [[440, 0, 0.12, "square", 0.14], [330, 0.15, 0.18, "square", 0.14]],
+      poziom: [[523, 0, 0.1, "triangle", 0.38], [659, 0.1, 0.1, "triangle", 0.38], [784, 0.2, 0.1, "triangle", 0.38], [1047, 0.3, 0.28, "triangle", 0.42]],
+      koniec: [[392, 0, 0.16, "triangle", 0.38], [523, 0.16, 0.16, "triangle", 0.38], [659, 0.32, 0.16, "triangle", 0.38], [784, 0.48, 0.45, "triangle", 0.42]],
+      start: [[330, 0, 0.1, "triangle", 0.34], [494, 0.1, 0.1, "triangle", 0.34], [659, 0.2, 0.22, "triangle", 0.4]]
+    };
+
+    function graj(nazwa) {
+      if (!ust.dzwiek || !gotowy()) return;
+      var e = EFEKTY[nazwa];
+      if (!e) return;
+      var t = ctx.currentTime + 0.01;
+      for (var i = 0; i < e.length; i++) nuta(e[i][0], t + e[i][1], e[i][2], e[i][3], e[i][4], e[i][5]);
+    }
+
+    /* Muzyka: łagodny, generowany motyw pentatoniczny — tło, nie melodia do zapamiętania. */
+    var PENTATONIKA = [0, 2, 4, 7, 9];
+    var BASY = [0, 5, 7, 3];
+    function hz(polton) { return 220 * Math.pow(2, polton / 12); }
+    function planuj() {
+      if (!ctx) return;
+      var osemka = 60 / (konf.tempo || 96) / 2;
+      while (nastepnaNuta < ctx.currentTime + 0.3) {
+        var wTakcie = krok % 16, takt = Math.floor(krok / 16);
+        if (wTakcie % 8 === 0) {
+          nuta(hz((konf.podstawa || 0) - 12 + BASY[takt % 4]), nastepnaNuta, osemka * 7, "triangle", 0.16, null, muzykaWzmocnienie);
+        }
+        if (wTakcie % 2 === 0 && (krok * 7) % 5 !== 0) {
+          var st = PENTATONIKA[(krok * 3 + takt) % 5] + (wTakcie > 10 ? 12 : 0);
+          nuta(hz((konf.podstawa || 0) + st), nastepnaNuta, osemka * 0.9, "sine", 0.09, null, muzykaWzmocnienie);
+        }
+        nastepnaNuta += osemka;
+        krok++;
+      }
+    }
+    function muzyka(wlacz, nowaKonf) {
+      if (nowaKonf) konf = nowaKonf;
+      var gra = !!(wlacz && ust.muzyka);
+      if (!gra && !ctx) return;
+      if (!gotowy()) return;
+      var teraz = ctx.currentTime;
+      muzykaWzmocnienie.gain.cancelScheduledValues(teraz);
+      muzykaWzmocnienie.gain.setTargetAtTime(gra ? 0.5 : 0, teraz, 0.25);
+      if (gra && !planista) {
+        nastepnaNuta = ctx.currentTime + 0.1;
+        planista = global.setInterval(planuj, 100);
+      } else if (!gra && planista) {
+        global.clearInterval(planista);
+        planista = null;
+      }
+    }
+
+    return { graj: graj, muzyka: muzyka, odblokuj: odblokuj };
+  }
+
+  /* ——— LMS: tylko „ukończone” ———
+     Gdy paczka ma most `Scorm` (formaty/scorm/scorm.js) — używamy go. Gdy nie ma (np. gra wstawiona
+     do cudzej paczki, PS — RAPORT-A §2 p. 6), rdzeń sam szuka API SCORM 1.2 w oknach nadrzędnych.
+     `completed` BEZ LMSFinish — sesję zamyka beforeunload (L63: po LMSFinish nic się już nie zapisuje). */
+  var lms = (function () {
+    var api = null, szukano = false, polaczono = false;
+    function szukaj(okno) {
+      var i = 0;
+      try {
+        while (okno && okno.API == null && okno.parent && okno.parent !== okno && i < 12) { i++; okno = okno.parent; }
+        return (okno && okno.API) || null;
+      } catch (e) { return null; }   /* ramka z innego origin */
+    }
+    function znajdz() {
+      if (szukano) return api;
+      szukano = true;
+      api = szukaj(global);
+      try { if (!api && global.opener && !global.opener.closed) api = szukaj(global.opener); } catch (e) { api = null; }
+      return api;
+    }
+    function wywolaj(m, a) {
+      if (!api) return "";
+      try { return api[m].apply(api, a || []); } catch (e) { return ""; }
+    }
+    return {
+      start: function () {
+        if (global.Scorm && global.Scorm.start) { try { return global.Scorm.start(); } catch (e) { return false; } }
+        if (polaczono || !znajdz()) return polaczono;
+        polaczono = wywolaj("LMSInitialize", [""]) === "true";
+        if (polaczono) {
+          var s = wywolaj("LMSGetValue", ["cmi.core.lesson_status"]);
+          if (!s || s === "not attempted") {
+            wywolaj("LMSSetValue", ["cmi.core.lesson_status", "incomplete"]);
+            wywolaj("LMSCommit", [""]);
+          }
+          global.addEventListener("beforeunload", function () {
+            if (polaczono) { wywolaj("LMSCommit", [""]); wywolaj("LMSFinish", [""]); }
+          });
+        }
+        return polaczono;
+      },
+      zakoncz: function () {
+        if (global.Scorm && global.Scorm.zakoncz) { try { global.Scorm.zakoncz(true); } catch (e) { /* podgląd */ } return; }
+        if (!polaczono) lms.start();
+        if (!polaczono) return;
+        wywolaj("LMSSetValue", ["cmi.core.lesson_status", "completed"]);
+        wywolaj("LMSCommit", [""]);
+      }
+    };
+  })();
+
+  /* ——— ukończenie: trzy tryby (ARCHITEKTURA §4.2) ———
+     gra   — gra jest osobną paczką: LMS dostaje „completed”
+     modul — gra jest ekranem modułu: tylko zdarzenie, LMS-em rządzi moduł kursu
+     brak  — Strona / samodzielny HTML: zapis lokalny + zdarzenie
+     We wszystkich trybach zostaje znacznik lokalny "<przestrzen>-gra-<id>-ukonczona" (jak w ZZR). */
+  var ukonczone = {};
+  function ukoncz(o) {
+    o = o || {};
+    var id = o.id || "bez-id";
+    var znak = klucz(o.przestrzen, "gra", id);
+    if (ukonczone[znak]) return false;
+    ukonczone[znak] = true;
+    var tryb = o.tryb === "modul" || o.tryb === "brak" ? o.tryb : "gra";
+    if (tryb === "gra") lms.zakoncz();
+    magazyn.zapisz(znak + "-ukonczona", "1");
+    var cel = o.korzen || doc;
+    try {
+      cel.dispatchEvent(new CustomEvent("gm:ukonczone", { bubbles: true, detail: { id: id, tryb: tryb, zrodlo: o.zrodlo || "gra" } }));
+    } catch (e) { /* stara przeglądarka bez CustomEvent */ }
+    return true;
+  }
+
+  /* ——— wstrzykiwanie CSS (format Strona: filtr Moodle wycina znacznik style z treści — CSS przychodzi z JS) ——— */
+  function wstrzyknijCss(nazwa, css) {
+    var znacznik = nazwa + "@" + WERSJA;
+    var istn = doc.querySelectorAll("style[data-gm-css]");
+    for (var i = 0; i < istn.length; i++) if (istn[i].getAttribute("data-gm-css") === znacznik) return false;
+    var st = doc.createElement("style");
+    st.setAttribute("data-gm-css", znacznik);
+    st.appendChild(doc.createTextNode(css));
+    (doc.head || doc.documentElement).appendChild(st);
+    return true;
+  }
+
+  /* ——— konfiguracja gry z korzenia i banku ——— */
+  function konfiguracja(korzen) {
+    var id = korzen.getAttribute("data-gra-id") || "";
+    var dane = (global.GM_DANE && global.GM_DANE[id]) || null;
+    return {
+      id: id,
+      przestrzen: korzen.getAttribute("data-gra-przestrzen") || (dane && dane.przestrzen) || "gm",
+      ukonczenie: korzen.getAttribute("data-gm-ukonczenie") || (dane && dane.ukonczenie) || (global.Scorm ? "gra" : "brak"),
+      dane: dane
+    };
+  }
+
+  /* ——— wersja tekstowa: odsyłacz i zaliczenie ———
+     Pytanie zatwierdza przycisk „Sprawdź odpowiedź”, nie samo zaznaczenie — zatwierdzanie na „change”
+     blokowało odpowiedzi 3 i 4 z klawiatury (L64). Stan pokazany znakiem i kolorem (1.4.1);
+     fokus na reakcji (4.1.3). Odpowiedź na wszystkie pytania zalicza materiał tak samo jak gra. */
+  var wersjaTekstowa = {
+    przejdz: function (idCelu) {
+      var cel = doc.getElementById(idCelu || "wersja-tekstowa");
+      if (!cel) return false;
+      if (cel.tagName === "DETAILS") cel.open = true;
+      cel.scrollIntoView({ block: "start" });
+      var h = cel.querySelector("h2, h3, summary");
+      if (h) {
+        if (h.tagName !== "SUMMARY") h.tabIndex = -1;
+        try { h.focus({ preventScroll: true }); } catch (e) { h.focus(); }
+      }
+      return true;
+    },
+    uruchom: function (kontener, naKoniec) {
+      var pytania = kontener.querySelectorAll("[data-gm-pytanie]");
+      var stan = { odpowiedziano: 0, wszystkich: pytania.length };
+      function postep() {
+        var l = kontener.querySelector("[data-gm-postep]");
+        if (l) l.textContent = stan.odpowiedziano + " z " + stan.wszystkich;
+        if (stan.wszystkich > 0 && stan.odpowiedziano === stan.wszystkich && naKoniec) naKoniec();
+      }
+      function znak(opcja, tekst) {
+        var s = doc.createElement("span");
+        s.className = "gm-odpowiedz__znak";
+        s.textContent = tekst;
+        opcja.appendChild(s);
+      }
+      Array.prototype.forEach.call(pytania, function (pytanie) {
+        var opcje = pytanie.querySelectorAll(".gm-odpowiedz");
+        var reakcja = pytanie.querySelector(".gm-reakcja");
+        if (!reakcja || !opcje.length) return;
+        reakcja.setAttribute("tabindex", "-1");
+        var przycisk = doc.createElement("button");
+        przycisk.type = "button";
+        przycisk.className = "gm-przycisk gm-pytanie__sprawdz";
+        przycisk.textContent = "Sprawdź odpowiedź";
+        reakcja.parentNode.insertBefore(przycisk, reakcja);
+        przycisk.addEventListener("click", function () {
+          if (pytanie.getAttribute("data-gm-zamkniete") === "tak") return;
+          var wybrana = null;
+          Array.prototype.forEach.call(opcje, function (o) {
+            var w = o.querySelector("input");
+            if (w && w.checked) wybrana = o;
+          });
+          if (!wybrana) {
+            reakcja.className = "gm-reakcja gm-reakcja--uwaga";
+            reakcja.innerHTML = "<p>Zaznacz jedną odpowiedź, a potem ją sprawdź.</p>";
+            reakcja.hidden = false;
+            reakcja.focus();
+            return;
+          }
+          pytanie.setAttribute("data-gm-zamkniete", "tak");
+          var dobra = wybrana.getAttribute("data-poprawna") === "tak";
+          stan.odpowiedziano += 1;
+          Array.prototype.forEach.call(opcje, function (o) {
+            var w = o.querySelector("input");
+            if (w) w.disabled = true;
+          });
+          wybrana.classList.add(dobra ? "gm-odpowiedz--ok" : "gm-odpowiedz--zle");
+          znak(wybrana, dobra ? "✓ dobrze" : "✗ nie tym razem");
+          if (!dobra) {
+            var wlasciwa = pytanie.querySelector('.gm-odpowiedz[data-poprawna="tak"]');
+            if (wlasciwa) { wlasciwa.classList.add("gm-odpowiedz--ok"); znak(wlasciwa, "✓ właściwa"); }
+          }
+          reakcja.className = "gm-reakcja " + (dobra ? "gm-reakcja--ok" : "gm-reakcja--zle");
+          reakcja.innerHTML = '<p><span class="gm-sr">' + (dobra ? "Dobrze. " : "Nie tym razem. ") + "</span>" +
+            bezpieczny(wybrana.getAttribute("data-reakcja") || "") + "</p>";
+          reakcja.hidden = false;
+          reakcja.focus();
+          przycisk.hidden = true;
+          postep();
+        });
+      });
+      postep();
+      return stan;
+    }
+  };
+
+  /* Na starcie strony: połączenie z LMS (status „incomplete”) i uruchomienie wersji tekstowych.
+     Wersja tekstowa wskazuje swoją grę przez data-gra-id — zalicza tak samo jak gra (równoważna, TOP 15 #10). */
+  gotowe(function () {
+    if (doc.querySelector('[data-gm-ukonczenie="gra"]')) lms.start();
+    Array.prototype.forEach.call(doc.querySelectorAll("[data-gm-wersja-tekstowa]"), function (k) {
+      if (k.getAttribute("data-gm-init")) return;
+      k.setAttribute("data-gm-init", "1");
+      var id = k.getAttribute("data-gra-id") || "";
+      var korzen = id ? doc.querySelector('[data-gra][data-gra-id="' + id + '"]') : null;
+      wersjaTekstowa.uruchom(k, function () {
+        var konf = korzen ? konfiguracja(korzen) : { id: id, przestrzen: k.getAttribute("data-gra-przestrzen") || "gm",
+          ukonczenie: k.getAttribute("data-gm-ukonczenie") || "brak" };
+        ukoncz({ tryb: konf.ukonczenie, przestrzen: konf.przestrzen, id: konf.id, korzen: korzen || k, zrodlo: "wersja-tekstowa" });
+      });
+    });
+  });
+
+  global.Gm = {
+    wersja: WERSJA,
+    bezpieczny: bezpieczny, tekstZHtml: tekstZHtml, gotowe: gotowe,
+    losowanie: losowanie, hasz: hasz, tasuj: tasuj, losuj: losuj,
+    ogranicz: ogranicz, lerp: lerp, wygladz: wygladz, rgba: rgba,
+    ogloszenia: ogloszenia, dzwiek: dzwiek,
+    klucz: klucz, magazyn: magazyn, ustawienia: ustawienia, rekord: rekord,
+    tempo: tempo, lms: lms, ukoncz: ukoncz,
+    wersjaTekstowa: wersjaTekstowa, wstrzyknijCss: wstrzyknijCss, konfiguracja: konfiguracja
+  };
+})(window);
+
+</script>
+<script data-gm-plik="gra.js">
+/* gry-moodle 0.5.0 — NIE EDYTUJ W KURSIE, poprawiaj w PLUGIN/gry-moodle (~/.claude/local-marketplace-maciek/plugins/gry-moodle) */
+/* gra.js — WARSTWA GIER (pętla, scena, pad, panele). Wymaga rdzen.js (przestrzeń Gm) wczytanego wcześniej.
+ *
+ * Baza: silnik kursu ZZR `wspolne/gra.js` 999 l. (SHA 42abbe69…, wgrany 24.09.2026) — nadzbiór wersji PS/pluginu 979.
+ * Zmiany względem bazy: lista R1–R18 w `GRY MOODLE/_produkcja/DZIENNIK-ETAP-2A.md`.
+ *
+ * ZAŁOŻENIA
+ *  - Scena = płótno (tło, efekty) + warstwa DOM z duszkami. Tekst zawsze w DOM — czytelny przy 320 px
+ *    i powiększalny. Na płótnie nie rysuj zdań.
+ *  - Sterowanie: klawiatura (strzałki/WASD, spacja/Enter, 1–9, P/Esc = pauza, I = info), mysz i dotyk
+ *    (pad przycisków pod sceną, stuknięcia w scenę).
+ *  - Pauza w każdej chwili. Domyślnie „bez pośpiechu” (decyzja 10): gra ×0,6, BEZ limitów czasu w wyborach
+ *    (2.2.1), a wyjaśnienie (g.wyjasnienie) czeka na „Dalej”. Tempo normalne tylko świadomym wyborem gracza.
+ *  - prefers-reduced-motion: bez wstrząsów, cząstek i błysków. Błysk najwyżej co 400 ms (2.3.1).
+ *  - Dźwięk syntezowany (Gm.dzwiek): dopiero po geście („Graj”), wyłączniki na pasku; muzyka domyślnie wyłączona.
+ *  - Decyzje w dostępnych panelach (role=dialog, prawdziwe przyciski, pułapka fokusu, klawisze 1–9).
+ *  - Do Moodle idzie tylko „ukończone” (Gm.ukoncz), bez wyniku punktowego.
+ *
+ * UŻYCIE (widok mechaniki):
+ *   var g = Gra.utworz(korzen, {
+ *     tytul: "Paragraf",
+ *     polecenie: "Wrzuć kartę do właściwego segregatora.",  // stale nad planszą (L21)
+ *     tempo: {domyslne: "bez-limitu", TEMPO: 1},             // z banku; domyślnie bez pośpiechu
+ *     ukonczenie: "gra" | "modul" | "brak",                  // z banku / data-gm-ukonczenie
+ *     strefy: function (g) { return [{nazwa, g, d}]; },      // pasy płótna, których dymek nie może kryć (sonda B13)
+ *     opisSterowania: "Strzałki w lewo i w prawo — segregator, spacja — wrzuć kartę, P — pauza.",
+ *     przyciski: [{akcja: "lewo", etykieta: "←", opis: "W lewo"}, {akcja: "akcja", etykieta: "Wrzuć", szeroki: true}],
+ *     muzyka: {tempo: 100, podstawa: 0},     // opcjonalnie; podstawa w półtonach od A3
+ *     przeciaganie: false,                   // true: dotyk nie przewija strony na scenie (gry z przeciąganiem)
+ *     zasadyHtml: "<ul><li>…</li></ul>",     // pokazywane w panelu pauzy
+ *     klatka:  function (dt, g) {},          // logika; dt w sekundach, już przemnożone przez tempo
+ *     rysuj:   function (ctx, g) {},         // tło i efekty na płótnie (współrzędne w px CSS sceny)
+ *     akcja:   function (nazwa, g) {},       // "lewo" "prawo" "gora" "dol" "akcja" "info" "1".."5"
+ *     wskaznik:function (typ, x, y, ev, g) {},// typ: "dol" | "ruch" | "gora"; x, y względem sceny
+ *     rozmiar: function (szer, wys, g) {},   // po zmianie rozmiaru sceny (także na starcie)
+ *     zmianaTempa: function (tempo, g) {},   // "normalne" | "spokojne"
+ *     zakonczRunde: function (g) {}          // jeśli podane, pauza ma przycisk „Zakończ rundę”
+ *   });
+ *   g.ekranStartowy({opis, zasady: [...], sterowanie: [...]}).then(function () { g.start(); });
+ *
+ *   Wywołania zwrotne dostają g jako OSTATNI argument. „rozmiar” przychodzi pierwszy raz tuż po powrocie z utworz().
+ *   Każda gra MUSI mieć <div data-gra data-gra-id="s25-paragraf" data-gra-przestrzen="zzr"> — id to klucz rekordu
+ *   w localStorage, a wszystkie paczki SCORM na Moodle dzielą jedno origin (bez id rekordy gier by się mieszały).
+ *   Klucze: "<przestrzen>-gry-ustawienia", "<przestrzen>-gra-<id>-rekord", "<przestrzen>-gra-<id>-ukonczona".
+ *
+ * API OBIEKTU g (najważniejsze)
+ *   g.szer, g.wys           rozmiar sceny w px CSS;  g.czas — sekundy aktywnej gry
+ *   g.dtReal                krok logiki BEZ mnożnika tempa (1/30 s) — ruch sterowany przez gracza nie zwalnia
+ *                           w tempie spokojnym. Logika chodzi stałym krokiem: przy niskiej liczbie klatek silnik
+ *                           nadrabia zaległość kilkoma krokami, więc gra ma tę samą prędkość na każdym sprzęcie.
+ *   g.kolor.{tlo, karta, glebia, tekst, tekstSlaby, glowny, akcent, akcentCiemny, pozytyw, uwaga,
+ *            ramka, ramkaKontrolka, naGlebi, tloOk, tloZle}  — kolory z tokenów styl.css
+ *   g.wcisniete[akcja]      czy klawisz/przycisk jest trzymany
+ *   g.spokojnie()           true w tempie spokojnym — WYŁĄCZ wtedy własne limity czasu
+ *   g.malyRuch              true przy prefers-reduced-motion — ogranicz własne animacje
+ *   g.start() / g.zatrzymaj() / g.pauza(true|false) / g.uruchomiona()
+ *   g.duszek({html | tekst, klasa, x, y, s, r, alfa, szer, dane}) → d
+ *        d.x, d.y (lewy górny róg), d.s (skala), d.r (stopnie), d.alfa; d.el; d.w, d.h (odczytaj raz);
+ *        d.usun().  Silnik co klatkę przenosi x/y/s/r na transform, a alfa na visibility (0 = ukryty; bez półprzezroczystości).
+ *   g.czysc()               usuwa duszki, cząstki i komunikaty
+ *   g.panel({tytul, tresc(HTML), przyciski:[{etykieta, wartosc, glowny}], ton:"ok|zle|uwaga",
+ *            szeroki, numeruj, opcje:true, limit(sek), poCzasie, fokusNaTytul, esc}) → Promise(wartosc)
+ *   g.wybor({tytul, tresc, opcje:[{tekst, wartosc}], limit, ton}) → Promise({wartosc, poCzasie})
+ *   g.komunikat(tekst, {ton, czas, ogloszenie})   krótki komunikat na scenie (+ czytnik)
+ *   g.ogloszenie(tekst)     tylko dla czytnika ekranu (aria-live)
+ *   g.stan({"Punkty": 120, "Poziom": 2})           pasek wyniku nad sceną
+ *   g.opiszPad({"1": {etykieta, opis, ukryty}})    zmienia napis i nazwę przycisku padu (gry wieloetapowe);
+ *                                                  ukryty:true chowa przycisk bez funkcji w danym etapie (L11)
+ *   g.wyjasnienie({tytul, tekst(HTML), ton, czytnik}) → Promise — bez pośpiechu: panel z „Dalej” (gra stoi,
+ *                           L18/L25); tempo normalne: dymek na czas ze słów (Gm.tempo.czasZeSlow), gra biegnie
+ *   g.czasCzytania(tekst)   ms na przeczytanie (Gm.tempo.czasZeSlow) — jedna stała TEMPO z banku
+ *   g.strefy()              strefy płótna z opcji „strefy” (dla sondy dymków)
+ *   g.dzwiek("ok"|"blad"|"klik"|"zbierz"|"zdarzenie"|"alarm"|"poziom"|"koniec"|"tik"|"start")
+ *   Akcje z klawiatury: lewo prawo gora dol akcja info pauza oraz cyfry "1"–"9"
+ *   g.czastki(x, y, {kolor, ile, predkosc}) / g.wstrzas(0..1) / g.blysk("ok"|"zle")
+ *   g.ekranStartowy({tytul, opis, zasady:[HTML], sterowanie:[HTML], dodatek, przycisk,
+ *                    przyciski:[{etykieta,wartosc}], numeruj, opcje}) → Promise
+ *                           własne „przyciski” zastępują parę Graj / Graj w tempie spokojnym (kilka wejść do gry)
+ *   g.omowienie({tytul, wynik(HTML), punkty:[{ton:"ok"|"zle", tekst(HTML)}], zapamietaj, dodatek,
+ *                przyciski}) → Promise; zalicza materiał w Moodle; "tekst" przewija do #wersja-tekstowa
+ *   g.ukoncz()              zalicza materiał (raz na wczytanie strony) — Gm.ukoncz w trybie gra/modul/brak
+ *   g.diagnostyka()         stan silnika do testów (uruchomiona, pauza, blokady, awaria, czas, duszki);
+ *                           ten sam obiekt wisi na scenie jako korzen.__gra
+ *   g.krokTestowy(sekundy)  przewija logikę bez klatek animacji — tylko do sprawdzania gry w przeglądarce
+ *   g.rekord(punkty)        → {rekord, nowy}
+ *   Gra.bezpieczny(t), Gra.tasuj(a, ziarno?), Gra.losuj(a), Gra.ogranicz(v,a,b), Gra.lerp(a,b,t),
+ *   Gra.wygladz(t), Gra.rgba(hex, alfa)  — delegowane do Gm (jedna implementacja w rdzeniu)
+ *
+ * TREŚĆ w HTML (tresc, punkty, etykiety) to zaufane dane z zasoby/dane.js (generowany z banku). Tekst z danych,
+ * który może zawierać < > &, przepuść przez Gra.bezpieczny().
+ */
+(function (global) {
+  "use strict";
+
+  if (!global.Gm) throw new Error("gra.js: brak rdzen.js (przestrzeń Gm) — wczytaj rdzen.js przed gra.js");
+  var Gm = global.Gm;
+
+  var MAPA_KLAWISZY = {
+    ArrowLeft: "lewo", KeyA: "lewo", ArrowRight: "prawo", KeyD: "prawo",
+    ArrowUp: "gora", KeyW: "gora", ArrowDown: "dol", KeyS: "dol",
+    Space: "akcja", Enter: "akcja", NumpadEnter: "akcja",
+    KeyP: "pauza", Escape: "pauza", KeyI: "info",
+    Digit1: "1", Digit2: "2", Digit3: "3", Digit4: "4", Digit5: "5",
+    Digit6: "6", Digit7: "7", Digit8: "8", Digit9: "9",
+    Numpad1: "1", Numpad2: "2", Numpad3: "3", Numpad4: "4", Numpad5: "5",
+    Numpad6: "6", Numpad7: "7", Numpad8: "8", Numpad9: "9"
+  };
+  /* Zapas po ev.key: klawiatury ekranowe, część czytników ekranu i sterowanie automatyczne wysyłają
+     zdarzenia bez ev.code — bez tego gra byłaby dla nich głucha. */
+  var MAPA_ZNAKOW = {
+    ArrowLeft: "lewo", Left: "lewo", a: "lewo", A: "lewo", ArrowRight: "prawo", Right: "prawo", d: "prawo", D: "prawo",
+    ArrowUp: "gora", Up: "gora", w: "gora", W: "gora", ArrowDown: "dol", Down: "dol", s: "dol", S: "dol",
+    " ": "akcja", Spacebar: "akcja", Enter: "akcja", p: "pauza", P: "pauza", Escape: "pauza", Esc: "pauza",
+    i: "info", I: "info",
+    "1": "1", "2": "2", "3": "3", "4": "4", "5": "5", "6": "6", "7": "7", "8": "8", "9": "9"
+  };
+  var KIERUNKI = { lewo: 1, prawo: 1, gora: 1, dol: 1 };
+  function akcjaKlawisza(ev) { return MAPA_KLAWISZY[ev.code] || MAPA_ZNAKOW[ev.key] || null; }
+
+  /* ——— drobne narzędzia (wspólne: w rdzeniu, tu tylko skróty) ——— */
+
+  function el(tag, klasa) {
+    var e = document.createElement(tag);
+    if (klasa) e.className = klasa;
+    return e;
+  }
+  var bezpieczny = Gm.bezpieczny, tasuj = Gm.tasuj, losuj = Gm.losuj, ogranicz = Gm.ogranicz,
+    lerp = Gm.lerp, wygladz = Gm.wygladz, rgba = Gm.rgba;
+  function fokus(e) {
+    if (!e) return;
+    try { e.focus({ preventScroll: true }); } catch (x) { e.focus(); }
+  }
+
+  /* Kolory płótna z tokenów (rdzen.css + motyw kursu). Zapas — gdy arkusz rdzenia się nie wczytał:
+     wtedy rysujemy w neutralnej szarości, a nie w palecie jednego kursu. */
+  function czytajKolory() {
+    var s = global.getComputedStyle(document.documentElement);
+    function v(nazwa, zapas) { return (s.getPropertyValue(nazwa) || "").trim() || zapas; }
+    return {
+      tlo: v("--tlo", "#F4F4F4"), karta: v("--tlo-karta", "#FFFFFF"), glebia: v("--tlo-glebia", "#2B2B2B"),
+      tekst: v("--tekst", "#1A1A1A"), tekstSlaby: v("--tekst-slaby", "#4A4A4A"), glowny: v("--glowny", "#2B2B2B"),
+      akcent: v("--akcent", "#1A1A1A"), akcentCiemny: v("--akcent-ciemny", "#000000"),
+      pozytyw: v("--pozytyw", "#1A1A1A"), uwaga: v("--uwaga", "#1A1A1A"), ramka: v("--ramka", "#CCCCCC"),
+      ramkaKontrolka: v("--ramka-kontrolka", "#767676"), naGlebi: v("--na-glebi", "#EEEEEE"),
+      tloOk: v("--tlo-ok", "#F4F4F4"), tloZle: v("--tlo-zle", "#F4F4F4")
+    };
+  }
+
+  /* ——— gra ——— */
+
+  var licznikGier = 0;
+
+  function utworz(korzen, opcje) {
+    if (!korzen) throw new Error("Gra.utworz: brak elementu [data-gra]");
+    opcje = opcje || {};
+    var nr = ++licznikGier;
+    var id = korzen.getAttribute("data-gra-id") || opcje.id ||
+      ("gra-" + (document.title || "bez-tytulu").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + "-" + nr);
+    /* Przestrzeń kluczy z korzenia albo z banku — zamiast zahardkodowanego „zzr-” (RAPORT-A §2 p. 7). */
+    var przestrzen = korzen.getAttribute("data-gra-przestrzen") || opcje.przestrzen || "gm";
+    var trybUkonczenia = korzen.getAttribute("data-gm-ukonczenie") || opcje.ukonczenie || (global.Scorm ? "gra" : "brak");
+    Gm.tempo.ustaw(opcje.tempo);
+    var zapisUstawien = Gm.ustawienia(przestrzen, { tempo: Gm.tempo.domyslneTempo(opcje.tempo) });
+    var ustawienia = zapisUstawien.wartosci;
+    function zapiszUstawienia() { zapisUstawien.zapisz(); }
+    var dzwiek = Gm.dzwiek(ustawienia);
+    var malyRuch = !!(global.matchMedia && global.matchMedia("(prefers-reduced-motion: reduce)").matches);
+
+    /* DOM */
+    korzen.classList.add("gra");
+    korzen.innerHTML = "";
+
+    /* Polecenie stale nad planszą — gra „działała”, a gracz nie wiedział, co ma zrobić, bo zdanie
+       było tylko w panelu, który się zamknął (L21, Przełącznica i Panoptikum). */
+    if (opcje.polecenie) {
+      var polecenieEl = el("p", "gra__polecenie");
+      polecenieEl.textContent = opcje.polecenie;
+      korzen.appendChild(polecenieEl);
+    }
+
+    var pasek = el("div", "gra__pasek");
+    pasek.setAttribute("role", "group");
+    pasek.setAttribute("aria-label", "Ustawienia gry");
+    var stanEl = el("div", "gra__stan");
+    stanEl.setAttribute("aria-hidden", "true");
+    function przelacznik(tekst) {
+      var b = el("button", "gra__przelacznik");
+      b.type = "button";
+      b.textContent = tekst;
+      pasek.appendChild(b);
+      return b;
+    }
+    pasek.appendChild(stanEl);
+    var bPauza = przelacznik("Pauza");
+    var bTempo = przelacznik("Bez pośpiechu");
+    var bDzwiek = przelacznik("Dźwięk");
+    var bMuzyka = przelacznik("Muzyka");
+    var bPelny = przelacznik("Pełny ekran");
+
+    var scena = el("div", "gra__scena");
+    scena.tabIndex = 0;
+    scena.setAttribute("role", "group");
+    scena.setAttribute("aria-roledescription", "plansza gry");
+    scena.setAttribute("aria-label", (opcje.tytul || "Gra") + ". " +
+      (opcje.opisSterowania || "Sterowanie: strzałki, spacja, P — pauza."));
+    if (opcje.przeciaganie) scena.style.touchAction = "none";
+    var plotno = el("canvas", "gra__plotno");
+    plotno.setAttribute("aria-hidden", "true");
+    var warstwa = el("div", "gra__duszki");
+    warstwa.setAttribute("aria-hidden", "true");
+    var blyskEl = el("div", "gra__blysk");
+    blyskEl.setAttribute("aria-hidden", "true");
+    var komunikaty = el("div", "gra__komunikaty");
+    komunikaty.setAttribute("aria-hidden", "true");
+    var nakladka = el("div", "gra__nakladka");
+    nakladka.hidden = true;
+    scena.appendChild(plotno);
+    scena.appendChild(warstwa);
+    scena.appendChild(blyskEl);
+    scena.appendChild(komunikaty);
+    scena.appendChild(nakladka);
+
+    var pad = el("div", "gra__pad");
+
+    korzen.appendChild(pasek);
+    korzen.appendChild(scena);
+    korzen.appendChild(pad);
+    /* region aria-live powstaje TERAZ, przy starcie gry, a nie przy pierwszym komunikacie */
+    var ogloszenia = Gm.ogloszenia(korzen);
+
+    var g = {
+      id: id, przestrzen: przestrzen, korzen: korzen, scena: scena, warstwa: warstwa, plotno: plotno,
+      ctx: plotno.getContext("2d"), szer: 0, wys: 0, czas: 0,
+      kolor: czytajKolory(), malyRuch: malyRuch, wcisniete: {}, duszki: []
+    };
+    g.spokojnie = function () { return ustawienia.tempo === "spokojne"; };
+    g.mnoznik = function () { return ustawienia.tempo === "spokojne" ? 0.6 : 1; };
+
+    /* awaria jednej gry nie może zamrozić strony ani sypać błędami co klatkę */
+    var awaria = false;
+    function bezpiecznie(fn) {
+      if (typeof fn !== "function" || awaria) return undefined;
+      var args = Array.prototype.slice.call(arguments, 1);
+      args.push(g);
+      try { return fn.apply(null, args); } catch (e) {
+        awaria = true;
+        if (global.console) global.console.error("[Gra] zatrzymana po błędzie:", e);
+        pokazAwarie();
+        return undefined;
+      }
+    }
+
+    /* rozmiar sceny — płótno w pikselach urządzenia, logika w px CSS */
+    var gotowa = false;
+    function dopasuj() {
+      var r = scena.getBoundingClientRect();
+      var w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
+      var dpr = Math.min(global.devicePixelRatio || 1, 2);
+      var pw = Math.round(w * dpr), ph = Math.round(h * dpr);
+      if (w === g.szer && h === g.wys && plotno.width === pw && plotno.height === ph) return;
+      g.szer = w;
+      g.wys = h;
+      plotno.width = pw;
+      plotno.height = ph;
+      g.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      if (gotowa) bezpiecznie(opcje.rozmiar, w, h);
+    }
+    if (global.ResizeObserver) new global.ResizeObserver(dopasuj).observe(scena);
+    else global.addEventListener("resize", dopasuj);
+
+    /* duszki */
+    g.duszek = function (o) {
+      o = o || {};
+      var e = el(o.tag || "div", "gra__duszek" + (o.klasa ? " " + o.klasa : ""));
+      if (o.html != null) e.innerHTML = o.html;
+      else if (o.tekst != null) e.textContent = o.tekst;
+      if (o.szer) e.style.width = o.szer + "px";
+      warstwa.appendChild(e);
+      var d = {
+        el: e, x: o.x || 0, y: o.y || 0, s: o.s == null ? 1 : o.s, r: o.r || 0,
+        alfa: o.alfa == null ? 1 : o.alfa, dane: o.dane == null ? null : o.dane,
+        usun: function () {
+          if (e.parentNode) e.parentNode.removeChild(e);
+          var i = g.duszki.indexOf(d);
+          if (i >= 0) g.duszki.splice(i, 1);
+        }
+      };
+      Object.defineProperty(d, "w", { get: function () { return e.offsetWidth; } });
+      Object.defineProperty(d, "h", { get: function () { return e.offsetHeight; } });
+      g.duszki.push(d);
+      return d;
+    };
+    g.czysc = function () {
+      g.duszki.slice().forEach(function (d) { d.usun(); });
+      czastki.length = 0;
+      komunikaty.innerHTML = "";
+    };
+
+    /* efekty */
+    var czastki = [];
+    var wstrzas = 0, wstrzasX = 0, wstrzasY = 0, ostatniBlysk = 0;
+    g.czastki = function (x, y, o) {
+      if (malyRuch) return;
+      o = o || {};
+      var ile = o.ile || 14;
+      for (var i = 0; i < ile; i++) {
+        var kat = Math.random() * Math.PI * 2;
+        var v = (o.predkosc || 160) * (0.4 + Math.random() * 0.8);
+        var zycie = 0.5 + Math.random() * 0.5;
+        czastki.push({ x: x, y: y, vx: Math.cos(kat) * v, vy: Math.sin(kat) * v - 40, zycie: zycie, max: zycie,
+          kolor: o.kolor || g.kolor.akcent, r: o.r || (2 + Math.random() * 3) });
+      }
+      if (czastki.length > 300) czastki.splice(0, czastki.length - 300);
+    };
+    g.wstrzas = function (sila) { if (!malyRuch) wstrzas = Math.min(1, wstrzas + (sila == null ? 0.5 : sila)); };
+    g.blysk = function (ton) {
+      if (malyRuch) return;
+      var teraz = Date.now();
+      if (teraz - ostatniBlysk < 400) return;
+      ostatniBlysk = teraz;
+      blyskEl.className = "gra__blysk gra__blysk--" + (ton === "ok" ? "ok" : "zle") + " gra__blysk--pokaz";
+      global.requestAnimationFrame(function () {
+        global.requestAnimationFrame(function () { blyskEl.classList.remove("gra__blysk--pokaz"); });
+      });
+    };
+    function aktualizujEfekty(dt) {
+      for (var i = czastki.length - 1; i >= 0; i--) {
+        var p = czastki[i];
+        p.zycie -= dt;
+        if (p.zycie <= 0) { czastki.splice(i, 1); continue; }
+        p.vy += 320 * dt;
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+      }
+      if (wstrzas > 0 && dt > 0) {
+        wstrzas = Math.max(0, wstrzas - dt * 2.5);
+        var s = wstrzas * wstrzas * 12;
+        wstrzasX = (Math.random() - 0.5) * s;
+        wstrzasY = (Math.random() - 0.5) * s;
+      } else if (dt > 0 || wstrzas === 0) {
+        wstrzasX = 0;
+        wstrzasY = 0;
+      }
+    }
+    function rysujCzastki(c) {
+      for (var i = 0; i < czastki.length; i++) {
+        var p = czastki[i];
+        c.globalAlpha = Math.max(0, p.zycie / p.max);
+        c.fillStyle = p.kolor;
+        c.beginPath();
+        c.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        c.fill();
+      }
+      c.globalAlpha = 1;
+    }
+
+    /* pętla */
+    var uruchomiona = false, pauza = false, blokady = 0, ostatni = 0, zaleglosc = 0;
+    var KROK = 1 / 30, MAKS_KROKOW = 12;   /* stały krok logiki — ta sama prędkość gry na słabym i mocnym sprzęcie */
+    function wstrzymana() { return !uruchomiona || pauza || blokady > 0 || awaria; }
+    function ustawDuszki() {
+      for (var i = 0; i < g.duszki.length; i++) {
+        var d = g.duszki[i];
+        var t = "translate(" + (d.x + wstrzasX).toFixed(1) + "px," + (d.y + wstrzasY).toFixed(1) + "px)";
+        if (d.s !== 1) t += " scale(" + d.s.toFixed(3) + ")";
+        if (d.r) t += " rotate(" + d.r.toFixed(1) + "deg)";
+        if (d._t !== t) { d.el.style.transform = t; d._t = t; }
+        /* 0.5.0: alfa → visibility, nie przezroczystość (B8 formatu Strona; przezroczysty tekst łamie kontrast 1.4.3):
+           alfa ≤ 0 — duszek ukryty, alfa > 0 — widoczny w pełnym kontraście. Żaden widok nie używał wartości pośrednich. */
+        var a = d.alfa > 0 ? "" : "hidden";
+        if (d._a !== a) { d.el.style.visibility = a; d._a = a; }
+      }
+    }
+    function petla(ts) {
+      global.requestAnimationFrame(petla);
+      if (!ostatni) ostatni = ts;
+      /* Przy 3 klatkach na sekundę (ukryta karta przeglądarki, słabszy telefon) klatka trwa 0,33 s.
+         Licząc logikę raz na klatkę i obcinając czas do 0,05 s, gra szłaby kilka razy wolniej niż zegar.
+         Dlatego nadrabiamy zaległość stałymi krokami — z górnym limitem, żeby po powrocie z tła nic nie
+         „przeskoczyło” i żeby przy zaciętej klatce gra nie wpadła w spiralę. */
+      var dtReal = Math.min(0.4, Math.max(0, (ts - ostatni) / 1000));
+      ostatni = ts;
+      var aktywna = !wstrzymana();
+      if (aktywna) {
+        zaleglosc += dtReal;
+        var kroki = 0;
+        while (zaleglosc >= KROK && kroki < MAKS_KROKOW) {
+          g.dtReal = KROK;
+          g.czas += KROK * g.mnoznik();
+          bezpiecznie(opcje.klatka, KROK * g.mnoznik());
+          zaleglosc -= KROK;
+          kroki++;
+        }
+        if (kroki >= MAKS_KROKOW) zaleglosc = 0;
+      } else {
+        zaleglosc = 0;
+      }
+      aktualizujEfekty(aktywna ? Math.min(dtReal, KROK * MAKS_KROKOW) : 0);
+      var c = g.ctx;
+      c.save();
+      c.clearRect(0, 0, g.szer, g.wys);
+      c.translate(wstrzasX, wstrzasY);
+      bezpiecznie(opcje.rysuj, c);
+      rysujCzastki(c);
+      c.restore();
+      ustawDuszki();
+    }
+
+    /* komunikaty i ogłoszenia */
+    g.ogloszenie = function (tekst) { ogloszenia.powiedz(tekst); };
+    g.komunikat = function (tekst, o) {
+      o = o || {};
+      /* Ten sam komunikat powtórzony (np. „poczekaj, aż się skończy”) nie ma się układać w stos —
+         odświeżamy ten, który już wisi. */
+      var ostatniK = komunikaty.lastElementChild;
+      if (ostatniK && ostatniK.textContent === tekst && !ostatniK.classList.contains("gra__komunikat--znika")) {
+        if (o.ogloszenie !== false) g.ogloszenie(tekst);
+        return;
+      }
+      var k = el("div", "gra__komunikat" + (o.ton ? " gra__komunikat--" + o.ton : ""));
+      k.textContent = tekst;
+      /* Nowy dymek ZASTĘPUJE wiszące, zamiast stawać pod nimi. Stos do trzech dymków rósł w głąb
+         planszy: w „Skrzynce” trzy wyjaśnienia zajęły 13–450 z 618 px, w „Zielonej kropce” drugi
+         dymek schodził z wolnego pasa na mapę (pomiar 24.09.2026). Żadna gra nie potrzebuje dwóch
+         naraz — nowszy komunikat unieważnia starszy, a czytnik ekranu i tak dostał każdy z osobna. */
+      komunikaty.innerHTML = "";
+      komunikaty.appendChild(k);
+      if (o.ogloszenie !== false) g.ogloszenie(tekst);
+      global.setTimeout(function () {
+        k.classList.add("gra__komunikat--znika");
+        global.setTimeout(function () { if (k.parentNode) k.parentNode.removeChild(k); }, 400);
+      }, o.czas || 2400);
+    };
+    g.stan = function (pola) {
+      stanEl.innerHTML = Object.keys(pola).map(function (k) {
+        return '<span class="gra__stan-pole"><span class="gra__stan-etykieta">' + bezpieczny(k) +
+          "</span> <b>" + bezpieczny(pola[k]) + "</b></span>";
+      }).join("");
+    };
+    g.dzwiek = function (nazwa) { dzwiek.graj(nazwa); };
+    g.czasCzytania = function (tekst) { return Gm.tempo.czasZeSlow(tekst); };
+    /* Strefy płótna (działo, linia trafień…) nie są duszkami — gra je deklaruje, sonda dymków je sprawdza. */
+    g.strefy = function () {
+      if (typeof opcje.strefy !== "function") return [];
+      try { return opcje.strefy(g) || []; } catch (e) { return []; }
+    };
+
+    /* panele (dialogi) */
+    var aktywnyPanel = null, licznikPaneli = 0;
+    function pokazPanel(o) {
+      o = o || {};
+      return new Promise(function (resolve) {
+        if (aktywnyPanel) aktywnyPanel.zamknij(null);
+        blokady++;
+        wygasPad(true);
+        nakladka.innerHTML = "";
+        var panel = el("div", "gra__panel" + (o.ton ? " gra__panel--" + o.ton : "") + (o.szeroki ? " gra__panel--szeroki" : ""));
+        panel.setAttribute("role", "dialog");
+        panel.setAttribute("aria-modal", "true");
+        var tytulEl = null;
+        if (o.tytul) {
+          tytulEl = el("h3", "gra__panel-tytul");
+          tytulEl.id = id + "-panel-" + (++licznikPaneli);
+          tytulEl.textContent = o.tytul;
+          tytulEl.tabIndex = -1;
+          panel.appendChild(tytulEl);
+          panel.setAttribute("aria-labelledby", tytulEl.id);
+        } else {
+          panel.setAttribute("aria-label", opcje.tytul || "Gra");
+        }
+        if (o.tresc) {
+          var t = el("div", "gra__panel-tresc");
+          t.innerHTML = o.tresc;
+          panel.appendChild(t);
+        }
+        var limitAktywny = !!(o.limit && !g.spokojnie());
+        var pasekCzasu = null;
+        if (limitAktywny) {
+          var czas = el("div", "gra__czas");
+          czas.setAttribute("aria-hidden", "true");
+          pasekCzasu = el("div", "gra__czas-pasek");
+          czas.appendChild(pasekCzasu);
+          panel.appendChild(czas);
+        }
+        var lista = el("div", "gra__panel-przyciski" + (o.opcje ? " gra__panel-przyciski--opcje" : ""));
+        var definicje = o.przyciski && o.przyciski.length ? o.przyciski : [{ etykieta: "Dalej", wartosc: true, glowny: true }];
+        var przyciski = definicje.map(function (p, i) {
+          var b = el("button", o.opcje ? "gra__opcja" : ("gm-przycisk" + (p.glowny ? "" : " gm-przycisk--cichy")));
+          b.type = "button";
+          b.innerHTML = (o.numeruj ? '<span class="gra__klawisz" aria-hidden="true">' + (i + 1) + "</span>" : "") +
+            "<span>" + (p.html ? p.etykieta : bezpieczny(p.etykieta)) + "</span>";
+          b.addEventListener("click", function () { zamknij(p.wartosc, false); });
+          lista.appendChild(b);
+          return b;
+        });
+        panel.appendChild(lista);
+        nakladka.appendChild(panel);
+        nakladka.hidden = false;
+
+        var zamknieto = false, rafCzasu = 0;
+        var koniec = limitAktywny ? global.performance.now() + o.limit * 1000 : 0;
+        function tykaj() {
+          if (zamknieto) return;
+          var zostalo = koniec - global.performance.now();
+          pasekCzasu.style.transform = "scaleX(" + Math.max(0, zostalo / (o.limit * 1000)).toFixed(3) + ")";
+          if (zostalo <= 0) { zamknij(o.poCzasie === undefined ? null : o.poCzasie, true); return; }
+          rafCzasu = global.requestAnimationFrame(tykaj);
+        }
+        if (limitAktywny) rafCzasu = global.requestAnimationFrame(tykaj);
+
+        function zamknij(wartosc, poCzasie) {
+          if (zamknieto) return;
+          zamknieto = true;
+          global.cancelAnimationFrame(rafCzasu);
+          nakladka.hidden = true;
+          nakladka.innerHTML = "";
+          blokady = Math.max(0, blokady - 1);
+          aktywnyPanel = null;
+          wygasPad(false);
+          fokus(scena);
+          resolve(o.zwrocCzas ? { wartosc: wartosc, poCzasie: !!poCzasie } : wartosc);
+        }
+        aktywnyPanel = { zamknij: zamknij, przyciski: przyciski, panel: panel, numeruj: !!o.numeruj, esc: o.esc, pauzaPanel: !!o.pauzaPanel };
+        global.setTimeout(function () {
+          if (zamknieto) return;
+          var cel = o.fokusNaTytul && tytulEl ? tytulEl : przyciski[0];
+          fokus(cel);
+          /* Fokus bez przewijania (preventScroll) zostawiał przycisk panelu POD krawędzią niskiej ramki SCORM:
+             klawiatura stała na niewidocznym „Dalej” (2.4.11; sonda B13 przy 320 px w ramce 500 px, 12.10.2026).
+             Przewijamy tylko wtedy, gdy cel nie jest widoczny — i tylko o tyle, ile trzeba. */
+          var r = cel && cel.getBoundingClientRect();
+          if (r && (r.bottom > global.innerHeight || r.top < 0)) {
+            try { cel.scrollIntoView({ block: "nearest" }); } catch (e) { /* stara przeglądarka */ }
+          }
+        }, 30);
+      });
+    }
+    g.panel = pokazPanel;
+    g.wybor = function (o) {
+      return pokazPanel({
+        tytul: o.tytul, tresc: o.tresc, ton: o.ton, limit: o.limit, poCzasie: null, zwrocCzas: true,
+        numeruj: true, opcje: true,
+        przyciski: (o.opcje || []).map(function (op) {
+          return { etykieta: op.tekst, wartosc: op.wartosc === undefined ? op : op.wartosc, html: !!op.html };
+        })
+      });
+    };
+
+    function pokazAwarie() {
+      pokazPanel({
+        tytul: "Gra się zatrzymała", ton: "zle",
+        tresc: "<p>Coś poszło nie tak po stronie gry. Tę samą wiedzę znajdziesz w wersji tekstowej pod planszą.</p>",
+        przyciski: [{ etykieta: "Przejdź do wersji tekstowej", wartosc: "tekst", glowny: true }]
+      }).then(przejdzDoWersjiTekstowej);
+    }
+    function przejdzDoWersjiTekstowej() { Gm.wersjaTekstowa.przejdz("wersja-tekstowa"); }
+
+    /* Wyjaśnienie po decyzji gracza. Bez pośpiechu (domyślnie, decyzja 10): panel z „Dalej” — gra stoi,
+       aż gracz przeczyta (L18: dymek przy biegnącej grze zakrywał planszę; L25: także po DOBREJ decyzji panel).
+       Tempo normalne: dymek na czas liczony ze słów, gra biegnie dalej (zachowanie gier ZZR). */
+    g.wyjasnienie = function (o) {
+      o = o || {};
+      var czytnik = o.czytnik || Gm.tekstZHtml((o.tytul ? o.tytul + " " : "") + (o.tekst || ""));
+      if (g.spokojnie()) {
+        g.ogloszenie(czytnik);
+        return pokazPanel({
+          tytul: o.tytul, ton: o.ton, tresc: o.tekst,
+          przyciski: [{ etykieta: o.dalej || "Dalej", wartosc: "dalej", glowny: true }]
+        });
+      }
+      var dymek = o.dymek || Gm.tekstZHtml((o.tytul ? o.tytul + " " : "") + (o.tekst || ""));
+      g.komunikat(dymek, { ton: o.ton, czas: g.czasCzytania(dymek), ogloszenie: false });
+      g.ogloszenie(czytnik);
+      return Promise.resolve("dymek");
+    };
+
+    /* ustawienia i pauza */
+    function odswiezPasek() {
+      bPauza.setAttribute("aria-pressed", String(pauza));
+      bPauza.textContent = pauza ? "Wznów" : "Pauza";
+      bTempo.setAttribute("aria-pressed", String(ustawienia.tempo === "spokojne"));
+      bDzwiek.setAttribute("aria-pressed", String(!!ustawienia.dzwiek));
+      bMuzyka.setAttribute("aria-pressed", String(!!ustawienia.muzyka));
+    }
+    /* Tempo zapisane jako WYBÓR gracza (tempoWybrane) — tylko taki wybór przykrywa domyślne „bez pośpiechu”. */
+    function ustawTempo(tempo) {
+      ustawienia.tempo = tempo;
+      ustawienia.tempoWybrane = true;
+      zapiszUstawienia();
+      odswiezPasek();
+      g.ogloszenie(tempo === "spokojne" ? "Bez pośpiechu: gra zwalnia, nie liczy czasu i czeka na Twoje „Dalej”." : "Tempo normalne.");
+      bezpiecznie(opcje.zmianaTempa, tempo);
+    }
+    function przelaczPauze(wymus) {
+      if (!uruchomiona) return;
+      var nowa = wymus == null ? !pauza : !!wymus;
+      if (nowa === pauza) return;
+      if (nowa && blokady > 0) return;
+      pauza = nowa;
+      odswiezPasek();
+      dzwiek.muzyka(!pauza);
+      if (!pauza) return;
+      g.wcisniete = {};
+      g.ogloszenie("Pauza.");
+      var przyciski = [{ etykieta: "Wróć do gry", wartosc: "wroc", glowny: true }];
+      if (typeof opcje.zakonczRunde === "function") przyciski.push({ etykieta: "Zakończ rundę", wartosc: "koniec" });
+      pokazPanel({
+        tytul: "Pauza", esc: "wroc", pauzaPanel: true, przyciski: przyciski,
+        tresc: "<p>Gra czeka. Wrócisz przyciskiem, klawiszem P albo Esc.</p>" + (opcje.zasadyHtml || "")
+      }).then(function (w) {
+        pauza = false;
+        odswiezPasek();
+        dzwiek.muzyka(uruchomiona);
+        if (w === "koniec") bezpiecznie(opcje.zakonczRunde);
+      });
+    }
+    g.pauza = function (wlacz) {
+      if (wlacz === false && aktywnyPanel && aktywnyPanel.pauzaPanel) { aktywnyPanel.zamknij("wroc"); return; }
+      przelaczPauze(wlacz == null ? true : !!wlacz);
+    };
+    g.uruchomiona = function () { return uruchomiona; };
+
+    bPauza.addEventListener("click", function () {
+      if (aktywnyPanel && aktywnyPanel.pauzaPanel) { aktywnyPanel.zamknij("wroc"); return; }
+      przelaczPauze(true);
+    });
+    /* Przełącznik kliknięty MYSZĄ w trakcie gry zostawiał fokus na sobie: strzałki szły w przycisk, nie
+       w scenę, i gra „zacinała się”, dopóki gracz nie kliknął planszy (zgłoszenie ze „Sprintu”, 24.09.2026;
+       pomiar: po kliknięciu „Dźwięk”, „Tempo spokojne” (dziś „Bez pośpiechu”) albo „Muzyka” trzy strzałki = zero ruchów).
+       Fokus wraca na scenę tylko po kliknięciu wskaźnikiem (detail > 0) — kto przełącza z klawiatury,
+       zostaje przy przycisku, na którym był (przewidywalny fokus, 3.2.1/3.2.2). */
+    function wrocNaScene(ev) { if (ev && ev.detail > 0 && !wstrzymana()) fokus(scena); }
+    bTempo.addEventListener("click", function (ev) {
+      ustawTempo(ustawienia.tempo === "spokojne" ? "normalne" : "spokojne");
+      wrocNaScene(ev);
+    });
+    bDzwiek.addEventListener("click", function (ev) {
+      ustawienia.dzwiek = !ustawienia.dzwiek;
+      zapiszUstawienia();
+      odswiezPasek();
+      if (ustawienia.dzwiek) { dzwiek.odblokuj(); dzwiek.graj("klik"); }
+      wrocNaScene(ev);
+    });
+    bMuzyka.addEventListener("click", function (ev) {
+      ustawienia.muzyka = !ustawienia.muzyka;
+      zapiszUstawienia();
+      odswiezPasek();
+      if (ustawienia.muzyka) dzwiek.odblokuj();
+      dzwiek.muzyka(uruchomiona && !pauza, opcje.muzyka);
+      wrocNaScene(ev);
+    });
+
+    var zadaniePelnego = korzen.requestFullscreen || korzen.webkitRequestFullscreen;
+    if (!zadaniePelnego) bPelny.hidden = true;
+    /* W ramce SCORM Moodle'a żądanie pełnego ekranu jest odrzucane i przycisk znika. Znikał RAZEM
+       z fokusem — ten spadał na <body>, a strzałki przewijały stronę zamiast sterować grą. Chowając
+       przycisk, oddajemy fokus scenie; po udanym wejściu (poza Moodle) — tylko przy kliknięciu myszą. */
+    bPelny.addEventListener("click", function (ev) {
+      var jest = document.fullscreenElement || document.webkitFullscreenElement;
+      try {
+        if (jest) {
+          (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+        } else {
+          var wynik = zadaniePelnego.call(korzen);
+          if (wynik && wynik.catch) wynik.catch(function () {
+            bPelny.hidden = true;
+            fokus(scena);
+            g.komunikat("Pełny ekran jest niedostępny w tym oknie.", { ton: "uwaga" });
+          });
+        }
+        wrocNaScene(ev);
+      } catch (e) { bPelny.hidden = true; fokus(scena); }
+    });
+    function poZmianiePelnego() {
+      bPelny.textContent = (document.fullscreenElement || document.webkitFullscreenElement) ? "Zamknij pełny ekran" : "Pełny ekran";
+      global.setTimeout(dopasuj, 60);
+    }
+    document.addEventListener("fullscreenchange", poZmianiePelnego);
+    document.addEventListener("webkitfullscreenchange", poZmianiePelnego);
+
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden && uruchomiona && !pauza && !aktywnyPanel) przelaczPauze(true);
+    });
+
+    /* wejście: klawiatura */
+    scena.addEventListener("keydown", function (ev) {
+      if (aktywnyPanel) {
+        if (ev.key === "Tab") {
+          var dostepne = Array.prototype.filter.call(
+            aktywnyPanel.panel.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'),
+            function (x) { return !x.disabled && x.offsetParent !== null; });
+          if (!dostepne.length) return;
+          var pierwszy = dostepne[0], ostatniEl = dostepne[dostepne.length - 1];
+          if (ev.shiftKey && (document.activeElement === pierwszy || !aktywnyPanel.panel.contains(document.activeElement))) {
+            ev.preventDefault(); fokus(ostatniEl);
+          } else if (!ev.shiftKey && document.activeElement === ostatniEl) {
+            ev.preventDefault(); fokus(pierwszy);
+          }
+        } else if (aktywnyPanel.numeruj && /^[1-9]$/.test(ev.key)) {
+          var b = aktywnyPanel.przyciski[Number(ev.key) - 1];
+          if (b) { ev.preventDefault(); b.click(); }
+        } else if (aktywnyPanel.pauzaPanel && akcjaKlawisza(ev) === "pauza") {
+          ev.preventDefault();
+          aktywnyPanel.zamknij("wroc");
+        } else if ((ev.key === "Escape" || ev.key === "Esc") && aktywnyPanel.esc !== undefined) {
+          ev.preventDefault();
+          aktywnyPanel.zamknij(aktywnyPanel.esc);
+        }
+        return;
+      }
+      var akcja = akcjaKlawisza(ev);
+      if (!akcja) return;
+      ev.preventDefault();
+      if (ev.repeat && !KIERUNKI[akcja]) return;
+      if (akcja === "pauza") { przelaczPauze(); return; }
+      g.wcisniete[akcja] = true;
+      if (!wstrzymana()) bezpiecznie(opcje.akcja, akcja);
+    });
+    scena.addEventListener("keyup", function (ev) {
+      var akcja = akcjaKlawisza(ev);
+      if (akcja) g.wcisniete[akcja] = false;
+    });
+    scena.addEventListener("blur", function () { g.wcisniete = {}; });
+
+    /* wejście: wskaźnik na scenie */
+    function polozenie(ev) {
+      var r = scena.getBoundingClientRect();
+      return { x: ev.clientX - r.left, y: ev.clientY - r.top };
+    }
+    scena.addEventListener("pointerdown", function (ev) {
+      if (aktywnyPanel || (ev.target.closest && ev.target.closest(".gra__nakladka"))) return;
+      fokus(scena);
+      if (typeof opcje.wskaznik !== "function" || wstrzymana()) return;
+      var p = polozenie(ev);
+      bezpiecznie(opcje.wskaznik, "dol", p.x, p.y, ev);
+    });
+    scena.addEventListener("pointermove", function (ev) {
+      if (aktywnyPanel || typeof opcje.wskaznik !== "function" || wstrzymana()) return;
+      var p = polozenie(ev);
+      bezpiecznie(opcje.wskaznik, "ruch", p.x, p.y, ev);
+    });
+    scena.addEventListener("pointerup", function (ev) {
+      if (aktywnyPanel || typeof opcje.wskaznik !== "function" || wstrzymana()) return;
+      var p = polozenie(ev);
+      bezpiecznie(opcje.wskaznik, "gora", p.x, p.y, ev);
+    });
+
+    /* wejście: pad pod sceną (dotyk, mysz; klawiatura przez Enter na przycisku) */
+    function nacisnij(akcja, trzymaj) {
+      if (akcja === "pauza") {
+        if (aktywnyPanel && aktywnyPanel.pauzaPanel) aktywnyPanel.zamknij("wroc");
+        else przelaczPauze(true);
+        return;
+      }
+      if (aktywnyPanel) return;
+      if (trzymaj) g.wcisniete[akcja] = true;
+      if (!wstrzymana()) bezpiecznie(opcje.akcja, akcja);
+    }
+    var padPrzyciski = {};
+    (opcje.przyciski || []).forEach(function (p) {
+      var b = el("button", "gra__pad-przycisk" + (p.szeroki ? " gra__pad-przycisk--szeroki" : ""));
+      padPrzyciski[p.akcja] = b;
+      b.type = "button";
+      b.innerHTML = '<span aria-hidden="true">' + bezpieczny(p.etykieta) + "</span>";
+      b.setAttribute("aria-label", p.opis || p.etykieta);
+      var trzymany = false;
+      b.addEventListener("pointerdown", function (ev) {
+        ev.preventDefault();
+        trzymany = true;
+        if (b.setPointerCapture) { try { b.setPointerCapture(ev.pointerId); } catch (x) { /* bez przechwycenia */ } }
+        nacisnij(p.akcja, true);
+      });
+      function pusc() { if (trzymany) { trzymany = false; g.wcisniete[p.akcja] = false; } }
+      b.addEventListener("pointerup", pusc);
+      b.addEventListener("pointercancel", pusc);
+      b.addEventListener("lostpointercapture", pusc);
+      b.addEventListener("click", function (ev) { if (ev.detail === 0) nacisnij(p.akcja, false); });
+      pad.appendChild(b);
+    });
+
+    /* Gra wieloetapowa zmienia znaczenie przycisków — pad musi mówić, co robi TERAZ (2.4.6, 2.5.3).
+       g.opiszPad({ "1": {etykieta: "Zgłoś", opis: "Zgłoś wiadomość jako podejrzaną"}, "5": {ukryty: true} })
+       ukryty:true chowa przycisk, który w danym etapie nic nie robi (L11, L46 — wisiał jako „•”). */
+    g.opiszPad = function (mapa) {
+      Object.keys(mapa || {}).forEach(function (akcja) {
+        var b = padPrzyciski[akcja], o = mapa[akcja];
+        if (!b || !o) return;
+        if (o.ukryty != null) b.hidden = !!o.ukryty;
+        if (o.etykieta != null) b.innerHTML = '<span aria-hidden="true">' + bezpieczny(o.etykieta) + "</span>";
+        if (o.opis != null || o.etykieta != null) b.setAttribute("aria-label", o.opis || o.etykieta || "");
+      });
+    };
+
+    /* Przy otwartym panelu pad nic nie robi (nacisnij() wraca) — więc nie może wyglądać na czynny (L17:
+       „1 2 3 4 · Następny tydzień” na ekranie oceny nic nie robiło). Pauza na padzie zostaje czynna. */
+    function wygasPad(wygas) {
+      if (!pad) return;
+      pad.classList.toggle("gra__pad--wygaszony", !!wygas);
+      Object.keys(padPrzyciski).forEach(function (akcja) {
+        if (akcja === "pauza") return;
+        if (wygas) padPrzyciski[akcja].setAttribute("aria-disabled", "true");
+        else padPrzyciski[akcja].removeAttribute("aria-disabled");
+      });
+    }
+
+    /* start, koniec, omówienie */
+    g.start = function () {
+      uruchomiona = true;
+      pauza = false;
+      ostatni = 0;
+      odswiezPasek();
+      fokus(scena);
+      dzwiek.muzyka(true, opcje.muzyka);
+    };
+    g.zatrzymaj = function () {
+      uruchomiona = false;
+      pauza = false;
+      g.wcisniete = {};
+      odswiezPasek();
+      dzwiek.muzyka(false);
+    };
+
+    /* Po „Graj” w kadrze ma być to, czym się gra. ZZR przewijał zawsze do góry korzenia — w niskiej ramce SCORM
+       (500 px, L43) plansza wystawała wtedy poza kadr, bo nad nią stoją polecenie i pasek (sonda B13: 172–510 z 498).
+       Wybieramy największy blok, który się mieści: wszystko → pasek+plansza (mysz/klawiatura) albo plansza+pad
+       (dotyk — bez padu nie ma czym grać, L14) → sama plansza. Polecenie wraca do kadru po przewinięciu w górę. */
+    function przewinDoGry() {
+      var wys = global.innerHeight, rk = korzen.getBoundingClientRect(), rp = pasek.getBoundingClientRect();
+      var rs = scena.getBoundingClientRect(), rd = pad.offsetHeight ? pad.getBoundingClientRect() : rs;
+      var dotyk = !!(global.matchMedia && global.matchMedia("(pointer: coarse)").matches);
+      var bloki = [[rk.top, Math.max(rd.bottom, rs.bottom)], [rp.top, rs.bottom], [rs.top, Math.max(rd.bottom, rs.bottom)], [rs.top, rs.bottom]];
+      if (dotyk) bloki = [bloki[0], bloki[2], bloki[1], bloki[3]];
+      var blok = bloki.filter(function (b) { return b[1] - b[0] <= wys; })[0] || bloki[3];
+      if (blok[0] >= 0 && blok[1] <= wys) return;   /* już widać */
+      try { global.scrollBy({ top: blok[0], behavior: malyRuch ? "auto" : "smooth" }); } catch (e) { global.scrollBy(0, blok[0]); }
+    }
+
+    function lista(elementy, klasa) {
+      return '<ul' + (klasa ? ' class="' + klasa + '"' : "") + ">" +
+        elementy.map(function (t) { return "<li>" + t + "</li>"; }).join("") + "</ul>";
+    }
+    g.ekranStartowy = function (o) {
+      o = o || {};
+      var tresc = (o.opis ? "<p>" + o.opis + "</p>" : "") +
+        (o.zasady && o.zasady.length ? "<h4>Jak grać</h4>" + lista(o.zasady) : "") +
+        (o.sterowanie && o.sterowanie.length ? "<h4>Sterowanie</h4>" + lista(o.sterowanie, "gra__sterowanie") : "") +
+        (o.dodatek || "") +
+        '<p class="gm-slaby">Bez pośpiechu: gra zwalnia, nigdzie nie liczy czasu, a każde wyjaśnienie czeka na „Dalej”. ' +
+        "Zmienisz to w każdej chwili przyciskiem nad planszą. Pauza: P albo Esc. " +
+        "Pod planszą jest wersja tekstowa z tą samą wiedzą.</p>";
+      /* Decyzja 10: pierwsza i domyślna opcja to „Graj bez pośpiechu”; tempo normalne tylko świadomym wyborem.
+         Gra z kilkoma wejściami (np. wybór fazy) podaje własne przyciski — wtedy tempo zostaje na przełączniku
+         nad planszą (domyślnie bez pośpiechu), o czym mówi stała nota. */
+      var przyciski = o.przyciski && o.przyciski.length ? o.przyciski
+        : [{ etykieta: o.przycisk || "Graj bez pośpiechu", wartosc: "spokojnie", glowny: true }];
+      if (!(o.przyciski && o.przyciski.length) && o.przyciskNormalnie !== false) {
+        przyciski.push({ etykieta: "Graj w tempie normalnym", wartosc: "graj" });
+      }
+      return pokazPanel({ tytul: o.tytul || opcje.tytul, tresc: tresc, szeroki: true, fokusNaTytul: true,
+                          numeruj: !!o.numeruj, opcje: !!o.opcje, przyciski: przyciski })
+        .then(function (w) {
+          dzwiek.odblokuj();
+          /* po chwili: gra uzupełnia pasek wyniku dopiero w swojej rundzie, a pasek z wynikiem bywa o wiersz wyższy */
+          global.setTimeout(przewinDoGry, 60);
+          if (w === "spokojnie") ustawTempo("spokojne");
+          else if (w === "graj") ustawTempo("normalne");
+          dzwiek.graj("start");
+          return w;
+        });
+    };
+
+    /* Ukończenie przez rdzeń: tryb gra (LMS „completed” bez LMSFinish) / modul (zdarzenie) / brak (zapis lokalny).
+       Klucz lokalny "<przestrzen>-gra-<id>-ukonczona" — przy przestrzeni „zzr” ten sam co w grach ZZR. */
+    g.ukoncz = function () {
+      Gm.ukoncz({ tryb: trybUkonczenia, przestrzen: przestrzen, id: id, korzen: korzen, zrodlo: "gra" });
+    };
+    g.rekord = function (punkty) { return Gm.rekord(przestrzen, id, punkty); };
+    g.omowienie = function (o) {
+      o = o || {};
+      g.ukoncz();
+      var tresc = (o.wynik ? '<p class="gra__wynik">' + o.wynik + "</p>" : "") +
+        (o.punkty && o.punkty.length ? '<ul class="gra__omowienie">' + o.punkty.map(function (p) {
+          var ton = p.ton === "ok" || p.ton === "zle" ? p.ton : "neutralny";
+          var znak = ton === "ok" ? "✓" : ton === "zle" ? "✗" : "•";
+          var czytnik = ton === "ok" ? "Dobrze: " : ton === "zle" ? "Do poprawy: " : "";
+          return '<li class="gra__omowienie-' + ton + '"><span class="gra__znak" aria-hidden="true">' + znak +
+            '</span><span><span class="gm-sr">' + czytnik + "</span>" + p.tekst + "</span></li>";
+        }).join("") + "</ul>" : "") +
+        (o.zapamietaj ? '<div class="gm-reakcja gm-reakcja--ok"><p><strong>Do zapamiętania:</strong> ' + o.zapamietaj + "</p></div>" : "") +
+        (o.dodatek || "");
+      dzwiek.graj("koniec");
+      var przyciski = o.przyciski || [
+        { etykieta: "Zagraj jeszcze raz", wartosc: "znowu", glowny: true },
+        { etykieta: "Przejdź do wersji tekstowej", wartosc: "tekst" }
+      ];
+      return pokazPanel({ tytul: o.tytul || "Omówienie", tresc: tresc, szeroki: true, fokusNaTytul: true, przyciski: przyciski })
+        .then(function (w) { if (w === "tekst") przejdzDoWersjiTekstowej(); return w; });
+    };
+
+    /* Uchwyt do sprawdzania gry w przeglądarce: korzen.__gra.diagnostyka() mówi, czy gra liczy logikę,
+       czy stoi na pauzie, panelu albo awarii. Nic w grze z tego nie korzysta. */
+    korzen.__gra = g;
+    /* Krok logiki wywołany z zewnątrz — do sprawdzania gry w karcie, która nie dostaje klatek animacji
+       (ukryta karta przeglądarki zatrzymuje requestAnimationFrame, więc gra stoi i nie da się jej przejść).
+       Sama gra tego nie woła; w Moodle nikt tego nie uruchamia. */
+    g.krokTestowy = function (sekundy) {
+      var ile = Math.max(1, Math.round((sekundy || KROK) / KROK));
+      for (var i = 0; i < ile && !wstrzymana(); i++) {
+        g.dtReal = KROK;
+        g.czas += KROK * g.mnoznik();
+        bezpiecznie(opcje.klatka, KROK * g.mnoznik());
+      }
+      ustawDuszki();
+      return g.diagnostyka();
+    };
+    g.diagnostyka = function () {
+      return {
+        uruchomiona: uruchomiona, pauza: pauza, blokady: blokady, awaria: awaria,
+        panel: aktywnyPanel ? "otwarty" : "brak", czasGry: Math.round(g.czas * 10) / 10,
+        duszki: g.duszki.length, tempo: ustawienia.tempo, dzwiek: ustawienia.dzwiek,
+        przestrzen: przestrzen, ukonczenie: trybUkonczenia
+      };
+    };
+
+    odswiezPasek();
+    dopasuj();
+    gotowa = true;
+    /* po powrocie z utworz(), żeby gra miała już swoją zmienną g */
+    Promise.resolve().then(function () { bezpiecznie(opcje.rozmiar, g.szer, g.wys); });
+    global.requestAnimationFrame(petla);
+    return g;
+  }
+
+  global.Gra = {
+    utworz: utworz, bezpieczny: bezpieczny, tasuj: tasuj, losuj: losuj, ogranicz: ogranicz,
+    lerp: lerp, wygladz: wygladz, rgba: rgba
+  };
+})(window);
+
+</script>
+<script data-gm-plik="dane.js">
+/* WYGENEROWANE z banku bank.json przez gry-moodle 0.9.0 (scripts/gm_zbuduj.py) — nie edytuj ręcznie, poprawiaj bank. */
+/* gry-moodle:dane */
+window.GM_DANE = window.GM_DANE || {};
+window.GM_DANE["mit-fakt"] = {"format":"gry-moodle/bank@1","id":"mit-fakt","przestrzen":"kurs","warstwa":"gra","mechanika":"klasyfikacja","widok":"gra-tor","tytul":"Mit czy fakt: sprawdź, co naprawdę wiemy","podtytul":"Twierdzenia z komentarzy pod postami kursu HoldUp: powielane przekonania i to, co potwierdza materiał.","paczka":{"id":"holdup-mit-fakt","tytul_prefiks":"HoldUp — Gra: ","stopka":"Kurs HoldUp · edukacja cyfrowa dla dorosłych"},"teksty":{"polecenie":"Zestrzel twierdzenie, które jest mitem. Przepuść twierdzenie, które potwierdza materiał kursu.","wstep":["Dwadzieścia siedem twierdzeń z różnych postów kursu. Część to powielane przekonania z komentarzy, część to ustalenia z postów."],"nota":"Do dziennika ocen idzie tylko informacja o ukończeniu — bez punktów.","opis":"Dwadzieścia siedem twierdzeń. Dziesięć na rundę — rozstrzygnij każde.","zasady":["Twierdzenie sunie po torze. <strong>Zestrzel<\/strong> je, jeśli to mit.","<strong>Przepuść<\/strong> je, jeśli potwierdza to materiał kursu — albo pozwól mu dolecieć do końca toru.","Po każdej decyzji dostajesz wyjaśnienie i źródło; w odprawie na końcu masz komplet.","Bez pośpiechu twierdzenie zatrzymuje się w połowie toru i czeka — nie ma żadnych limitów czasu, a wyjaśnienie czeka na „Dalej”."],"zasady_pauza":["Zestrzel twierdzenie, które jest <strong>mitem<\/strong>.","Przepuść twierdzenie, które <strong>potwierdza materiał kursu<\/strong>.","Po każdej decyzji dostajesz wyjaśnienie i źródło."],"sterowanie":["<kbd>←<\/kbd> <kbd>→<\/kbd> — celownik","<kbd>Spacja<\/kbd> — strzał (to mit)","<kbd>↓<\/kbd> — przepuść (to fakt)","<kbd>I<\/kbd> — przeczytaj twierdzenie jeszcze raz, <kbd>P<\/kbd> — pauza","Dotyk: stuknij w twierdzenie, żeby strzelić; przycisk „To fakt” pod planszą przepuszcza"],"opis_sterowania":"Strzałki w lewo i w prawo przesuwają celownik, spacja strzela, strzałka w dół przepuszcza twierdzenie, P — pauza.","zapamietaj":"Mit rozpoznaje się nie po tym, że brzmi głupio, tylko po tym, że materiał mówi coś innego. Zanim udostępnisz, zaufasz jednemu przykładowi albo powiesz „mnie to nie dotyczy”, sprawdź, co faktycznie wiadomo.","zrodla_wstep":"Każde twierdzenie ma podane źródło przy wyjaśnieniu. Poniżej lista postów kursu HoldUp, z których pochodzą karty.","widok":{"meta":"Twierdzenie {nr} z {ile}","ogloszenie_elementu":"Twierdzenie {nr} z {ile}. {tekst} Strzał, jeśli to mit. Przepuść, jeśli to fakt.","czeka":"Twierdzenie czeka na decyzję.","pudlo":"Strzał obok twierdzenia — ustaw celownik pod tekstem.","info":"Twierdzenie {nr}: {tekst} Celownik w {x} pikselach od lewej krawędzi.","tempo_spokojne":"Bez pośpiechu: twierdzenie zatrzyma się i poczeka na Twoją decyzję.","tempo_normalne":"Tempo normalne: twierdzenie znów sunie po torze.","omowienie_tytul":"Odprawa po rundzie","wynik":"Trafione decyzje: {trafien} z {ile} · punkty: {punkty}","nowy_rekord":" — nowy rekord","stan":{"punkty":"Punkty","element":"Twierdzenie","trafione":"Trafione"}}},"zrodla":[{"id":"Z1","krotko":"HoldUp, post „Scrollowanie, uwaga i sen”","opis":"Kurs HoldUp, post „Scrollowanie, uwaga i sen” (treść posta, sekcja komentarzy i uwag)","adres":"materiał kursu HoldUp","dostep":"22.10.2026"},{"id":"Z2","krotko":"HoldUp, post „Hasła, 2FA, passkeys”","opis":"Kurs HoldUp, post „Hasła, 2FA, passkeys” (treść posta, sekcja komentarzy i uwag)","adres":"materiał kursu HoldUp","dostep":"22.10.2026"},{"id":"Z3","krotko":"HoldUp, post „Wycieki danych i PESEL”","opis":"Kurs HoldUp, post „Wycieki danych i PESEL” (treść posta, sekcja komentarzy i uwag)","adres":"materiał kursu HoldUp","dostep":"22.10.2026"},{"id":"Z4","krotko":"HoldUp, post „Phishing, BLIK i fałszywy kurier”","opis":"Kurs HoldUp, post „Phishing, BLIK i fałszywy kurier” (treść posta, sekcja komentarzy i uwag)","adres":"materiał kursu HoldUp","dostep":"22.10.2026"},{"id":"Z5","krotko":"HoldUp, post „Oszustwa uczuciowe”","opis":"Kurs HoldUp, post „Oszustwa uczuciowe” (treść posta, sekcja komentarzy i uwag)","adres":"materiał kursu HoldUp","dostep":"22.10.2026"},{"id":"Z6","krotko":"HoldUp, post „Lokalizacja i cyfrowy stalking”","opis":"Kurs HoldUp, post „Lokalizacja i cyfrowy stalking” (treść posta, sekcja komentarzy i uwag)","adres":"materiał kursu HoldUp","dostep":"22.10.2026"},{"id":"Z7","krotko":"HoldUp, post „Intymne zdjęcia”","opis":"Kurs HoldUp, post „Intymne zdjęcia” (treść posta, sekcja komentarzy i uwag)","adres":"materiał kursu HoldUp","dostep":"22.10.2026"},{"id":"Z8","krotko":"HoldUp, post „Wciąganie w grupy skrajne”","opis":"Kurs HoldUp, post „Wciąganie w grupy skrajne” (treść posta, sekcja komentarzy i uwag)","adres":"materiał kursu HoldUp","dostep":"22.10.2026"},{"id":"Z9","krotko":"HoldUp, post „Skrzynki w grach i gacha”","opis":"Kurs HoldUp, post „Skrzynki w grach i gacha” (treść posta, sekcja komentarzy i uwag)","adres":"materiał kursu HoldUp","dostep":"22.10.2026"},{"id":"Z10","krotko":"HoldUp, post „Kryptowaluty”","opis":"Kurs HoldUp, post „Kryptowaluty” (treść posta, sekcja komentarzy i uwag)","adres":"materiał kursu HoldUp","dostep":"22.10.2026"},{"id":"Z11","krotko":"HoldUp, post „Czarne rynki dark netu”","opis":"Kurs HoldUp, post „Czarne rynki dark netu” (treść posta, sekcja komentarzy i uwag)","adres":"materiał kursu HoldUp","dostep":"22.10.2026"},{"id":"Z12","krotko":"HoldUp, post „Dark net”","opis":"Kurs HoldUp, post „Dark net” (treść posta, sekcja komentarzy i uwag)","adres":"materiał kursu HoldUp","dostep":"22.10.2026"},{"id":"Z13","krotko":"HoldUp, post „Dark net a krzywdzenie dzieci”","opis":"Kurs HoldUp, post „Dark net a krzywdzenie dzieci” (treść posta, sekcja komentarzy i uwag)","adres":"materiał kursu HoldUp","dostep":"22.10.2026"},{"id":"Z14","krotko":"HoldUp, post „Prawda czy AI”","opis":"Kurs HoldUp, post „Prawda czy AI” (treść posta, sekcja komentarzy i uwag)","adres":"materiał kursu HoldUp","dostep":"22.10.2026"},{"id":"Z15","krotko":"HoldUp, post „Halucynacje AI”","opis":"Kurs HoldUp, post „Halucynacje AI” (treść posta, sekcja komentarzy i uwag)","adres":"materiał kursu HoldUp","dostep":"22.10.2026"},{"id":"Z16","krotko":"HoldUp, post „Deepfake”","opis":"Kurs HoldUp, post „Deepfake” (treść posta, sekcja komentarzy i uwag)","adres":"materiał kursu HoldUp","dostep":"22.10.2026"},{"id":"Z17","krotko":"HoldUp, post „Co wklejasz do chatbota”","opis":"Kurs HoldUp, post „Co wklejasz do chatbota” (treść posta, sekcja komentarzy i uwag)","adres":"materiał kursu HoldUp","dostep":"22.10.2026"},{"id":"Z18","krotko":"HoldUp, post „Wi-Fi, router i kamerka”","opis":"Kurs HoldUp, post „Wi-Fi, router i kamerka” (treść posta, sekcja komentarzy i uwag)","adres":"materiał kursu HoldUp","dostep":"22.10.2026"},{"id":"Z19","krotko":"HoldUp, post „Złośliwe programy”","opis":"Kurs HoldUp, post „Złośliwe programy” (treść posta, sekcja komentarzy i uwag)","adres":"materiał kursu HoldUp","dostep":"22.10.2026"},{"id":"Z20","krotko":"HoldUp, post „Hakerzy”","opis":"Kurs HoldUp, post „Hakerzy” (treść posta, sekcja komentarzy i uwag)","adres":"materiał kursu HoldUp","dostep":"22.10.2026"},{"id":"Z21","krotko":"HoldUp, post „Wielozadaniowość”","opis":"Kurs HoldUp, post „Wielozadaniowość” (treść posta, sekcja komentarzy i uwag)","adres":"materiał kursu HoldUp","dostep":"22.10.2026"},{"id":"Z22","krotko":"HoldUp, post „Wizerunek w sieci”","opis":"Kurs HoldUp, post „Wizerunek w sieci” (treść posta, sekcja komentarzy i uwag)","adres":"materiał kursu HoldUp","dostep":"22.10.2026"},{"id":"Z23","krotko":"HoldUp, post „Ktoś ukradł Twoje zdjęcie”","opis":"Kurs HoldUp, post „Ktoś ukradł Twoje zdjęcie” (treść posta, sekcja komentarzy i uwag)","adres":"materiał kursu HoldUp","dostep":"22.10.2026"},{"id":"Z24","krotko":"HoldUp, post „Pro-ana i „motylki””","opis":"Kurs HoldUp, post „Pro-ana i „motylki”” (treść posta, sekcja komentarzy i uwag)","adres":"materiał kursu HoldUp","dostep":"22.10.2026"},{"id":"Z25","krotko":"HoldUp, post „Gdzie szukać pomocy”","opis":"Kurs HoldUp, post „Gdzie szukać pomocy” (treść posta, sekcja komentarzy i uwag)","adres":"materiał kursu HoldUp","dostep":"22.10.2026"}],"punkty":{"wlaczone":true,"rekord":true,"za_trafienie":10},"tempo":{"domyslne":"bez-limitu","TEMPO":1.0,"bazowo_s":6,"na_slowo_s":0.45,"min_s":4.5},"runda":{"ile":10,"z_puli":true},"kolejnosc_opcji":"losowa","wersja_tekstowa":{"tryb":"pytania+lista","wstep":"Te same decyzje co w grze: sześć twierdzeń do oceny.","pytania":[{"id":"p01","pytanie":"Czy to mit czy fakt? „Mam tryb nocny i filtr światła niebieskiego, więc mogę scrollować do drugiej w nocy i nic mi się nie dzieje.”","odpowiedzi":[{"tekst":"To fakt","poprawna":false,"reakcja":"Nie. W jednym badaniu na młodych dorosłych taki tryb nie poprawił snu. Tryb nocny zmienia kolor ekranu, a problemem jest przede wszystkim to, że nie kładziesz się spać, i to, co oglądasz."},{"tekst":"To mit","poprawna":true,"reakcja":"Tak. W jednym badaniu na młodych dorosłych taki tryb nie poprawił snu. Tryb nocny zmienia kolor ekranu, a problemem jest przede wszystkim to, że nie kładziesz się spać, i to, co oglądasz."}]},{"id":"p02","pytanie":"Czy to mit czy fakt? „W ankiecie 844 dorosłych wysyłanie wiadomości i rozmowy telefoniczne po zgaszeniu światła wiązały się z gorszym snem i większym zmęczeniem w ciągu dnia.”","odpowiedzi":[{"tekst":"To mit","poprawna":false,"reakcja":"Nie. To wynik Exelmansa i Van den Bulcka (Social Science & Medicine, 2016). Jest to związek, nie dowód przyczyny, a wzór różnił się zależnie od wieku."},{"tekst":"To fakt","poprawna":true,"reakcja":"Tak. To wynik Exelmansa i Van den Bulcka (Social Science & Medicine, 2016). Jest to związek, nie dowód przyczyny, a wzór różnił się zależnie od wieku."}]},{"id":"p03","pytanie":"Czy to mit czy fakt? „Hasło trzeba zmieniać co 30 dni, bo inaczej hakerzy mają czas je złamać.”","odpowiedzi":[{"tekst":"To fakt","poprawna":false,"reakcja":"Nie. Wymuszone, częste zmiany prowadzą do przewidywalnych wzorów (hasło1, hasło2), a NIST od 2017 roku odradza taką praktykę. Hasło zmieniasz po wycieku lub podejrzeniu, nie według kalendarza."},{"tekst":"To mit","poprawna":true,"reakcja":"Tak. Wymuszone, częste zmiany prowadzą do przewidywalnych wzorów (hasło1, hasło2), a NIST od 2017 roku odradza taką praktykę. Hasło zmieniasz po wycieku lub podejrzeniu, nie według kalendarza."}]},{"id":"p04","pytanie":"Czy to mit czy fakt? „Drugi składnik logowania (2FA) zmniejsza ryzyko przejęcia konta o ok. 99%, choć SMS można wyłudzić.”","odpowiedzi":[{"tekst":"To fakt","poprawna":true,"reakcja":"Tak. Tak wynika z analizy Microsoftu z 2023 r. (preprint, konta firmowe). Passkeys idą dalej: eliminują hasło i są związane z prawdziwą stroną."},{"tekst":"To mit","poprawna":false,"reakcja":"Nie. Tak wynika z analizy Microsoftu z 2023 r. (preprint, konta firmowe). Passkeys idą dalej: eliminują hasło i są związane z prawdziwą stroną."}]},{"id":"p05","pytanie":"Czy to mit czy fakt? „Mam jedno hasło do wszystkiego, ale bardzo długie i skomplikowane, więc nic mi nie grozi.”","odpowiedzi":[{"tekst":"To fakt","poprawna":false,"reakcja":"Nie. Gdy hasło wycieknie z jednego serwisu, atakujący wypróbują je gdzie indziej. Liczy się unikalność hasła, a nie tylko jego siła; w wycieku z CKE (2025) użyto konta pracownika, który tego samego hasła używał prywatnie."},{"tekst":"To mit","poprawna":true,"reakcja":"Tak. Gdy hasło wycieknie z jednego serwisu, atakujący wypróbują je gdzie indziej. Liczy się unikalność hasła, a nie tylko jego siła; w wycieku z CKE (2025) użyto konta pracownika, który tego samego hasła używał prywatnie."}]},{"id":"p06","pytanie":"Czy to mit czy fakt? „Ja się nie nabiorę na phishing, bo jestem informatykiem. To problem starszych osób.”","odpowiedzi":[{"tekst":"To fakt","poprawna":false,"reakcja":"Nie. Podatność nie zależy od wiedzy technicznej, tylko od chwili: zmęczony, spieszący się informatyk też klika. Kluczowy jest kontekst (Williams i in. 2017), a ani wykształcenie, ani sława nie chronią."},{"tekst":"To mit","poprawna":true,"reakcja":"Tak. Podatność nie zależy od wiedzy technicznej, tylko od chwili: zmęczony, spieszący się informatyk też klika. Kluczowy jest kontekst (Williams i in. 2017), a ani wykształcenie, ani sława nie chronią."}]}]},"ukonczenie":"gra","jezyk":{"lang":"pl","rodzaj":"ukosnik-czasownik"},"dzwiek":{"muzyka":{"tempo":104,"podstawa":-2}},"dane":{"kategorie":[{"id":"mit","nazwa":"To mit","akcja":"zestrzel","przycisk":"To mit","opis_przycisku":"Strzał: uznaj twierdzenie za mit","w_omowieniu":"mit","komunikat_dobrze":"Zestrzelony słusznie.","komunikat_zle":"To nie był mit."},{"id":"zrodlo","nazwa":"To fakt","akcja":"przepusc","przycisk":"To fakt","opis_przycisku":"Przepuść: uznaj twierdzenie za potwierdzone w materiale kursu","w_omowieniu":"fakt","komunikat_dobrze":"Słusznie przepuszczone.","komunikat_zle":"Przepuszczone, a to mit.","komunikat_zle_samo":"Twierdzenie przeleciało, a to był mit."}],"elementy":[{"id":"e01","tekst":"Mam tryb nocny i filtr światła niebieskiego, więc mogę scrollować do drugiej w nocy i nic mi się nie dzieje.","klasa":"mit","dlaczego":"W jednym badaniu na młodych dorosłych taki tryb nie poprawił snu. Tryb nocny zmienia kolor ekranu, a problemem jest przede wszystkim to, że nie kładziesz się spać, i to, co oglądasz.","zrodlo":"Z1","miejsce":"komentarz Karoliny_ZUT, uwaga"},{"id":"e02","tekst":"W ankiecie 844 dorosłych wysyłanie wiadomości i rozmowy telefoniczne po zgaszeniu światła wiązały się z gorszym snem i większym zmęczeniem w ciągu dnia.","klasa":"zrodlo","dlaczego":"To wynik Exelmansa i Van den Bulcka (Social Science & Medicine, 2016). Jest to związek, nie dowód przyczyny, a wzór różnił się zależnie od wieku.","zrodlo":"Z1","miejsce":"sekcja „Co mówią badania”"},{"id":"e03","tekst":"Hasło trzeba zmieniać co 30 dni, bo inaczej hakerzy mają czas je złamać.","klasa":"mit","dlaczego":"Wymuszone, częste zmiany prowadzą do przewidywalnych wzorów (hasło1, hasło2), a NIST od 2017 roku odradza taką praktykę. Hasło zmieniasz po wycieku lub podejrzeniu, nie według kalendarza.","zrodlo":"Z2","miejsce":"komentarz Piotra, uwaga"},{"id":"e04","tekst":"Drugi składnik logowania (2FA) zmniejsza ryzyko przejęcia konta o ok. 99%, choć SMS można wyłudzić.","klasa":"zrodlo","dlaczego":"Tak wynika z analizy Microsoftu z 2023 r. (preprint, konta firmowe). Passkeys idą dalej: eliminują hasło i są związane z prawdziwą stroną.","zrodlo":"Z2","miejsce":"sekcja „Co mówią badania”"},{"id":"e05","tekst":"Mam jedno hasło do wszystkiego, ale bardzo długie i skomplikowane, więc nic mi nie grozi.","klasa":"mit","dlaczego":"Gdy hasło wycieknie z jednego serwisu, atakujący wypróbują je gdzie indziej. Liczy się unikalność hasła, a nie tylko jego siła; w wycieku z CKE (2025) użyto konta pracownika, który tego samego hasła używał prywatnie.","zrodlo":"Z3","miejsce":"komentarz Bartka_P, uwaga; sekcja „Co mówią badania”"},{"id":"e06","tekst":"Ja się nie nabiorę na phishing, bo jestem informatykiem. To problem starszych osób.","klasa":"mit","dlaczego":"Podatność nie zależy od wiedzy technicznej, tylko od chwili: zmęczony, spieszący się informatyk też klika. Kluczowy jest kontekst (Williams i in. 2017), a ani wykształcenie, ani sława nie chronią.","zrodlo":"Z4","miejsce":"komentarz Piotra, uwaga"},{"id":"e07","tekst":"Ofiarami romance scamu są osoby naiwne i samotne.","klasa":"mit","dlaczego":"To upraszczenie. Wielu poszkodowanych to osoby ostrożne i wykształcone, a oszustwo działa dzięki procesowi emocjonalnemu, nie brakowi inteligencji. Samotność zwiększa ryzyko, ale nie jest warunkiem.","zrodlo":"Z5","miejsce":"komentarz Magdy_Samotnej, uwaga"},{"id":"e08","tekst":"Udostępnianie lokalizacji w związku ma sens tylko wtedy, gdy jest dobrowolne, wzajemne i odwoływalne bez kary.","klasa":"zrodlo","dlaczego":"Zasada „kto nie ma nic do ukrycia” jest fałszywa. Jeśli wyłączenie lokalizacji wywołuje awanturę, to nie jest troska, tylko kontrola.","zrodlo":"Z6","miejsce":"komentarz Kuby_w_Związku, uwaga"},{"id":"e09","tekst":"Jak intymne zdjęcie wyciekło, to wina osoby, która je wysłała.","klasa":"mit","dlaczego":"Wysłanie zdjęcia za zgodą i zaufaniem nie jest zgodą na rozpowszechnianie. Winny jest ten, kto je rozsyła bez zgody, a obwinianie ofiary sprawia, że ofiary milczą (Citron 2014).","zrodlo":"Z7","miejsce":"komentarz Sebastiana_Trenera, uwaga"},{"id":"e10","tekst":"Większość serwerów Discorda to kółka znajomych i hobby; ostrzegać powinny konkretne wzorce, a nie sama platforma.","klasa":"zrodlo","dlaczego":"Wzorce to prośba o prywatny kontakt, nagrody za posłuszeństwo i groźby. Warto je znać, a nie bać się całej platformy.","zrodlo":"Z8","miejsce":"komentarz Marka_Informatyka, uwaga"},{"id":"e11","tekst":"Skrzynki w grach nie mają nic wspólnego z hazardem, bo przedmiot nie ma wartości w prawdziwych pieniądzach.","klasa":"mit","dlaczego":"Prawnie w Polsce skrzynki, według stanowiska Ministerstwa Finansów, nie są hazardem, ale mechanizm psychologicznie go przypomina (Drummond i Sauer: 10 z 22 gier spełniało wszystkie kryteria). W niektórych grach przedmioty można wypłacić jako pieniądze.","zrodlo":"Z9","miejsce":"komentarz Maksa_IT, uwaga; sekcja „Co mówią badania”"},{"id":"e12","tekst":"Bitcoin już kilka razy spadał o 80% i się odbijał, więc wystarczy przeczekać.","klasa":"mit","dlaczego":"Odrobienie strat po szczycie z 2021 r. zajęło ponad dwa lata, a część tokenów (Luna, SQUID) nie wróciła wcale. Nie ma gwarancji, że przyszłość powtórzy przeszłość.","zrodlo":"Z10","miejsce":"komentarz Wojtka_S, uwaga"},{"id":"e13","tekst":"Kryptowaluty są anonimowe, więc policja i tak nic nie znajdzie.","klasa":"mit","dlaczego":"Wiele kryptowalut działa na publicznym rejestrze transakcji, a firmy analityczne łączą adresy w grupy. Przy Hydrze niemieckie służby przejęły ok. 23 mln EUR w bitcoinach; „nie do wyśledzenia” to mit.","zrodlo":"Z11","miejsce":"komentarz Michała_K, uwaga"},{"id":"e14","tekst":"Tor jest ogólnodostępnym programem i nie wymaga umiejętności hakerskich, więc trafiają do niego także nastolatki.","klasa":"zrodlo","dlaczego":"Barierą nie jest wiedza techniczna, tylko świadomość ryzyka.","zrodlo":"Z12","miejsce":"komentarz Marka_Informatyka, uwaga"},{"id":"e15","tekst":"Samo natknięcie się na niedozwoloną treść nie jest przestępstwem, ale po jej znalezieniu nie wolno jej zapisywać ani wysyłać dalej.","klasa":"zrodlo","dlaczego":"Przestępstwa dotyczą celowego działania: szukania, przechowywania, uzyskiwania dostępu, zapisywania, przesyłania dalej. Adres zgłaszasz do Dyżurnet.pl lub na policję.","zrodlo":"Z13","miejsce":"komentarz Marka_Taty, uwaga"},{"id":"e16","tekst":"Ja zawsze poznam obraz z AI po dziwnych dłoniach i oczach. Mnie nie oszuka.","klasa":"mit","dlaczego":"Dłonie i oczy były typowymi błędami starszych generatorów, a nowe modele poprawiają je lepiej. W quizie Microsoftu ponad 12 tys. osób oceniło ok. 287 tys. obrazów i trafiło w 62% przypadków, czyli niewiele lepiej niż rzut monetą (preprint z 2025 r.).","zrodlo":"Z14","miejsce":"komentarz Anity_N, uwaga"},{"id":"e17","tekst":"Chatbot odpowiedział, że jest pewien, iż artykuł istnieje, i podał stronę, więc to wystarczy.","klasa":"mit","dlaczego":"Pytanie „czy jesteś pewien?” nie uruchamia sprawdzania w bazie. Model generuje kolejną prawdopodobną odpowiedź, więc zapewnienie bywa tak samo zmyślone jak pierwsza odpowiedź. Weryfikacją jest dopiero znalezienie źródła poza czatem.","zrodlo":"Z15","miejsce":"komentarz Marka_W, uwaga"},{"id":"e18","tekst":"Gdy deepfake przedstawia Ciebie, nadal możesz dochodzić ochrony dóbr osobistych, zgłosić podszywanie się lub zniesławienie.","klasa":"zrodlo","dlaczego":"Zakres jednego przepisu wobec obrazów wygenerowanych jest sporny, ale to nie znaczy, że nic nie można zrobić. Platformy mają też procedury usuwania treści.","zrodlo":"Z16","miejsce":"komentarz Piotra, uwaga"},{"id":"e19","tekst":"Rozmowy z chatbotem mogą być przechowywane, przeglądane przez firmę lub wykorzystywane do poprawy usługi, zależnie od ustawień.","klasa":"zrodlo","dlaczego":"Czat nie jest „prywatny” jak notatnik. Dane klienta wklejone bez zgody mogą naruszać umowę praktyk lub przepisy o ochronie danych.","zrodlo":"Z17","miejsce":"komentarz Piotra, uwaga"},{"id":"e20","tekst":"W publicznym Wi-Fi haker w kawiarni widzi moje hasła i przelewy.","klasa":"mit","dlaczego":"To opis sprzed lat. Treść stron i formularzy przez HTTPS jest szyfrowana (CERT Polska, grudzień 2025). Prawdziwe ryzyko to fałszywa sieć i fałszywa strona logowania, w którą wpisujesz dane sam.","zrodlo":"Z18","miejsce":"komentarz Tomasza_W, uwaga"},{"id":"e21","tekst":"Mam antywirusa z automatycznymi aktualizacjami, więc złośliwe programy do mnie nie dotrą.","klasa":"mit","dlaczego":"Antywirus zmniejsza ryzyko, ale go nie usuwa; CERT Polska zaznacza, że może nie wykryć zagrożenia. Często to Ty uruchamiasz plik, jak w kampanii opisanej przez Mandiant (2025).","zrodlo":"Z19","miejsce":"komentarz Marka_S, uwaga"},{"id":"e22","tekst":"Opisane w kursie włamania opierały się na prostych metodach, a chronią przed nimi unikalne hasła, drugi składnik logowania i aktualizacje.","klasa":"zrodlo","dlaczego":"Raport CSRB (2023) o Lapsus$ wskazuje przejmowanie numerów telefonów i phishing; Uber opisał wejście przez hasło wykonawcy. Obrona jest nudna, ale istnieje.","zrodlo":"Z20","miejsce":"komentarz Krzysztofa_M, uwaga"},{"id":"e23","tekst":"Są osoby, które radzą sobie z wielozadaniowością lepiej, ale to rzadki wyjątek: 5 z około 200 osób w jednym badaniu.","klasa":"zrodlo","dlaczego":"To wynik Watsona i Strayera (2010). Koszty przełączania mierzy się w ułamkach sekundy i w błędach, których zwykle się nie zauważa (Rubinstein i in. 2001).","zrodlo":"Z21","miejsce":"komentarz Anny_Księgowej, uwaga"},{"id":"e24","tekst":"Część pracodawców sprawdza kandydatów w sieci; w sondażu CareerBuilder z 2018 r. (USA) było to 70%.","klasa":"zrodlo","dlaczego":"Kompetencje liczą się najbardziej, ale profil bywa pierwszą informacją, jaką widzi rekruter. Pusty lub sprzeczny z CV profil rodzi pytania.","zrodlo":"Z22","miejsce":"komentarz Roberta_Inżyniera, uwaga"},{"id":"e25","tekst":"Ochrona praw autorskich powstaje z chwilą ustalenia pracy, bez rejestracji i bez znaczka ©.","klasa":"zrodlo","dlaczego":"Znaczek © tylko informuje. W sprawie „Cordoba” (TSUE 2018) zdjęcie było w sieci bez zabezpieczeń, a ponowna publikacja i tak wymagała zgody fotografa.","zrodlo":"Z23","miejsce":"komentarz Jacka_M, uwaga"},{"id":"e26","tekst":"Dieta i zaburzenie odżywiania to nie to samo: w zaburzeniu jedzenie i waga zaczynają organizować dzień, myśli i nastrój.","klasa":"zrodlo","dlaczego":"Osoba nie zyskuje kontroli, tylko ją traci. Czekanie, aż „samo przejdzie”, bywa ryzykowne, bo WHO wiąże jadłowstręt z przedwczesną śmiercią.","zrodlo":"Z24","miejsce":"komentarz Maksa_G, uwaga"},{"id":"e27","tekst":"Nikt uczciwy nie prosi o dane logowania do banku ani o zaliczkę za odzyskanie pieniędzy z oszustwa.","klasa":"zrodlo","dlaczego":"To druga fala oszustwa, „odzyskiwanie pieniędzy”. Sprawę zgłaszasz do banku i na policję.","zrodlo":"Z25","miejsce":"komentarz Szybka_Pomoc_Online, uwaga"}]}};
+
+</script>
+<script data-gm-plik="klasyfikacja-model.js">
+/* gry-moodle 0.4.0 — NIE EDYTUJ W KURSIE, poprawiaj w PLUGIN/gry-moodle (~/.claude/local-marketplace-maciek/plugins/gry-moodle) */
+/* mechaniki/klasyfikacja/model.js — LOGIKA klasyfikacji bez DOM (testowalna w node: scripts/test/model_klasyfikacja.test.js).
+ *
+ * Bank (`dane` wg schemat.json):
+ *   kategorie: [{id, nazwa, akcja, przycisk, opis_przycisku, w_omowieniu, komunikat_dobrze, komunikat_zle, komunikat_zle_samo?}]
+ *   elementy:  [{id, tekst, klasa, dlaczego?, zrodlo? (id z zrodla[]), miejsce?}]
+ *   poziomy?:  [{predkosc}] (gra-szuflady), runda_dodatkowa?: {kategorie, elementy, z_kategorii, …} (gra-szuflady)
+ * Klucz siedzi w elemencie (`klasa`), nigdy w pozycji (ARCH §3.1 reguła 1).
+ * Widoki (gra-tor, gra-szuflady, cwiczenie) korzystają z tego samego modelu. Binarna (2 kategorie) i kategoryzacja (3–4)
+ * to ten sam model: funkcje z 0.2.0 mają te same podpisy i to samo zachowanie (Strzelnica bez zmian w banku);
+ * nowe parametry są opcjonalne i na końcu.
+ * Wyjaśnienie (`dlaczego`) jest opcjonalne tylko w banku ze świadomym `dane.bez_wyjasnien` (B3) — wtedy informacja zwrotna
+ * mówi samą kategorię (wzór ME Sortowanie, gdzie karty nie mają wyjaśnień).
+ */
+(function (global) {
+  "use strict";
+
+  function kropka(t) {   /* zdania w banku kończą się kropką — kod nie dokleja drugiej (L33) */
+    return String(t == null ? "" : t).replace(/\s+$/, "");
+  }
+
+  var Model = {
+    /* źródło do wyświetlenia: krótkie (autor, tytuł — dymek, L28) i pełne (z miejscem — omówienie, czytnik) */
+    zrodlo: function (bank, el) {
+      var lista = (bank && bank.zrodla) || [];
+      for (var i = 0; i < lista.length; i++) if (lista[i].id === el.zrodlo) return lista[i];
+      return null;
+    },
+    zrodloKrotkie: function (bank, el) {
+      var z = Model.zrodlo(bank, el);
+      return z ? z.krotko : "";
+    },
+    zrodloPelne: function (bank, el) {
+      var z = Model.zrodlo(bank, el);
+      if (!z) return "";
+      return el.miejsce ? z.krotko + ", " + el.miejsce : z.krotko;
+    },
+
+    /* `lista` — opcjonalnie inny zestaw kategorii (runda dodatkowa gra-szuflady); domyślnie dane.kategorie */
+    kategoria: function (bank, id, lista) {
+      var k = lista || bank.dane.kategorie;
+      for (var i = 0; i < k.length; i++) if (k[i].id === id) return k[i];
+      return null;
+    },
+    kategoriaAkcji: function (bank, akcja) {
+      var k = bank.dane.kategorie;
+      for (var i = 0; i < k.length; i++) if (k[i].akcja === akcja) return k[i];
+      return null;
+    },
+
+    /* Runda = `ile` elementów z puli, w losowej kolejności. Każda kategoria obecna w puli trafia do rundy
+       co najmniej raz (B3: „obie klasy w rundzie”) — przy 15 mitach na 24 losowanie bez tej poprawki
+       dawało rundę bez ani jednego twierdzenia „ze źródła” średnio raz na 260 rund. */
+    losujRunde: function (bank, tasuj) {
+      var pula = bank.dane.elementy.slice();
+      var ile = Math.min((bank.runda && bank.runda.ile) || pula.length, pula.length);
+      var wymieszane = tasuj(pula);
+      var runda = wymieszane.slice(0, ile), reszta = wymieszane.slice(ile);
+      bank.dane.kategorie.forEach(function (kat) {
+        var jest = runda.some(function (e) { return e.klasa === kat.id; });
+        if (jest) return;
+        var zastepca = null;
+        for (var i = 0; i < reszta.length; i++) if (reszta[i].klasa === kat.id) { zastepca = reszta.splice(i, 1)[0]; break; }
+        if (!zastepca) return;
+        /* wymieniamy element kategorii, której w rundzie jest najwięcej */
+        var licz = {};
+        runda.forEach(function (e) { licz[e.klasa] = (licz[e.klasa] || 0) + 1; });
+        var najwiecej = Object.keys(licz).sort(function (a, b) { return licz[b] - licz[a]; })[0];
+        for (var j = runda.length - 1; j >= 0; j--) {
+          if (runda[j].klasa === najwiecej && licz[najwiecej] > 1) { reszta.push(runda[j]); runda[j] = zastepca; break; }
+        }
+      });
+      return tasuj(runda);
+    },
+
+    /* Ocena decyzji: `wybrana` = id kategorii, którą wybrał gracz; `samo` = element sam dotarł do końca
+       (gracz nic nie zrobił — liczy się jak wybór kategorii z akcją „przepusc”). */
+    ocen: function (bank, el, wybrana, samo, kategorie) {
+      var kat = Model.kategoria(bank, wybrana, kategorie);
+      var dobrze = el.klasa === wybrana;
+      var wstep = dobrze ? kat.komunikat_dobrze : ((samo && kat.komunikat_zle_samo) || kat.komunikat_zle);
+      return { dobrze: dobrze, wstep: kropka(wstep), kategoria: kat, prawdziwa: Model.kategoria(bank, el.klasa, kategorie) };
+    },
+
+    /* Teksty po decyzji: dymek (krótkie źródło), czytnik (pełne źródło), wpis do omówienia (HTML, bezpieczny) */
+    /* Bez wyjaśnienia (bank z dane.bez_wyjasnien) teksty mówią tylko kategorię: „<wstęp> <w_omowieniu>.” —
+       nic nie jest dopisywane od siebie (decyzja 8). Z wyjaśnieniem — dokładnie jak w 0.2.0 (gra-tor). */
+    teksty: function (bank, el, ocena, bezpieczny) {
+      var esc = bezpieczny || function (t) { return String(t); };
+      var krotkie = Model.zrodloKrotkie(bank, el), pelne = Model.zrodloPelne(bank, el);
+      var wstep = ocena.wstep ? ocena.wstep + " " : "";
+      if (!el.dlaczego) {
+        var kat = ocena.prawdziwa.w_omowieniu + ".";
+        return {
+          tytul: ocena.wstep,
+          dymek: wstep + kat, czytnik: wstep + kat,
+          panel: "<p>" + esc(kat) + "</p>",
+          omowienie: "<strong>" + esc(el.tekst) + "</strong> — " + esc(kat)
+        };
+      }
+      var zr = function (z) { return z ? " Źródło: " + z + "." : ""; };
+      return {
+        tytul: ocena.wstep,
+        dymek: wstep + el.dlaczego + zr(krotkie),
+        czytnik: wstep + el.dlaczego + zr(pelne),
+        panel: "<p>" + esc(el.dlaczego) + "</p>" + (pelne ? '<p class="gm-slaby">Źródło: ' + esc(pelne) + ".</p>" : ""),
+        omowienie: "<strong>" + esc(el.tekst) + "</strong> — " + esc(ocena.prawdziwa.w_omowieniu) + ". " +
+          esc(el.dlaczego) + (pelne ? ' <span class="gra-plakietka">' + esc(pelne) + "</span>" : "")
+      };
+    },
+
+    /* ——— gra-szuflady (wzór: ZZR „Paragraf” paragraf.js, 24.09.2026) ——— */
+
+    /* Pula rozłożona na `n` poziomów: każda kategoria rozdzielona możliwie równo, żeby żaden poziom nie trafił
+       losowo w same elementy jednego typu. Kolejność wewnątrz poziomu losowa. */
+    rozlozNaPoziomy: function (elementy, n, tasuj) {
+      var grupy = {}, klucze = [];
+      elementy.forEach(function (e) {
+        if (!grupy[e.klasa]) { grupy[e.klasa] = []; klucze.push(e.klasa); }
+        grupy[e.klasa].push(e);
+      });
+      var poziomy = [];
+      for (var i = 0; i < n; i++) poziomy.push([]);
+      klucze.forEach(function (k) {
+        tasuj(grupy[k]).forEach(function (e, idx) { poziomy[idx % n].push(e); });
+      });
+      return poziomy.map(function (p) { return tasuj(p); });
+    },
+
+    /* Runda dodatkowa: po `ile` losowych elementów z każdej kategorii (mniej, gdy w kategorii jest mniej), razem potasowane. */
+    losujPoKategorii: function (elementy, kategorie, ile, tasuj) {
+      var wynik = [];
+      kategorie.forEach(function (k) {
+        var z = elementy.filter(function (e) { return e.klasa === k.id; });
+        wynik = wynik.concat(tasuj(z).slice(0, ile));
+      });
+      return tasuj(wynik);
+    },
+
+    /* seria trafień podbija mnożnik punktów: ×1, od 3 trafień ×2, od 6 ×3, od 9 ×4 (Paragraf) */
+    mnoznik: function (seria) { return Math.min(4, 1 + Math.floor(Math.max(0, seria) / 3)); },
+
+    /* podstawienie znaczników czasu gry: "Moduł {nr} z {ile}" */
+    wypelnij: function (wzor, wartosci) {
+      return String(wzor == null ? "" : wzor).replace(/\{([a-z_]+)\}/g, function (m, k) {
+        return Object.prototype.hasOwnProperty.call(wartosci, k) ? String(wartosci[k]) : m;
+      });
+    }
+  };
+
+  if (typeof module === "object" && module.exports) module.exports = Model;
+  else global.GmKlasyfikacja = Model;
+})(typeof window !== "undefined" ? window : this);
+
+</script>
+<script data-gm-plik="klasyfikacja-gra-tor.js">
+/* gry-moodle 0.2.0 — NIE EDYTUJ W KURSIE, poprawiaj w PLUGIN/gry-moodle (~/.claude/local-marketplace-maciek/plugins/gry-moodle) */
+/* mechaniki/klasyfikacja/gra-tor.js — WIDOK GRY „tor”: element sunie po torze, gracz go zestrzeliwuje
+ * (kategoria z akcją „zestrzel”) albo przepuszcza (kategoria z akcją „przepusc”, także gdy element doleci do końca).
+ * Wzór: gra ZZR „Strzelnica mitów o pracy zdalnej” (`mit-buster.js`, 317 l., 23–24.09.2026).
+ *
+ * Wymaga: rdzen.js (Gm), gry/gra.js (Gra), mechaniki/klasyfikacja/model.js (GmKlasyfikacja), dane.js (GM_DANE).
+ * Treść WYŁĄCZNIE z banku: window.GM_DANE[data-gra-id] (decyzja 8). W kodzie są tylko napisy mechaniki
+ * („Celownik w lewo”), wszystko, co nazywa element lub kategorię, przychodzi z banku (teksty.widok, kategorie).
+ *
+ * Tempo: bez pośpiechu (domyślne) — element zatrzymuje się w połowie toru i czeka; wyjaśnienie po decyzji
+ * w panelu z „Dalej”. Tempo normalne (świadomy wybór) — element sunie do końca toru, wyjaśnienie w dymku.
+ */
+(function (global) {
+  "use strict";
+
+  var Gm = global.Gm, Gra = global.Gra, Model = global.GmKlasyfikacja;
+  if (!Gm || !Gra || !Model) return;
+
+  var PREDKOSC_MODULU = 40;       // px/s w tempie normalnym
+  var PREDKOSC_CELOWNIKA = 420;   // px/s przy przytrzymaniu, liczona z dtReal
+  var KROK_CELOWNIKA = 56;        // px na jedno naciśnięcie strzałki (klawiatura i pad)
+  var WYS_DZIALA = 46;
+
+  /* Dymki silnika siadały przy DOLNEJ krawędzi — na dziale z celownikiem, które rysuje płótno (ZZR 24.09.2026).
+     Tor jest u góry (16% wysokości), działo na dole — dymek idzie na środek, między jedno a drugie. */
+  var CSS = ".gm-tor .gra__komunikaty{justify-content:center}";
+
+  function uruchom(korzen) {
+    var konf = Gm.konfiguracja(korzen);
+    var bank = konf.dane;
+    if (!bank || !bank.dane) return null;
+    Gm.wstrzyknijCss("gra-tor", CSS);
+    korzen.classList.add("gm-tor");
+
+    var T = bank.teksty || {};
+    var W = T.widok || {};
+    var KAT_STRZAL = Model.kategoriaAkcji(bank, "zestrzel");
+    var KAT_PRZEPUSC = Model.kategoriaAkcji(bank, "przepusc");
+    var W_RUNDZIE = Math.min((bank.runda && bank.runda.ile) || bank.dane.elementy.length, bank.dane.elementy.length);
+    var PUNKTY = !bank.punkty || bank.punkty.wlaczone !== false;
+    var ZA_TRAFIENIE = (bank.punkty && bank.punkty.za_trafienie) || 10;
+    var STAN = W.stan || { punkty: "Punkty", element: "Element", trafione: "Trafione" };
+    var los = bank.runda && bank.runda.ziarno != null ? Gm.losowanie(bank.runda.ziarno) : null;
+    function tasuj(a) { return Gm.tasuj(a, los || undefined); }
+    function wypelnij(w, o) { return Model.wypelnij(w, o); }
+
+    var kolejka = [], modul = null, dane = null;
+    var punkty = 0, nr = 0, wyniki = [], trafien = 0;
+    var celownikX = 0, laser = null, rozstrzygniete = false, stoi = false;
+    var tor = { y: 60, stop: 0 }, nastepnaWys = 0;
+
+    function lista(el) { return el && el.length ? "<ul>" + el.map(function (t) { return "<li>" + t + "</li>"; }).join("") + "</ul>" : ""; }
+
+    var g = Gra.utworz(korzen, {
+      tytul: bank.tytul,
+      polecenie: T.polecenie,
+      tempo: bank.tempo,
+      ukonczenie: konf.ukonczenie,
+      przestrzen: konf.przestrzen,
+      opisSterowania: T.opis_sterowania,
+      przyciski: [
+        { akcja: "lewo", etykieta: "←", opis: "Celownik w lewo" },
+        { akcja: "akcja", etykieta: KAT_STRZAL.przycisk, opis: KAT_STRZAL.opis_przycisku, szeroki: true },
+        { akcja: "prawo", etykieta: "→", opis: "Celownik w prawo" },
+        { akcja: "dol", etykieta: KAT_PRZEPUSC.przycisk, opis: KAT_PRZEPUSC.opis_przycisku, szeroki: true }
+      ],
+      muzyka: bank.dzwiek && bank.dzwiek.muzyka,
+      zasadyHtml: lista(T.zasady_pauza),
+      klatka: klatka,
+      rysuj: rysuj,
+      akcja: akcja,
+      wskaznik: wskaznik,
+      rozmiar: ulozTor,
+      strefy: function (g) { return [{ nazwa: "działo z celownikiem", g: g.wys - 50, d: g.wys }]; },
+      zmianaTempa: function (tempo) {
+        g.komunikat(tempo === "spokojne" ? W.tempo_spokojne : W.tempo_normalne, { ogloszenie: false });
+      },
+      zakonczRunde: koniec
+    });
+
+    function stan() {
+      var s = {};
+      if (PUNKTY) s[STAN.punkty] = punkty;
+      s[STAN.element] = nr + "/" + W_RUNDZIE;
+      s[STAN.trafione] = trafien + "/" + (rozstrzygniete || !modul ? nr : nr - 1);
+      g.stan(s);
+    }
+
+    /* ——— układ ——— */
+
+    function ulozTor() {
+      tor.y = Math.max(48, Math.round(g.wys * 0.16));
+      tor.stop = punktStopu();
+      celownikX = Gra.ogranicz(celownikX || g.szer / 2, 24, g.szer - 24);
+      if (modul) {
+        modul.y = tor.y;
+        modul.x = Gra.ogranicz(modul.x, -modul.w, g.szer);
+      }
+    }
+
+    /* Przy 320 px karta bywa szersza niż połowa sceny — zatrzymanie w „połowie toru” wypchnęłoby ją
+       poza prawą krawędź. Stąd punkt stopu liczony z szerokości karty. */
+    function punktStopu() {
+      var szerKarty = modul ? modul.w : Math.min(300, Math.max(180, g.szer - 60));
+      return Math.max(8, Math.min(Math.round(g.szer * 0.52), g.szer - szerKarty - 8));
+    }
+
+    function rysuj(c) {
+      var k = g.kolor;
+      var dolTorow = tor.y + (modul ? modul.h : 90) + 18;
+
+      /* siatka retro */
+      c.strokeStyle = Gra.rgba(k.naGlebi, 0.14);
+      c.lineWidth = 1;
+      for (var x = 0; x < g.szer; x += 32) {
+        c.beginPath(); c.moveTo(x + 0.5, 0); c.lineTo(x + 0.5, g.wys); c.stroke();
+      }
+      for (var y = 0; y < g.wys; y += 32) {
+        c.beginPath(); c.moveTo(0, y + 0.5); c.lineTo(g.szer, y + 0.5); c.stroke();
+      }
+
+      /* tor elementu */
+      c.fillStyle = Gra.rgba(k.naGlebi, 0.08);
+      c.fillRect(0, tor.y - 14, g.szer, dolTorow - tor.y + 28);
+      c.strokeStyle = Gra.rgba(k.naGlebi, 0.3);
+      c.lineWidth = 2;
+      c.beginPath(); c.moveTo(0, tor.y - 14); c.lineTo(g.szer, tor.y - 14); c.stroke();
+      c.beginPath(); c.moveTo(0, dolTorow + 14); c.lineTo(g.szer, dolTorow + 14); c.stroke();
+
+      /* strefa „przepuszczone” przy prawej krawędzi */
+      c.fillStyle = Gra.rgba(k.pozytyw, 0.22);
+      c.fillRect(g.szer - 10, tor.y - 14, 10, dolTorow - tor.y + 28);
+
+      /* laser */
+      if (laser) {
+        c.fillStyle = Gra.rgba(laser.trafiony ? k.pozytyw : k.uwaga, laser.alfa);
+        c.fillRect(laser.x - 3, laser.doY, 6, g.wys - WYS_DZIALA - laser.doY);
+      }
+
+      /* działo */
+      c.fillStyle = k.naGlebi;
+      c.beginPath();
+      c.moveTo(celownikX - 22, g.wys - 8);
+      c.lineTo(celownikX + 22, g.wys - 8);
+      c.lineTo(celownikX + 12, g.wys - WYS_DZIALA + 12);
+      c.lineTo(celownikX - 12, g.wys - WYS_DZIALA + 12);
+      c.closePath();
+      c.fill();
+      c.fillRect(celownikX - 5, g.wys - WYS_DZIALA - 2, 10, 16);
+
+      /* linia celownika */
+      c.strokeStyle = Gra.rgba(k.akcent, 0.5);
+      c.lineWidth = 2;
+      c.setLineDash([4, 10]);
+      c.beginPath();
+      c.moveTo(celownikX, g.wys - WYS_DZIALA - 4);
+      c.lineTo(celownikX, dolTorow + 16);
+      c.stroke();
+      c.setLineDash([]);
+    }
+
+    /* ——— runda ——— */
+
+    function nowyModul() {
+      if (!kolejka.length) { koniec(); return; }
+      dane = kolejka.shift();
+      nr++;
+      var szer = Math.min(300, Math.max(180, g.szer - 60));
+      modul = g.duszek({
+        klasa: "gra-karta",
+        szer: szer,
+        html: '<span class="gra-karta__meta">' + Gra.bezpieczny(wypelnij(W.meta, { nr: nr, ile: W_RUNDZIE })) + "</span>" +
+              Gra.bezpieczny(dane.tekst),
+        dane: dane
+      });
+      modul.x = -szer - 10;
+      modul.y = tor.y;
+      rozstrzygniete = false;
+      stoi = false;
+      tor.stop = punktStopu();
+      /* wiszący dymek poprzedniej decyzji: tor mógł urosnąć (dłuższa karta) — przelicz jego miejsce */
+      nastepnaWys = Math.max(nastepnaWys, modul.h);
+      ulozDymek();
+      /* licznik ma pokazywać element, który JEST na torze, a nie ostatni rozstrzygnięty */
+      stan();
+      g.ogloszenie(wypelnij(W.ogloszenie_elementu, { nr: nr, ile: W_RUNDZIE, tekst: dane.tekst }));
+    }
+
+    function klatka(dt) {
+      /* celownik — z dtReal, żeby w tempie spokojnym reagował tak samo (L9) */
+      if (g.wcisniete.lewo) celownikX -= PREDKOSC_CELOWNIKA * g.dtReal;
+      if (g.wcisniete.prawo) celownikX += PREDKOSC_CELOWNIKA * g.dtReal;
+      celownikX = Gra.ogranicz(celownikX, 24, g.szer - 24);
+
+      if (laser) {
+        laser.alfa -= g.dtReal * 3.2;
+        if (laser.alfa <= 0) laser = null;
+      }
+
+      if (!modul || rozstrzygniete) return;
+
+      if (g.spokojnie()) {
+        /* element dojeżdża do połowy toru i czeka — bez limitu czasu (2.2.1) */
+        if (!stoi) {
+          modul.x += PREDKOSC_MODULU * dt;
+          if (modul.x >= tor.stop) { modul.x = tor.stop; stoi = true; g.ogloszenie(W.czeka); }
+        }
+        return;
+      }
+
+      modul.x += PREDKOSC_MODULU * dt;
+      if (modul.x > g.szer) rozstrzygnij(KAT_PRZEPUSC.id, true);
+    }
+
+    function strzal() {
+      if (!modul || rozstrzygniete) return;
+      var lewo = modul.x, prawo = modul.x + modul.w;
+      var trafiony = celownikX >= lewo && celownikX <= prawo;
+      laser = { x: celownikX, doY: tor.y + modul.h / 2, alfa: 1, trafiony: trafiony };
+      if (!trafiony) {
+        g.dzwiek("klik");
+        g.komunikat(W.pudlo, { ton: "uwaga", czas: 1800 });
+        return;
+      }
+      rozstrzygnij(KAT_STRZAL.id, false);
+    }
+
+    /* wybrana = id kategorii, którą wskazał gracz; samo = element doleciał do końca toru */
+    function rozstrzygnij(wybrana, samo) {
+      if (!modul || rozstrzygniete) return;
+      rozstrzygniete = true;
+      var d = modul.dane;
+      var ocena = Model.ocen(bank, d, wybrana, samo);
+      var dobrze = ocena.dobrze;
+      var zestrzelony = wybrana === KAT_STRZAL.id;
+      var srodek = modul.x + modul.w / 2;
+
+      modul.el.classList.add(dobrze ? "gra-karta--ok" : "gra-karta--zle");
+
+      if (dobrze) {
+        punkty += ZA_TRAFIENIE;
+        trafien++;
+        g.dzwiek(zestrzelony ? "ok" : "zbierz");
+        if (zestrzelony) g.czastki(srodek, tor.y + modul.h / 2, { kolor: g.kolor.pozytyw, ile: 14 });
+        g.blysk("ok");
+      } else {
+        g.dzwiek("blad");
+        g.blysk("zle");
+        if (!g.malyRuch) g.wstrzas(0.45);
+      }
+
+      /* Ekran obiecuje „przy każdej decyzji wyjaśnienie i źródło” — źródło jest także w dymku (L28):
+         w dymku autor i tytuł, w panelu, odprawie i odczycie czytnika — pełne, z rozdziałem. */
+      var t = Model.teksty(bank, d, ocena, Gra.bezpieczny);
+      wyniki.push({ ton: dobrze ? "ok" : "zle", tekst: t.omowienie, id: d.id });
+      stan();
+
+      /* karta zostaje na torze (z kolorem oceny) do „Dalej” albo do końca odliczania; logika już jej nie rusza */
+      var znikajacy = modul;
+      nastepnaWys = modul.h;
+      modul = null;
+      function dalej() {
+        if (!g.uruchomiona()) return;
+        znikajacy.usun();
+        nowyModul();
+      }
+      g.wyjasnienie({ tytul: t.tytul, tekst: t.panel, ton: dobrze ? "ok" : "zle", dymek: t.dymek, czytnik: t.czytnik })
+        .then(function (w) {
+          if (w === "dymek") { ulozDymek(); global.setTimeout(dalej, dobrze ? 1400 : 2600); }
+          else dalej();
+        });
+    }
+
+    /* Dymek wyjaśnienia (tempo normalne) — pod torem, nad działem, jeśli się tam mieści: wtedy nie zakrywa
+       ani nadlatującej karty, ani działa (L18: położenie liczone z układu gry, nie na sztywno). Gdy pas jest za
+       niski (wąski ekran, długie wyjaśnienie) — zostaje na środku sceny, jak w oryginale. */
+    function ulozDymek() {
+      var kont = korzen.querySelector(".gra__komunikaty"), d = kont && kont.lastElementChild;
+      if (!d) return;
+      var dolTorow = tor.y + (nastepnaWys || 90) + 18 + 14;
+      var wolne = g.wys - 56 - dolTorow;
+      if (d.offsetHeight + 12 <= wolne) {
+        kont.style.justifyContent = "flex-start";
+        kont.style.paddingTop = (dolTorow + 6) + "px";
+      } else {
+        kont.style.justifyContent = "";
+        kont.style.paddingTop = "";
+      }
+    }
+
+    function akcja(nazwa) {
+      /* Pojedyncze naciśnięcie przesuwa celownik o krok — przytrzymanie działa płynnie przez g.wcisniete.
+         Bez tego stuknięcie strzałki przesuwało celownik o kilkanaście pikseli i celowanie z klawiatury
+         było praktycznie niemożliwe. */
+      if (nazwa === "lewo" || nazwa === "prawo") {
+        celownikX = Gra.ogranicz(celownikX + (nazwa === "lewo" ? -KROK_CELOWNIKA : KROK_CELOWNIKA), 24, g.szer - 24);
+        return;
+      }
+      if (nazwa === "akcja") strzal();
+      else if (nazwa === "dol") rozstrzygnij(KAT_PRZEPUSC.id, false);
+      else if (nazwa === "info" && modul) {
+        g.ogloszenie(wypelnij(W.info, { nr: nr, tekst: modul.dane.tekst, x: Math.round(celownikX) }));
+      }
+    }
+
+    /* dotyk: stuknięcie w element = strzał w to miejsce; stuknięcie pod torem przesuwa celownik */
+    function wskaznik(typ, x, y) {
+      if (typ === "gora") return;
+      celownikX = Gra.ogranicz(x, 24, g.szer - 24);
+      if (typ === "dol" && modul && !rozstrzygniete) {
+        var wModule = y >= tor.y - 14 && y <= tor.y + modul.h + 14;
+        if (wModule) strzal();
+      }
+    }
+
+    /* ——— koniec i start ——— */
+
+    function koniec() {
+      g.zatrzymaj();
+      g.czysc();
+      modul = null;
+      laser = null;
+      var r = PUNKTY && (!bank.punkty || bank.punkty.rekord !== false) ? g.rekord(punkty) : { nowy: false };
+      var ile = wyniki.length;
+      g.omowienie({
+        tytul: W.omowienie_tytul,
+        wynik: Gra.bezpieczny(wypelnij(PUNKTY ? W.wynik : W.wynik_bez_punktow || W.wynik, { trafien: trafien, ile: ile, punkty: punkty })) +
+               (r.nowy ? Gra.bezpieczny(W.nowy_rekord || "") : ""),
+        punkty: wyniki,
+        zapamietaj: T.zapamietaj
+      }).then(function (w) { if (w === "znowu") runda(); });
+    }
+
+    function runda() {
+      kolejka = Model.losujRunde(bank, tasuj);
+      punkty = 0; nr = 0; trafien = 0; wyniki = []; laser = null; modul = null;
+      ulozTor();
+      stan();
+      g.start();
+      nowyModul();
+    }
+
+    /* Uchwyt dla testów (B11 — bot doskonały): który element jest na torze i jaka jest jego klasa.
+       Gra z tego nie korzysta; w Moodle nikt tego nie woła. */
+    korzen.__widok = {
+      biezacy: function () {
+        return modul && !rozstrzygniete ? { id: modul.dane.id, klasa: modul.dane.klasa, x: modul.x, w: modul.w, stoi: stoi } : null;
+      },
+      wyniki: function () { return wyniki.map(function (w) { return { id: w.id, ton: w.ton }; }); },
+      akcje: { strzal: KAT_STRZAL.id, przepusc: KAT_PRZEPUSC.id }
+    };
+
+    g.ekranStartowy({ opis: T.opis, zasady: T.zasady, sterowanie: T.sterowanie }).then(runda);
+    return g;
+  }
+
+  function wszystkie() {
+    Array.prototype.forEach.call(document.querySelectorAll('[data-gra][data-gm-widok="gra-tor"]'), function (k) {
+      if (k.getAttribute("data-gm-init")) return;
+      k.setAttribute("data-gm-init", "1");
+      uruchom(k);
+    });
+  }
+
+  global.GmGraTor = { uruchom: uruchom };
+  Gm.gotowe(wszystkie);
+})(window);
+
+</script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "plugin": "gry-moodle",
+  "wersja": "0.9.0",
+  "format": "html",
+  "tryb": null,
+  "ukonczenie": "brak",
+  "id": "holdup-po-infekcji",
+  "bank": "gry/kolejnosc/bank.json",
+  "bank_sha256": "3a2238585ca82df0755a168ae901827b4b3bef56df0b1d68ee3e0699911f75ec",
+  "zbudowano": "2026-10-22T01:20:48",
+  "odstepstwa_tresci": [],
+  "pliki": {
+    "index.html": "cb7c961394751ed7e1fa90a363b3ddc22de06559fe14e9031e0a653cabcf2f2b"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "gra": "ppd-plansza-m9",
+  "silnik": "1.1.0",
+  "format": "strona (mod_page)",
+  "bank": "gry/plansza/bank.json",
+  "bank_sha256": "8e22d2f18c1a78939f592cabd6bf7cf9d748d61e5f507552c61e826b0a61a320",
+  "zbudowano": "2026-10-22T01:23:53",
+  "ostrzezenia": [],
+  "obrazy": {},
+  "nagrania": {
+    "liczba": 0,
+    "bajty": 0,
+    "pliki": [],
+    "trzony": 0,
+    "odpowiedzi": 0,
+    "informacje_zwrotne": 0
+  },
+  "pliki": {
+    "fragment.html": {
+      "sha256": "8f49675a39402129175ad04ca0b75df341aea70203a922007e9f68cf56de0dab",
+      "bajty": 185994
+    },
+    "podglad.html": {
+      "sha256": "d0dffa0070a77734ac91944c38a61c4254d4716b5928f88243ed51b3ed084f44",
+      "bajty": 186823
+    }
+  },
+  "strona": {
+    "fragment": "fragment.html",
+    "bajtow": 185994,
+    "id_kontenera": "gm-ppd-plansza",
+    "suma_ciala": "e6f47fdf872ba6ef6de920358446e42b8ab4805fab224fc17a7612a724bb8f94",
+    "suma_ciala_16": "e6f47fdf872ba6ef",
+    "definicja_sumy": "sha256 (UTF-8) tekstu między wierszem „// <![CDATA[” a wierszem „// ]]>” (bez tych wierszy i bez skrajnych znaków nowego wiersza)",
+    "uwaga": "Wklej CAŁĄ treść fragment.html do pola „Treść strony” z pominięciem edytora wizualnego (skill widgety-moodle-strona §3–§4); po zapisie ciało skryptu ma dać tę samą sumę."
+  }
+}

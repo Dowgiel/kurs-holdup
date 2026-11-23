@@ -1,0 +1,15 @@
+{
+  "plugin": "gry-moodle",
+  "wersja": "0.9.0",
+  "format": "html",
+  "tryb": null,
+  "ukonczenie": "brak",
+  "id": "scenariusz",
+  "bank": "gry/scenariusz/bank.json",
+  "bank_sha256": "ee8015e22b9ce480ecfe2cba44d9fc457df4ba7c2ff7a590ba5a8daef9a91466",
+  "zbudowano": "2026-10-22T01:21:59",
+  "odstepstwa_tresci": [],
+  "pliki": {
+    "index.html": "40c91a449daa3040bc86bac3b90fc72a3a59822c0cfbe5353b18f8e3e5cfff5f"
+  }
+}

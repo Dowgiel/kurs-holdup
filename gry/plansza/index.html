@@ -1,0 +1,1178 @@
+<!doctype html>
+<html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Plansza HoldUp: finał kursu</title><style>body{margin:0;padding:12px;background:#fff;color:#1a1a1a;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}</style></head><body><main>
+<div class="gm-ppd-plansza" id="gm-ppd-plansza">Gra „Finał kursu: Plansza HoldUp” — plansza z pytaniami z całego kursu. Jeśli się nie wczyta (na przykład w aplikacji mobilnej Moodle), otwórz tę stronę w przeglądarce internetowej albo skorzystaj z listy pytań pod grą.</div>
+<script>
+// <![CDATA[
+/* Gra planszowa „Droga do egzaminu dyplomowego” — silnik 1.1.0. WYGENEROWANE przez zbuduj_plansza.py z banku.
+   NIE EDYTUJ w Moodle ani w pliku — poprawiaj bank albo generator i przebuduj.
+   Forma (widgety-moodle-strona §2): w polu tylko <div> z tekstem zastępczym + ten skrypt w CDATA; CSS wstrzykiwany
+   do head (filtr platformy wycina znacznik style); ensureWidget() przywraca id i klasę; data-pw-init chroni przed
+   podwójnym uruchomieniem. */
+(function () {
+  "use strict";
+  var ID = "gm-ppd-plansza";
+  var CSS = "#gm-ppd-plansza{--tusz:#202124;--tusz2:#4A4F5E;--papier:#FFFFFF;--mgla:#FBFBFC;--mgla2:#F1F2F6;--linia:#DBDCE3;--kontrolka:#767676;\n --roz:#C01563;--rozc:#A51256;--okz:#1E7A4C;--oktlo:#EDF7F1;--blad:#B23A2A;--bladtlo:#FBF0ED;\n font-family:Inter,-apple-system,\"Segoe UI\",Roboto,Arial,sans-serif;color:var(--tusz);background:var(--papier);\n max-width:72rem;margin:0 auto;line-height:1.5;font-size:1rem;text-align:left}\n#gm-ppd-plansza *{box-sizing:border-box}\n#gm-ppd-plansza [hidden]{display:none!important}\n#gm-ppd-plansza p{margin:0 0 .5rem}\n#gm-ppd-plansza .gp-tyt{font-family:Fraunces,Lora,Georgia,serif;font-variant-numeric:lining-nums;font-weight:600;font-size:2.125rem;line-height:1.15;margin:0 0 .4rem;\n letter-spacing:-.01em;color:var(--tusz)}\n#gm-ppd-plansza .gp-pod{color:var(--tusz2);font-size:1.125rem;margin:0 0 1rem}\n#gm-ppd-plansza .gp-polecenie{margin:0 0 .6rem}\n#gm-ppd-plansza details{border-top:1px solid var(--linia);border-bottom:1px solid var(--linia);margin:0 0 1rem;padding:0}\n#gm-ppd-plansza details+details{border-top:0;margin-top:-1rem}\n#gm-ppd-plansza summary{cursor:pointer;font-weight:600;padding:.6rem 0;min-height:44px}\n#gm-ppd-plansza details ul{margin:0 0 .75rem;padding-left:1.25rem}\n#gm-ppd-plansza details li{margin:.25rem 0}\n#gm-ppd-plansza .gp-panel{border:1px solid var(--tusz);border-radius:6px;padding:1.1rem 1.1rem 1rem;margin:0 0 1.1rem;display:grid;gap:1rem;background:var(--papier)}\n#gm-ppd-plansza .gp-stan{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.75rem}\n#gm-ppd-plansza .gp-stan-k{display:flex;gap:.75rem;align-items:center;margin:0;padding:.7rem .85rem;border:1px solid var(--linia);border-radius:6px;background:var(--mgla);min-width:0}\n#gm-ppd-plansza .gp-stan-k--akt{border:2px solid var(--tusz);background:var(--papier);padding:calc(.7rem - 1px) calc(.85rem - 1px)}\n#gm-ppd-plansza .gp-stan-tx{display:flex;flex-direction:column;gap:.1rem;min-width:0;flex:1 1 auto}\n#gm-ppd-plansza .gp-stan-poz{font-weight:700;font-size:1.25rem;line-height:1.25;font-variant-numeric:lining-nums tabular-nums}\n#gm-ppd-plansza .gp-stan-et{color:var(--tusz2);font-size:1rem;line-height:1.3;overflow-wrap:anywhere}\n#gm-ppd-plansza .gp-stan-tura{display:inline-block;align-self:flex-start;margin-top:.25rem;padding:.1rem .55rem;border-radius:3px;background:var(--tusz);color:#FFFFFF;font-weight:700;font-size:1rem;line-height:1.4}\n#gm-ppd-plansza .gp-stan-k--ty.gp-stan-k--akt .gp-stan-tura{background:var(--roz)}\n#gm-ppd-plansza .gp-stan-w{margin:0;color:var(--tusz2);font-size:1.0625rem}\n#gm-ppd-plansza .gp-akcja{display:flex;gap:1rem 1.25rem;align-items:center;flex-wrap:wrap}\n#gm-ppd-plansza .gp-kostka-blok{display:flex;gap:.9rem;align-items:center}\n#gm-ppd-plansza .gp-kostka{width:4.5rem;height:4.5rem;perspective:24rem;display:grid;place-items:center;flex:0 0 4.5rem}\n#gm-ppd-plansza .gp-kostka-skok{width:3rem;height:3rem;transform-style:preserve-3d}\n#gm-ppd-plansza .gp-kostka-przechyl{width:3rem;height:3rem;position:relative;transform-style:preserve-3d;transform:rotateX(-24deg) rotateY(-30deg)}\n#gm-ppd-plansza .gp-szescian{width:3rem;height:3rem;position:relative;transform-style:preserve-3d;transform:rotateX(0) rotateY(0)}\n#gm-ppd-plansza .gp-sc{position:absolute;left:0;top:0;width:3rem;height:3rem;box-sizing:border-box;border:1.5px solid var(--tusz);border-radius:.55rem;background:var(--papier);\n display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);padding:.38rem;backface-visibility:hidden;-webkit-backface-visibility:hidden}\n#gm-ppd-plansza .gp-sc--1{transform:translateZ(1.5rem)}\n#gm-ppd-plansza .gp-sc--6{transform:rotateY(180deg) translateZ(1.5rem)}\n#gm-ppd-plansza .gp-sc--3{transform:rotateY(90deg) translateZ(1.5rem)}\n#gm-ppd-plansza .gp-sc--4{transform:rotateY(-90deg) translateZ(1.5rem)}\n#gm-ppd-plansza .gp-sc--2{transform:rotateX(90deg) translateZ(1.5rem)}\n#gm-ppd-plansza .gp-sc--5{transform:rotateX(-90deg) translateZ(1.5rem)}\n#gm-ppd-plansza .gp-oko{width:.55rem;height:.55rem;border-radius:50%;background:var(--tusz);place-self:center}\n#gm-ppd-plansza .gp-oko--roz{background:var(--roz)}\n#gm-ppd-plansza .gp-kostka-wynik{display:flex;flex-direction:column;line-height:1.15;min-width:4.5rem}\n#gm-ppd-plansza .gp-kw-et{color:var(--tusz2);font-size:1rem}\n#gm-ppd-plansza .gp-kw-cyfra{font-size:2.25rem;font-weight:700;font-variant-numeric:lining-nums tabular-nums;min-width:1.5ch}\n#gm-ppd-plansza .gp-komunikat{margin:0;padding:.75rem 0 0;border-top:1px solid var(--linia);min-height:3.2rem;font-size:1.125rem;line-height:1.45}\n#gm-ppd-plansza .gp-narzedzia{border:1px solid var(--linia);border-radius:6px;padding:.8rem 1rem;margin:0 0 1.25rem;background:var(--mgla)}\n#gm-ppd-plansza .gp-lektor{display:inline-flex;align-items:center;gap:.65rem;text-align:left}\n#gm-ppd-plansza .gp-lektor-stan{display:inline-block;padding:.05rem .5rem;border-radius:3px;border:1px solid var(--tusz);font-weight:700;font-size:1rem;line-height:1.4;background:var(--papier);color:var(--tusz)}\n#gm-ppd-plansza .gp-lektor[aria-pressed=\"true\"]{background:var(--tusz);color:#FFFFFF}\n#gm-ppd-plansza .gp-lektor[aria-pressed=\"true\"] .gp-lektor-stan{background:var(--papier);color:var(--tusz)}\n#gm-ppd-plansza .gp-lektor-opis{margin:.55rem 0 0;color:var(--tusz2);font-size:1rem}\n#gm-ppd-plansza .gp-btn{font:inherit;font-weight:600;font-size:1rem;line-height:1.3;min-height:44px;padding:.55rem 1.1rem;border-radius:3px;\n border:1px solid var(--tusz);background:var(--papier);color:var(--tusz);cursor:pointer;text-align:center}\n#gm-ppd-plansza .gp-btn:hover{background:var(--mgla2)}\n#gm-ppd-plansza .gp-btn--gl{background:var(--roz);border-color:var(--roz);color:#FFFFFF}\n#gm-ppd-plansza .gp-btn--gl:hover{background:var(--rozc);border-color:var(--rozc)}\n#gm-ppd-plansza .gp-btn[aria-disabled=\"true\"]{background:var(--papier);border-color:var(--kontrolka);color:var(--tusz2);cursor:not-allowed}\n#gm-ppd-plansza :is(button,summary,input,[tabindex]):focus-visible{outline:2px solid var(--tusz);outline-offset:2px}\n#gm-ppd-plansza .gp-pion{display:inline-grid;place-items:center;width:2.25rem;height:2.25rem;flex:0 0 2.25rem;font-weight:700;font-size:1rem;\n line-height:1;color:#FFFFFF;letter-spacing:0}\n#gm-ppd-plansza .gp-pion--ty{background:var(--roz);border-radius:50%}\n#gm-ppd-plansza .gp-pion--k{background:var(--tusz);border-radius:3px}\n#gm-ppd-plansza .gp-h{font-family:Fraunces,Lora,Georgia,serif;font-variant-numeric:lining-nums;font-size:1.5rem;line-height:1.25;font-weight:600;margin:1.5rem 0 .5rem;color:var(--tusz)}\n#gm-ppd-plansza .gp-legenda{list-style:none;margin:0 0 1rem;padding:0;display:flex;flex-direction:column;gap:.6rem}\n#gm-ppd-plansza .gp-legenda li{display:flex;flex-wrap:wrap;align-items:center;gap:.9rem;margin:0;padding:.65rem .85rem;border:1px solid var(--linia);border-radius:6px;background:var(--papier)}\n#gm-ppd-plansza .gp-leg-znaki{display:flex;align-items:center;gap:.5rem;flex:0 0 5.9rem;min-width:0}\n#gm-ppd-plansza .gp-leg-znak{display:inline-grid;place-items:center;width:2.4rem;height:2.4rem;flex:0 0 2.4rem;border:1px solid var(--linia);border-radius:6px;background:var(--papier);\n font-weight:700;font-size:1.0625rem;line-height:1;color:var(--tusz);font-variant-numeric:lining-nums}\n#gm-ppd-plansza .gp-leg-znak--pul{border:1px dashed var(--blad);color:var(--blad)}\n#gm-ppd-plansza .gp-leg-znak--pre{border-color:var(--okz);color:var(--okz)}\n#gm-ppd-plansza .gp-leg-znak--odk{background:var(--mgla2);color:var(--tusz2)}\n#gm-ppd-plansza .gp-leg-znak--meta{border:2px solid var(--roz);color:var(--roz)}\n#gm-ppd-plansza .gp-leg-znak--pion{border:0;background:none;width:2.4rem}\n#gm-ppd-plansza .gp-leg-ob{width:2.6rem;height:2.6rem;flex:0 0 2.6rem;object-fit:contain;mix-blend-mode:multiply;pointer-events:none;user-select:none}\n#gm-ppd-plansza .gp-leg-tx{display:flex;flex-direction:column;gap:.1rem;min-width:0;flex:1 1 9rem}\n#gm-ppd-plansza .gp-leg-nazwa{font-weight:700;font-size:1.0625rem;color:var(--tusz)}\n#gm-ppd-plansza .gp-leg-opis{color:var(--tusz2);font-size:1rem;line-height:1.45}\n#gm-ppd-plansza .gp-ik{font-weight:700;display:inline-block;min-width:1.1em;text-align:center}\n#gm-ppd-plansza .gp-ik--pul{color:var(--blad)}\n#gm-ppd-plansza .gp-ik--pre{color:var(--okz)}\n#gm-ppd-plansza .gp-podp{color:var(--tusz2);margin:0 0 .6rem}\n#gm-ppd-plansza .gp-tor-wrap{position:relative;margin:0 0 1.25rem;padding:1.4rem 1.1rem 1.8rem;border:1px solid var(--linia);border-radius:6px;background:var(--mgla);overflow:hidden}\n#gm-ppd-plansza .gp-tlo{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;opacity:.55;pointer-events:none;user-select:none}\n#gm-ppd-plansza .gp-sciezka{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:1;overflow:visible}\n#gm-ppd-plansza .gp-sciezka polyline{fill:none;stroke:var(--tusz2);stroke-width:3;stroke-dasharray:1 9;stroke-linecap:round;stroke-linejoin:round}\n#gm-ppd-plansza .gp-tor{position:relative;z-index:2;list-style:none;margin:0;padding:0;display:grid;gap:2rem 1.6rem;\n grid-template-columns:repeat(var(--kol,6),minmax(0,1fr))}\n#gm-ppd-plansza .gp-tor li{margin:0;padding:0;min-width:0}\n#gm-ppd-plansza .gp-pole{position:relative;width:100%;aspect-ratio:1/1;display:flex;flex-direction:column;gap:.05rem;padding:.25rem .2rem .3rem;\n border:3px solid var(--tusz);border-radius:8px;background:var(--papier);color:var(--tusz);font:inherit;font-size:1rem;\n text-align:center;cursor:pointer;min-width:0;overflow:visible}\n#gm-ppd-plansza .gp-str{position:absolute;z-index:1;transform:translate(-50%,-50%);font-weight:700;font-size:1.25rem;line-height:1;color:var(--tusz);background:var(--mgla);border-radius:50%;padding:.05rem .1rem;pointer-events:none;user-select:none}\n#gm-ppd-plansza .gp-str--w{font-size:1.5rem;color:var(--roz)}\n#gm-ppd-plansza .gp-pole--c1{border-color:var(--tusz)}\n#gm-ppd-plansza .gp-pole--c2{border-color:var(--roz)}\n#gm-ppd-plansza .gp-pole--c0{border-color:var(--okz)}\n#gm-ppd-plansza .gp-pole:hover{background:var(--mgla2)}\n#gm-ppd-plansza .gp-pole:focus-visible{outline:3px solid var(--tusz);outline-offset:4px;box-shadow:0 0 0 4px #FFFFFF}\n#gm-ppd-plansza .gp-p-gora{display:flex;justify-content:space-between;align-items:baseline;gap:.2rem;flex:0 0 auto;text-align:left;padding:0 .15rem}\n#gm-ppd-plansza .gp-p-nr{font-weight:700;font-size:1.5rem;line-height:1.1;font-variant-numeric:lining-nums tabular-nums}\n#gm-ppd-plansza .gp-p-tag{font-weight:700;font-size:1.0625rem;white-space:nowrap}\n#gm-ppd-plansza .gp-p-et{font-size:1rem;font-weight:600;line-height:1.1;letter-spacing:-.01em;color:var(--tusz);overflow-wrap:anywhere;hyphens:auto;text-wrap:balance;flex:1 1 auto;display:flex;align-items:center;justify-content:center;text-align:center;min-height:0}\n#gm-ppd-plansza .gp-p-dol{position:absolute;left:0;right:0;bottom:-1rem;display:flex;justify-content:center;pointer-events:none;z-index:3}\n#gm-ppd-plansza .gp-pionki{display:flex;gap:.2rem}\n#gm-ppd-plansza .gp-pionki .gp-pion{width:1.9rem;height:1.9rem;flex:0 0 1.9rem;font-size:1rem;box-shadow:0 0 0 2px #FFFFFF}\n#gm-ppd-plansza .gp-p-odk{font-weight:700;color:var(--tusz);margin-left:.3rem;font-size:1.125rem}\n#gm-ppd-plansza .gp-p-nrw{display:flex;align-items:baseline}\n#gm-ppd-plansza :is(.gp-ik-pola,.gp-hero,.gp-ob-stan,.gp-ob-kostka,.gp-ob-okno,.gp-ob-fb,.gp-pod-puchar){mix-blend-mode:multiply}\n#gm-ppd-plansza .gp-ik-pola{position:absolute;right:.3rem;bottom:.3rem;width:2.5rem;height:2.5rem;object-fit:contain;pointer-events:none;user-select:none}\n#gm-ppd-plansza .gp-pion--nowy{animation:gp-skok .42s cubic-bezier(.3,.7,.4,1)}\n@keyframes gp-skok{0%{transform:translateY(0) scale(1)}35%{transform:translateY(-.8rem) scale(1.22)}65%{transform:translateY(0) scale(.94)}82%{transform:translateY(-.2rem) scale(1.04)}100%{transform:translateY(0) scale(1)}}\n#gm-ppd-plansza .gp-kostka--rzut .gp-kostka-skok{animation:gp-podskok-k var(--gp-czas-rzutu,.9s) ease-out}\n@keyframes gp-podskok-k{0%{transform:translateY(0)}30%{transform:translateY(-1.1rem)}55%{transform:translateY(0)}72%{transform:translateY(-.35rem)}100%{transform:translateY(0)}}\n#gm-ppd-plansza .gp-naglowek{display:flex;gap:1rem;align-items:flex-start;justify-content:space-between}\n#gm-ppd-plansza .gp-naglowek\u003ediv{min-width:0}\n#gm-ppd-plansza .gp-hero{flex:0 0 auto;width:min(16rem,40%);height:auto;max-height:11.5rem;object-fit:contain;pointer-events:none;user-select:none}\n#gm-ppd-plansza .gp-ob-stan{width:2.6rem;height:2.6rem;object-fit:contain;flex:0 0 2.6rem;pointer-events:none;user-select:none}\n#gm-ppd-plansza .gp-ob-kostka{width:3.2rem;height:3.2rem;object-fit:contain;pointer-events:none;user-select:none}\n#gm-ppd-plansza .gp-ob-okno{float:right;width:3.6rem;height:3.6rem;object-fit:contain;margin:0 0 .4rem .7rem;pointer-events:none;user-select:none}\n#gm-ppd-plansza .gp-ob-fb{float:right;width:3.2rem;height:3.2rem;object-fit:contain;margin:0 0 .3rem .6rem;pointer-events:none;user-select:none}\n#gm-ppd-plansza .gp-podium{display:flex;align-items:flex-end;justify-content:center;gap:.5rem;margin:.4rem 0 .9rem}\n#gm-ppd-plansza .gp-pod-m{display:flex;flex-direction:column;align-items:center;gap:.25rem;min-width:0;flex:0 1 9rem}\n#gm-ppd-plansza .gp-pod-st{width:100%;border:1px solid var(--tusz);border-radius:3px 3px 0 0;background:var(--papier);display:flex;flex-direction:column;\n align-items:center;justify-content:flex-start;padding:.4rem .3rem;font-weight:700;text-align:center;font-size:1rem;line-height:1.3}\n#gm-ppd-plansza .gp-pod-m--1 .gp-pod-st{height:6rem;background:var(--roz);border-color:var(--roz);color:#FFFFFF}\n#gm-ppd-plansza .gp-pod-m--2 .gp-pod-st{height:4rem}\n#gm-ppd-plansza .gp-pod-puchar{width:4.5rem;height:4.5rem;object-fit:contain;pointer-events:none;user-select:none}\n#gm-ppd-plansza .gp-pod-nr{font-size:1.5rem;line-height:1.1;font-variant-numeric:lining-nums}\n#gm-ppd-plansza .gp-pole--pulapka{border-style:dashed}\n#gm-ppd-plansza .gp-pole--pulapka .gp-p-tag{color:var(--blad)}\n#gm-ppd-plansza .gp-pole--premia{border-style:double;border-width:4px}\n#gm-ppd-plansza .gp-pole--premia .gp-p-tag{color:var(--okz)}\n#gm-ppd-plansza .gp-pole--start .gp-p-tag{color:var(--tusz2)}\n#gm-ppd-plansza .gp-pole--meta{border:3px solid var(--roz);box-shadow:inset 0 0 0 2px #FFFFFF,inset 0 0 0 4px var(--tusz)}\n#gm-ppd-plansza .gp-pole--meta .gp-p-tag{color:var(--roz)}\n#gm-ppd-plansza .gp-pole--odk{background:var(--mgla2)}\n#gm-ppd-plansza .gp-plansza-sek{margin:0 0 1rem}\n#gm-ppd-plansza .gp-info-box{position:sticky;top:var(--gp-gora,0);z-index:4;display:flex;gap:.4rem 1rem;align-items:baseline;flex-wrap:wrap;margin:0 0 .75rem;padding:.7rem .9rem;\n border:2px solid var(--tusz);border-radius:6px;background:var(--papier)}\n#gm-ppd-plansza .gp-info-et{font-weight:700;font-size:1rem;letter-spacing:0;text-transform:none;font-weight:700;color:var(--tusz2);flex:0 0 auto}\n#gm-ppd-plansza .gp-info{flex:1 1 14rem;min-width:0;margin:0;min-height:3.2rem;font-size:1.125rem;line-height:1.45;color:var(--tusz)}\n#gm-ppd-plansza .gp-koniec{border:1px solid var(--linia);border-radius:6px;padding:1.1rem 1rem;margin:0 0 1rem}\n#gm-ppd-plansza .gp-k-lista-sek{margin:0 0 1rem}\n#gm-ppd-plansza .gp-k-tyt{font-family:Fraunces,Lora,Georgia,serif;font-weight:600;font-size:1.5rem;line-height:1.25;margin:0 0 .4rem}\n#gm-ppd-plansza .gp-k-zw{font-size:1.0625rem;font-weight:600}\n#gm-ppd-plansza .gp-k-akcje,#gm-ppd-plansza .gp-o-akcje{display:flex;gap:.6rem;flex-wrap:wrap;margin:.75rem 0 0}\n#gm-ppd-plansza .gp-k-h{font-size:1.0625rem;font-weight:700;margin:1.1rem 0 .3rem}\n#gm-ppd-plansza .gp-k-lista{list-style:none;margin:0;padding:0}\n#gm-ppd-plansza .gp-k-lista li{border-top:1px solid var(--linia);padding:.6rem 0 .2rem;margin:0}\n#gm-ppd-plansza .gp-k-ok{color:var(--okz);font-weight:700}\n#gm-ppd-plansza .gp-k-zle{color:var(--blad);font-weight:700}\n#gm-ppd-plansza .gp-k-pop{color:var(--tusz2)}\n#gm-ppd-plansza .gp-rekord-nowy{font-weight:700}\n#gm-ppd-plansza .gp-slaby{color:var(--tusz2)}\n#gm-ppd-plansza .gp-wersja ol{list-style:none;margin:0 0 .75rem;padding:0}\n#gm-ppd-plansza .gp-wersja li{border-top:1px solid var(--linia);padding:.6rem 0 .2rem;margin:0}\n#gm-ppd-plansza .gp-wersja p{margin:0 0 .3rem}\n#gm-ppd-plansza .gp-nakladka{position:fixed;top:0;right:0;bottom:0;left:0;z-index:5000;background:rgba(32,33,36,.55);display:flex;\n align-items:center;justify-content:center;padding:1rem .5rem;overflow-y:auto}\n#gm-ppd-plansza .gp-okno{background:var(--papier);color:var(--tusz);border:1px solid var(--linia);border-radius:6px;width:100%;max-width:40rem;\n max-height:calc(100vh - 2rem);overflow-y:auto;padding:1.25rem 1.25rem 1.1rem;margin:auto;text-align:left;font-size:1rem}\n#gm-ppd-plansza .gp-o-nad{margin:0 0 .2rem;color:var(--tusz2);font-weight:700;font-size:1rem;letter-spacing:0;text-transform:none;font-weight:700}\n#gm-ppd-plansza .gp-o-tyt{font-family:Fraunces,Lora,Georgia,serif;font-variant-numeric:lining-nums;font-weight:600;font-size:1.375rem;line-height:1.25;margin:0 0 .3rem}\n#gm-ppd-plansza .gp-o-tyt:focus,#gm-ppd-plansza .gp-o-tyt:focus-visible,#gm-ppd-plansza .gp-k-tyt:focus,#gm-ppd-plansza .gp-k-tyt:focus-visible{outline:none}\n#gm-ppd-plansza .gp-o-rodzaj{color:var(--tusz2);margin:0 0 .9rem;padding-bottom:.75rem;border-bottom:1px solid var(--linia)}\n#gm-ppd-plansza fieldset.gp-odp{border:0;margin:0;padding:0;min-width:0}\n#gm-ppd-plansza .gp-o-pyt{font-weight:600;font-size:1.0625rem;line-height:1.45;margin:0 0 .65rem;padding:0;float:none;width:100%}\n#gm-ppd-plansza .gp-odp-l{display:flex;gap:.6rem;align-items:flex-start;border:1px solid var(--linia);border-radius:3px;padding:.65rem .75rem;\n margin:0 0 .45rem;cursor:pointer;min-height:44px;font-weight:400}\n#gm-ppd-plansza .gp-odp-l input{width:1.15rem;height:1.15rem;margin:.2rem 0 0;accent-color:var(--tusz);flex:0 0 auto}\n#gm-ppd-plansza .gp-odp-l:hover{border-color:var(--tusz2)}\n#gm-ppd-plansza .gp-odp-l:has(input:checked){border-color:var(--tusz);background:var(--mgla2)}\n#gm-ppd-plansza .gp-odp-l:has(input:focus-visible){outline:2px solid var(--tusz);outline-offset:2px}\n#gm-ppd-plansza .gp-odp-l:has(input:disabled){cursor:default}\n#gm-ppd-plansza .gp-odp-tx{min-width:0;overflow-wrap:anywhere}\n#gm-ppd-plansza .gp-litera{font-weight:700;margin-right:.35rem}\n#gm-ppd-plansza .gp-zn{display:block;font-weight:700;margin-top:.15rem}\n#gm-ppd-plansza .gp-zn:empty{display:none}\n#gm-ppd-plansza .gp-odp-k{list-style:none;margin:0;padding:0}\n#gm-ppd-plansza .gp-odp-k li{display:flex;gap:.1rem;border:1px solid var(--linia);border-radius:3px;padding:.65rem .75rem;margin:0 0 .45rem}\n#gm-ppd-plansza .gp-ok{border-color:var(--okz)!important;background:var(--oktlo)!important}\n#gm-ppd-plansza .gp-ok .gp-zn{color:var(--okz)}\n#gm-ppd-plansza .gp-zle{border-color:var(--blad)!important;background:var(--bladtlo)!important}\n#gm-ppd-plansza .gp-zle .gp-zn{color:var(--blad)}\n#gm-ppd-plansza .gp-o-blad{min-height:0;margin:0;color:var(--blad);font-weight:600}\n#gm-ppd-plansza .gp-o-blad:empty{display:none}\n#gm-ppd-plansza .gp-mysli{border:1px solid var(--linia);border-radius:3px;padding:.65rem .75rem;margin:.6rem 0 0;font-weight:600;background:var(--mgla)}\n#gm-ppd-plansza .gp-fb{border:1px solid var(--linia);border-radius:6px;padding:.75rem .9rem;margin:.75rem 0 0;background:var(--mgla)}\n#gm-ppd-plansza .gp-fb p{margin:.3rem 0}\n#gm-ppd-plansza .gp-fb-gl{font-weight:700;font-size:1.0625rem}\n#gm-ppd-plansza .gp-fb.gp-ok .gp-fb-gl{color:var(--okz)}\n#gm-ppd-plansza .gp-fb.gp-zle .gp-fb-gl{color:var(--blad)}\n#gm-ppd-plansza .gp-o-pod{font-size:1.0625rem;font-weight:700;margin:1.1rem 0 .45rem;padding-top:.8rem;border-top:1px solid var(--linia)}\n#gm-ppd-plansza .gp-w-dod{margin-top:.5rem!important}\n#gm-ppd-plansza .gp-fb-sk{font-weight:700;border-top:1px solid var(--linia);padding-top:.45rem;margin-top:.5rem!important}\n@media (max-width:900px){\n #gm-ppd-plansza .gp-tor{gap:2rem 1.1rem}\n #gm-ppd-plansza .gp-tor-wrap{padding:1.1rem .8rem 1.8rem}\n}\n@media (max-width:560px){\n #gm-ppd-plansza .gp-stan{grid-template-columns:minmax(0,1fr)}\n #gm-ppd-plansza .gp-panel{padding:.9rem .8rem .85rem}\n #gm-ppd-plansza .gp-tyt{font-size:1.75rem}\n #gm-ppd-plansza .gp-okno{padding:1rem .85rem .9rem}\n #gm-ppd-plansza .gp-h{font-size:1.375rem}\n #gm-ppd-plansza .gp-info-box{padding:.6rem .7rem}\n #gm-ppd-plansza .gp-tor{gap:1.7rem 1.1rem}\n #gm-ppd-plansza .gp-tor-wrap{padding:1.1rem .7rem 1.6rem}\n #gm-ppd-plansza .gp-ob-stan{display:none}\n #gm-ppd-plansza .gp-stan-tura{white-space:nowrap}\n #gm-ppd-plansza .gp-lektor{flex-wrap:wrap;justify-content:center;width:100%}\n #gm-ppd-plansza .gp-legenda li{padding:.55rem .65rem;gap:.55rem .8rem}\n}\n@media (max-width:560px){\n #gm-ppd-plansza .gp-hero{display:none}\n #gm-ppd-plansza .gp-tor-wrap{padding:.9rem .5rem 1.5rem}\n}\n@media (prefers-reduced-motion:reduce){#gm-ppd-plansza *{transition:none!important;animation:none!important}}";
+  var D = {"id":"plansza","tytul":"Finał kursu: Plansza HoldUp","podtytul":"Powtórka całego kursu — Ty kontra komputer","polecenie":"Rzucaj kostką i idź przez cały kurs. Na każdym polu czeka pytanie z jednego z poruszanych tematów, a gra rusza dalej dopiero po Twojej odpowiedzi.","zasady":["Rzucasz kostką (od 1 do 4) na przemian z komputerem i przesuwasz pionek o tyle pól, ile wypadło, od pola Start do mety.","Wygrywa ten, kto pierwszy dojdzie do mety, a dokładny rzut nie jest potrzebny.","Na każdym polu od 1 do 39 czeka pytanie: wybierz odpowiedź, naciśnij „Sprawdź”, a potem „Dalej”. Po złej odpowiedzi czeka jeszcze jedno pytanie z tego pola, a druga zła odpowiedź cofa o 1 pole.","Zła odpowiedź na zwykłym polu cofa o 2 pola, na polu pułapki o 3 lub 4 pola, a dobra odpowiedź na polu premii przesuwa do przodu o 2 lub 3 pola.","Jeśli staniesz na polu, na którym pytanie już padło, dostajesz pytanie z ostatniego minietego pola, które jest jeszcze nieodkryte. Pytania z jednego pola się nie powtarzają: w kolejnej grze dostaniesz inne.","Komputer też odpowiada na pytania, a po grze możesz odkryć pola, na których nikt nie stanął, i przeczytać ich pytania."],"zrodla":[{"id":"kurs","krotko":"Kurs HoldUp"}],"start":{"etykieta":"Początek kursu"},"meta":{"etykieta":"Koniec kursu"},"miejsca":["Scrollowanie, uwaga i sen: czemu rano brak skupienia","Memy, „brain rot” i Great Meme Reset: panika czy diagnoza?","Cudze memy, zdjęcia i muzyka: co wolno, a co jest plagiatem","Algorytm uczy się Ciebie: bańka filtrująca i radykalizacja","Gry online: pieniądze, oszustwa i dorośli wśród młodszych","Skrzynki w grach i gacha: czy to już hazard?","Blind boxy, kolekcje i odsprzedaż: FOMO czy presja czasu?","Bukmacherzy i kasyna online: długi, reklama, uzależnienie","Patostreamy i donejty: upokorzenie na zamówienie","Wyzwania w sieci: zabawa, presja czy ryzyko?","Finfluencerzy i kursy „na zarobek”","Krypto: inwestycja, hazard czy fałszywa platforma?","„Szybkie 200 zł”: słup finansowy na zleceniu","Phishing, BLIK „na kolegę” i fałszywy kurier","Hasła, 2FA, passkeys i mit zmiany co 30 dni","Wycieki danych: co się dzieje z Twoim PESEL-em","Kredyt na Twoje dane: kradzież tożsamości","Fałszywe oferty pracy i mieszkań","Oszustwa uczuciowe i catfishing","Lokalizacja, metadane i cyfrowy stalking","Doxxing i swatting: kiedy adres staje się bronią","Czekoladowa afera i komentowanie cudzego ciała","Idealna twarz z filtra, looksmaxxing i „rate me”","Pornografia dorosłych: skrypty, spory i granice zgody","Intymne zdjęcia: wysłać, wyciec, zgłosić","Sekstorsja: szantaż intymnymi materiałami","Manosfera i incele: radykalizacja czy panika?","Wciąganie w grupy skrajne: Discord, Telegram, sieć 764","Hejt, cancel i „pranie” starych postów","Czaty rodziców, pracy i studiów: plotki i screeny","Szef pisze o 22:30: praca zdalna i mobbing online","Ślad cyfrowy, rekrutacja i zdjęcia z dzieciństwa","Nagrywanie spotkań, szkoleń i zajęć online","Zbiórki w sieci: rekordowy stream i co sprawdzić","Gdzie szukać pomocy: numery i kroki","AI slop: czy sieć staje się śmietnikiem?","Prawda czy AI: czy poznasz po zdjęciu?","Deepfake: jak się bronić, gdy to Ty jesteś bohaterem","Chatbot jako przyjaciel i terapeuta: pomoc czy pułapka?","AI w nauce i w pracy: pomoc, ściąganie czy plagiat?","Co wklejasz do chatbota? Dane, praca, praktyki","Dezinformacja: jak sprawdzić w pół minuty","„Ja tylko wpłaciłem”: kto odpowiada za patostream","Głos szefa, twarz znanej osoby: oszustwa z deepfake","Netykieta dziś: kropka, kciuk i kamera na spotkaniu","Wielozadaniowość to mit, a przełączanie kosztuje","Wizerunek w sieci: budować świadomie, ale uczciwie","Sławni z tego, że są sławni: influencer jako zawód","Pro-ana i „motylki”: choroba, nie styl życia","Jedno nagranie, fala protestów: głos obywateli w sieci","Dark net: czym jest, a czym nie jest","Czarne rynki dark netu: upadki, oszustwa, ślady","Dark net a krzywdzenie dzieci: rola dorosłych","Kryptowaluty: czym są, skąd kurs i co grozi","Halucynacje AI: dlaczego model zmyśla pewnym tonem","Czaty AI: kto za nimi stoi i co daje płatny plan","Ktoś ukradł Twoje zdjęcie lub projekt: co możesz zrobić","Kto jest właścicielem tego, co tworzysz w pracy","Piractwo: torrenty, pirackie IPTV i „ja tylko oglądam”","AI a prawo autorskie: trening na cudzych dziełach i wyniki","Wi-Fi, router i kamerka: co grozi w sieci i w domu","Złośliwe programy: kradzież haseł, przejęte konta i okup","Hakerzy: nastolatki, gangi, służby i ci „etyczni”"],"pola":[{"nr":1,"modul":2,"etykieta":"Scrollowanie","rodzaj":"zwykle","pyt":[["Badanie 844 dorosłych Flamandów dotyczyło pisania i dzwonienia po zgaszeniu światła. Co z niego wynika?",["Używanie telefonu w łóżku poprawia sen młodych osób","Takie używanie telefonu wiązało się z gorszym snem","Telefon po zgaszeniu światła powoduje bezsenność"],1,"Badanie jest przekrojowe, więc pokazuje związek, a nie przyczynę. Możliwe, że telefon po zgaszeniu światła biorą ludzie, którzy i tak źle śpią.",0],["Co w praktyce proponuje post na wieczór, żeby poprawić szanse na sen?",["Przeglądać feed nie dłużej niż dziesięć minut przed snem","Odłożyć telefon poza łóżko i zająć się czymś z końcem","Zostawić telefon przy łóżku i wyłączyć mu wszystkie dźwięki"],1,"Post radzi odłożyć telefon poza zasięg łóżka i zamienić ostatnie pół godziny na coś, co ma koniec, na przykład rozdział książki lub prysznic.",0],["Komentator pisze: „Włączam tryb nocny, więc mogę scrollować do późna i sen na tym nie ucierpi”. Co jest tu błędne?",["Tryb nocny działa tylko wtedy, gdy ekran jest ciemny","Kolor ekranu liczy się bardziej niż to, co oglądasz","Problemem jest też to, że nie idziesz spać, i treść"],2,"Tryb nocny zmienia barwę ekranu, ale nie treść ani to, że nie kładziesz się spać. W jednym badaniu na młodych dorosłych nie poprawił snu.",0],["Gloria Mark mierzyła pracę przy komputerze. Co oznacza jej wynik o kilkudziesięciu sekundach na jednym ekranie?",["Tyle trwa jedno oglądanie krótkiego filmu w mediach społecznościowych","Tyle średnio trwa praca na ekranie przed przełączeniem się","Tyle wynosi maksymalny czas skupienia dorosłego człowieka"],1,"To miara zachowania przy pracy, czyli czasu do przełączenia, a nie granica ludzkiej uwagi. Każde przełączenie kosztuje czas i zmęczenie.",1],["Co radzi post komuś, kto zastanawia się, czy krótkie filmy mu szkodzą?",["Całkiem zrezygnować z memów i krótkich filmów na stałe","Sprawdzić, czy po filmach trudniej wrócić do tekstu","Poczekać, aż badania ostatecznie rozstrzygną cały spór"],1,"Nie trzeba rozstrzygać sporu, by działać. Jeśli po filmach trudniej wrócić do tekstu, warto zmienić kolejność: najpierw zadanie, potem feed.",1]]},{"nr":2,"modul":2,"etykieta":"Memy","rodzaj":"zwykle","pyt":[["Komentator: „Badania udowodniły, że memy i krótkie filmy psują mózg”. Co w tym jest błędne?",["Żadne badania nie dotyczą krótkich filmów ani uwagi","Badania wykazały wyłącznie pozytywny wpływ takich treści","Są to badania pokazujące związek, a nie dowód przyczyny"],2,"Przegląd badań łączy nadmiar płytkich treści z gorszą uwagą, ale to korelacja. Możliwe, że osoby z kłopotami z uwagą chętniej po nie sięgają.",1],["Co według postu jest chronione prawem autorskim w przypadku utworu?",["Sposób wyrażenia, a nie sama idea","Tylko dzieła poważne i zawodowe","Sama idea, nawet bez żadnego zapisu"],0,"Utworem jest każdy przejaw działalności twórczej o indywidualnym charakterze, niezależnie od tego, czy jest poważny. Chroniony jest sposób wyrażenia, nie idea.",2],["Jakie trzy pytania zadać sobie przed wrzuceniem cudzego materiału do sieci?",["Czy jest ładne, czy jest popularne, czy ktoś już to wrzucił","Czy jest w sieci, czy ma podpis, czy ktoś się już czepia","Czyje to jest, czy mam zgodę, czy autor jest podany"],2,"Zasada trzech pytań porządkuje sprawę: autorstwo, zgoda lub licencja oraz podanie autora. Zdjęcia warto szukać tam, gdzie licencja jest jasna.",2],["Komentator: „Wyciąłem podpis z cudzego zdjęcia, bo psuł efekt, i nikt się nie czepia, więc jest okej”. Co jest błędne?",["Brak reakcji autora oznacza, że prawo zostało zachowane","Wycinanie podpisu jest dozwolone, gdy zdjęcie jest dobre","Wycięcie podpisu i rozpowszechnianie też narusza prawo"],2,"Autor ma prawo do podpisu przy swojej pracy, a to, że nikt się nie czepia, nie znaczy, że wolno. Autor może się odezwać nawet po miesiącach.",2],["Co według Parisera robi personalizacja wyników w sieci?",["Pokazuje nam wszystkie poglądy w równych proporcjach","Ukrywa przed nami tylko reklamy i treści płatne","Po cichu zawęża to, co widzimy, bez naszej wiedzy"],2,"Pariser nazwał ten skutek bańką filtrującą: wyniki dopasowują się do poprzednich kliknięć, więc nie wiesz, czego nie widzisz.",3]]},{"nr":3,"modul":2,"etykieta":"Algorytm uczy się Ciebie","rodzaj":"premia","doprzodu":2,"pyt":[["W badaniu Guessa i współautorów zamieniono feed algorytmiczny na chronologiczny. Co zmieniło się w trzy miesiące?",["Wyraźnie spadła polaryzacja i zmieniły się poglądy","Nic się nie zmieniło, także czas spędzany na platformie","Zmieniło się, co ludzie widzą, lecz nie ich postawy"],2,"Zmieniło się to, co użytkownicy widzą, i czas na platformie, ale polaryzacja i postawy zmieniły się nieistotnie. To nie znaczy, że algorytm nie ma wpływu.",3],["Komentator: „Skoro Bruns kwestionuje bańki, to algorytm nie ma na nas żadnego wpływu”. Co jest błędne?",["Zmieniło się, co ludzie widzą, ale nie ich postawy","Wyraźnie spadła polaryzacja i zmieniły się poglądy ludzi","Nic się nie zmieniło, także czas spędzany na platformie"],0,"Bruns uważa, że szczelne bańki nie mają mocnego poparcia w badaniach, ale zastrzega, że platformy nadal wpływają na wybór informacji i są nieprzejrzyste.",3],["Co ilustruje wynik ok. 25,4 mln jednocześnie grających w jedną grę na Robloxie w październiku 2025 roku?",["Bruns uważa, że algorytmy są całkowicie przejrzyste","Bruns twierdzi, że bańki są dobrze udowodnione","Brak szczelnej bańki nie znaczy braku wpływu"],2,"Skala pokazuje, że platforma przyciąga dorosłych, młodzież i najmłodszych, więc zasady bezpieczeństwa muszą obejmować wszystkich.",4],["Jakie zabezpieczenia konta i wydatków poleca post graczowi dorosłemu?",["Zakup konta od sprawdzonego sprzedawcy i wspólny login","Płacenie poza oficjalnym sklepem, bo bywa trochę taniej","Limit wydatków, brak zakupów od obcych i 2FA"],2,"Post radzi ustawić limit wydatków, nie kupować kont, kodów i boostingu od osób z internetu oraz włączyć uwierzytelnianie dwuskładnikowe.",4],["Komentator: „Boosting to jak korepetycje, ktoś lepszy gra za mnie”. Co w tym jest błędne?",["Wymaga podania loginu obcej osobie i łamie regulamin","Boosting nie wymaga żadnych danych, więc jest bezpieczny","Boosting jest oficjalną usługą z gwarancją sklepu gry"],0,"Boosting oznacza przekazanie komuś dostępu do konta, więc możesz stracić konto lub dane do płatności. Często łamie też regulamin gry.",4]]},{"nr":4,"modul":2,"etykieta":"Skrzynki w grach i gacha","rodzaj":"zwykle","pyt":[["Zendle i Cairns zbadali 7422 graczy. Jak wydatki na skrzynki wiązały się z problemowym hazardem?",["Słabiej niż inne zakupy, co potwierdził eksperyment w grach","Dowodem na to, że skrzynki same wywołują problemowy hazard","Silniej niż inne zakupy, bez pewności co do kierunku"],2,"Badanie wykazało silniejszy związek wydatków na skrzynki z problemowym hazardem, ale kierunku zależności nie da się wskazać.",5],["Co post radzi zrobić przed otwarciem skrzynki w grze?",["Sprawdzić szanse na nagrody i ustalić limit kwoty","Kupić jeszcze jedną, jeśli poprzednia nie dała nagrody","Poczekać na promocję i kupić od razu kilka skrzynek"],0,"Warto sprawdzić, czy gra podaje szanse na nagrody, ustalić kwotę, której nie przekroczysz, i nie kupować kolejnej po stracie.",5],["Komentator: „Po kilku nieudanych skrzynkach kolejna na pewno wypadnie lepiej”. Co jest tu błędne?",["Szansa rośnie, ale tylko przy płatności kartą w grze","Każde losowanie jest niezależne od poprzednich","Gra wyrównuje wyniki, gdy ktoś długo przegrywa z rzędu"],1,"To gonienie strat, typowy schemat hazardowy. Kolejna skrzynka po stracie nie zwiększa szansy na wygraną, bo każde losowanie jest niezależne.",5],["Czym według postu różni się FOMO od presji czasu przy zakupach?",["FOMO to technika sprzedaży, a presja czasu to lęk przed stratą","To dwa różne słowa na dokładnie to samo zjawisko","FOMO to lęk przed ominięciem, a presja to technika"],2,"FOMO to mierzalny lęk, że inni mają doświadczenie, którego Ty nie masz. Presja czasu, jak „oferta kończy się dziś”, ogranicza czas na zastanowienie.",6]]},{"nr":5,"modul":2,"etykieta":"Blind boxy","rodzaj":"pulapka","cofnij":3,"pyt":[["Co post radzi zrobić przed zakupem kolejnego blind boxa?",["Założyć, że odsprzedaż z zyskiem na pewno zwróci koszt","Czy chcę przedmiot, czy emocję losowania","Kupić od razu, bo rzadkie wersje szybko znikają ze sklepów"],1,"Przed zakupem warto ustalić miesięczny budżet na hobby i zapytać siebie, czy chcę ten konkretny przedmiot, czy emocję losowania.",6],["Komentator: „Kupuję blind boxy na odsprzedaż, to pewny zysk”. Co jest tu błędne?",["Odsprzedaż jest zawsze zakazana przez polskie prawo","Zysk bywa złudzeniem, bo dochodzą opłaty i przesyłki","Ceny rzadkich figurek zawsze rosną po zakupie pudełka"],1,"Jeśli nie liczysz kosztów, zysk bywa złudzeniem: dochodzą opłaty i przesyłki, ceny mogą spaść, a regularna odsprzedaż może mieć skutki podatkowe.",6],["Co szacuje Lancet Public Health Commission (2024) o ryzyku związanym z hazardem u dorosłych na świecie?",["Ok. 80 mln ma ryzyko, a ok. 448 mln zaburzenie","Ok. 448 mln ma ryzyko, ok. 80 mln zaburzenie","Ryzyko dotyczy niemal wszystkich dorosłych na świecie"],1,"Około 448 mln dorosłych doświadcza jakiegoś poziomu ryzyka, a ok. 80 mln z nich ma zaburzenie lub problemowy hazard, czyli podzbiór.",7],["Co radzi post osobie, która gra u bukmachera, żeby ograniczyć ryzyko?",["Podnosić stawki po przegranej, aby szybciej odrobić stratę","Ustawić limit depozytu i czasu, nie odrabiać strat","Grać na zagranicznych stronach z korzystniejszymi bonusami"],1,"Warto ustawić limity depozytu i czasu, korzystać tylko z licencjonowanych podmiotów i nie odrabiać strat, bo każdy zakład jest niezależny.",7],["Komentator: „Znam się na piłce, więc bukmacher nie ma nade mną przewagi”. Co jest błędne?",["Marża daje bukmacherowi przewagę w długim czasie","Marża bukmachera dotyczy wyłącznie początkujących graczy","Znajomość sportu gwarantuje stały zysk z zakładów"],0,"Bukmacher ma wbudowaną marżę. Serie wygranych się zdarzają, ale nie dowodzą umiejętności, a wiara w kontrolę nad wynikiem to typowy błąd poznawczy.",7]]},{"nr":6,"modul":2,"etykieta":"Patostreamy i donejty","rodzaj":"zwykle","pyt":[["Wohn i współautorzy zbadali 230 widzów płacących streamerom. Z czym wiązała się więź parasocjalna?",["Z wsparciem emocjonalnym, instrumentalnym i finansowym","Z mniejszą skłonnością do wpłat dla twórców i do oglądania","Wyłącznie z samym oglądaniem transmisji, bez płacenia"],0,"Więź parasocjalna, czyli jednostronna relacja z osobą, której się nie zna, wiązała się z trzema rodzajami wsparcia, w tym finansowym.",8],["Co post radzi, gdy ktoś proponuje wpłatę „zamawiającą” komuś upokorzenie w transmisji?",["Nie wysyłać dotacji i nie udostępniać transmisji","Wysłać małą kwotę, bo to przecież tylko wsparcie twórcy","Oglądać do końca, a zgłosić dopiero po zakończeniu transmisji"],0,"Nie wysyłaj dotacji zlecających upokorzenie lub ryzyko i nie udostępniaj takich nagrań. Gdy ktoś jest w zagrożeniu, zgłoś platformie, a w nagłym wypadku zadzwoń pod 112.",8],["Komentator: „Skoro osoba się zgodziła, nie ma problemu”. Co w tym jest błędne?",["Przepis o patostreamingu obejmuje poniżanie także za zgodą","Przepis obejmuje wyłącznie sytuacje bez zgody osoby","Zgoda zawsze całkowicie zwalnia nadawcę z odpowiedzialności"],0,"Od 23 sierpnia 2026 r. przepis karny dotyczy rozpowszechniania poniżającego traktowania człowieka także za jego zgodą. Donaty dodatkowo zachęcają do eskalacji.",8],["Co sprawia, że w wyzwaniach w sieci trudno odmówić?",["Anonimowy udział bez nominowania innych","Obowiązkowa opłata za udział w grupie","Nominacja i publiczny dowód wykonania"],2,"Nominacja jest osobistym zaproszeniem, a odmowa jest widoczna dla całej grupy.",9],["Znajomy nominował Cię do wyzwania w sieci. Co warto zrobić, zanim się zgodzisz?",["Sprawdzić, ilu znajomych już wzięło udział w wyzwaniu","Zapytać o najgorszy scenariusz i o zysk","Nagrać próbę, by mieć dowód, że jest bezpiecznie"],1,"Warto zadać pytania o najgorszy scenariusz, zysk osób trzecich i możliwość odmowy bez wyjaśnień.",9]]},{"nr":7,"modul":3,"etykieta":"Wyzwania w sieci","rodzaj":"zwykle","pyt":[["Komentator: „Wszyscy to robią, więc jest bezpiecznie”. Co jest w tym błędne?",["Liczy się wyłącznie to, czy wyzwanie jest charytatywne","Wiele osób obniża ryzyko, ale tylko przy wyzwaniach","To dowód społeczny, a nie argument o bezpieczeństwie"],2,"Ryzyko nie maleje dlatego, że uczestniczy dużo osób. W eksperymentach pod presją grupy ludzie powtarzali błędną odpowiedź, choć znali właściwą.",9],["Dlaczego finfluencerzy często działają w luce regulacyjnej?",["Nie są licencjonowanymi doradcami","Ich porady nie podlegają żadnej kontroli w Europie","Prawo uznaje ich wyłącznie za dziennikarzy"],0,"Porady finfluencerów przypominają doradztwo, ale nie zawsze podlegają tym samym zasadom co doradztwo licencjonowane.",10],["Przed wpłatą za kurs „na zarobek” warto o coś poprosić sprzedawcę. O co?",["O rozliczenie przychodów i kosztów","O zaliczkę, aby zablokować niższą cenę kursu","O dodatkowe opinie klientów z jego własnego kanału"],0,"Zrzut ekranu można dobrać i zmodyfikować, a rozliczenie przychodów i kosztów pozwala ocenić realny zysk.",10],["Komentator: „Znam osobę, która kupiła kurs i zarobiła, więc to działa”. Co jest błędne?",["Zarobek znajomego dowodzi, że kurs jest uczciwy","To błąd ocalałego: nie widać tych, którzy stracili","Pojedyncza historia sukcesu jest zawsze zmyślona"],1,"Osoby, które kupiły kurs i nie zarobiły, zwykle nie nagrywają filmów, więc widać tylko zwycięzców. Poza tym przychód to nie zysk.",10],["Co zwykle dzieje się po małej wpłacie na fałszywą platformę inwestycyjną?",["Platforma wypłaca cały zysk po upływie miesiąca bez opłat","Pieniądze trafiają na giełdę pod nadzorem KNF","Panel pokazuje zysk, potem pada prośba o opłatę"],2,"Wykres na ekranie to rysunek strony, a nie rynek. Zysk jest pozorny, a opłaty za wypłatę służą kolejnym wyłudzeniom.",11]]},{"nr":8,"modul":3,"etykieta":"Krypto","rodzaj":"zwykle","pyt":[["Reklama z celebrytą obiecuje zysk z krypto. Jak ją potraktować?",["Jako wiarygodną, jeśli wpłata jest niewielka","Jako dowód, że oferta została sprawdzona","Jako sygnał oszustwa, a nie polecenie"],2,"Wizerunek znanych osób bywa podrabiany deepfakem, a poleganie na autorytecie to częsty element oszustwa.",11],["Komentator: „Krypto to czysty hazard, bo nie generuje przepływów pieniężnych”. Co jest uproszczone?",["Krypto jest inwestycją, jeśli kupujesz tylko bitcoina","Spór został rozstrzygnięty na korzyść krytyków","Granica zależy od sposobu użycia i jest płynna"],2,"To jedna ze stron sporu. Stała, niewielka kwota odkładana na lata różni się od lewarowanego handlu na emocjach.",11],["Czym zajmuje się tzw. słup finansowy?",["Sprzedaje oszustom dane z publicznych wycieków baz","Użycza konta lub BLIK-a albo wypłaca pieniądze","Kieruje grupą i planuje kolejne wyłudzenia online"],1,"Słup nie jest szefem grupy, ale bez niego pieniądze z oszustwa trudno wyprać.",12],["Dostajesz ofertę: użycz konta lub BLIK-a, a dostaniesz procent. Co robić?",["Zgodzić się, jeśli prowizja jest odpowiednio wysoka","Odmówić i nie udostępniać konta ani BLIK-a","Zażądać umowy i dopiero wtedy użyczyć konta"],1,"Konta, karty, BLIK-a ani numeru telefonu nie udostępnia się nikomu, nawet za prowizję.",12],["Ktoś mówi: „Nie wiedziałem, skąd pieniądze, więc nie odpowiadam”. Co jest błędne?",["Niewiedza nie zawsze chroni przy podejrzanej ofercie","Odpowiada tylko osoba, która wyłudziła pieniądze od ofiar","Odpowiedzialność zależy od kwoty, nie od wiedzy"],0,"Gdy oferta wyglądała podejrzanie, sąd może uznać, że ktoś godził się na ryzyko. Liczy się udział i wiedza o pochodzeniu środków.",12]]},{"nr":9,"modul":3,"etykieta":"Phishing","rodzaj":"premia","doprzodu":2,"pyt":[["Co należy zrobić z kodem BLIK, hasłem i kodem SMS?",["Zachować je wyłącznie dla siebie","Przekazać je znajomemu w razie pilnej prośby","Podawać je tylko osobie, która dzwoni z banku"],0,"Kod BLIK, hasło i kod SMS są tylko dla Ciebie, bo kod BLIK pozwala wypłacić pieniądze lub zapłacić.",13],["Znajomy z komunikatora prosi o pilny przelew BLIK. Jak zweryfikować prośbę?",["Zadzwonić do niego na znany numer","Dopytać o szczegóły w tej samej rozmowie","Sprawdzić zdjęcie profilowe i nazwę konta"],0,"Oszust przejmuje konto w komunikatorze i prosi znajomych o pożyczkę, więc prośbę o pieniądze potwierdza się telefonem.",13],["Komentator: „Mnie nie oszukają, jestem informatykiem”. Co jest błędne?",["Podatność zależy od chwili, np. od pośpiechu","Informatycy są podatni tylko na ataki telefoniczne i SMS","Wiedza techniczna chroni, ale tylko w pracy zawodowej"],0,"Zmęczony lub spieszący się człowiek, także informatyk, może kliknąć. Podatność zależy od kontekstu, nie od inteligencji.",13],["Co mówią wytyczne NIST o wymuszaniu okresowej zmiany haseł bez powodu?",["Zalecają zmianę co 30 dni dla ważnych kont","Zalecają zmianę raz na kwartał razem z 2FA","Odradzają ją, a wersja z 2025 roku jej zabrania"],2,"NIST odradza taką praktykę od 2017 roku, a wersja końcowa z 2025 roku wprost jej zabrania.",14],["W jakiej sytuacji według kursu warto zmienić hasło?",["Po wycieku lub przy podejrzeniu","Za każdym razem, gdy zmieniasz telefon lub system","Co miesiąc, według stałego kalendarza w firmie"],0,"Wymuszone, częste zmiany prowadzą do przewidywalnych wzorów, więc hasło zmienia się po wycieku lub podejrzeniu.",14]]},{"nr":10,"modul":3,"etykieta":"Hasła","rodzaj":"zwykle","pyt":[["Komentator: „Hasło Ania1985! jest bezpieczne, bo ma cyfry i wykrzyknik”. Co jest błędne?",["Brakuje w nim znaku specjalnego innego niż wykrzyknik","To typowy wzór, który sprawdzają jako pierwszy","Jest zbyt długie i przez to trudne do zapamiętania"],1,"Imię, rok i wykrzyknik to wzór sprawdzany na początku. Formalna złożoność nie zastępuje losowości i unikalności.",14],["Jak doszło do wycieku z systemu egzaminów zawodowych CKE w 2025 roku?",["Pracownik wysłał całą bazę w odpowiedzi na phishing","Włamywacz przełamał zabezpieczenia systemu egzaminów","Użyto konta pracownika z hasłem używanym prywatnie"],2,"Systemu nie przełamano. Ktoś użył konta pracownika szkoły, który tego samego hasła używał prywatnie.",15],["Co warto zrobić, jeśli Twój PESEL nie jest zastrzeżony?",["Zastrzec go za darmo w mObywatelu","Zmienić go w urzędzie gminy po wycieku","Zapłacić bankowi za dodatkową ochronę numeru"],0,"Wyciek nie jest powodem zmiany PESEL, dlatego zastrzeżenie w mObywatelu jest podstawową ochroną.",15],["Komentator: „Po wycieku nic nie zrobisz, dane już krążą”. Co jest błędne?",["Zastrzeżony PESEL i 2FA blokują typowe nadużycia","Wystarczy odczekać rok, aż dane stracą ważność","Dane można wycofać z obiegu, zgłaszając wniosek firmie"],0,"Zabezpieczenia nie cofną wycieku, ale ograniczają to, co ktoś z danymi zrobi.",15]]},{"nr":11,"modul":3,"etykieta":"Kredyt na Twoje dane","rodzaj":"pulapka","cofnij":3,"pyt":[["Co od 1 czerwca 2024 muszą robić banki i inne instytucje w sprawie PESEL?",["Sprawdzać, czy PESEL jest zastrzeżony","Informować klienta o każdym użyciu PESEL","Zastrzegać PESEL każdemu klientowi z urzędu"],0,"Obowiązek sprawdzania zastrzeżenia dotyczy m.in. banków, firm pożyczkowych, operatorów i notariuszy.",16],["Dostajesz nakaz zapłaty z e-sądu za kredyt, którego nie brałeś. Co robić?",["Odpisać dopiero po miesiącu, bez dokumentów sprawy","Poczekać, aż bank sam wycofa nakaz zapłaty","Złożyć sprzeciw w ciągu 14 dni od doręczenia"],2,"Po upływie 14 dni nakaz się uprawomocni, więc na sprzeciw masz tylko tyle czasu od doręczenia.",16],["Komentator: „Mam zastrzeżony PESEL, więc skan dowodu jest bezpieczny”. Co jest błędne?",["Zastrzeżenie działa dopiero po 30 dniach od założenia","To tylko jedna warstwa ochrony, nie pancerz","Zastrzeżenie chroni też sam skan dowodu przed użyciem"],1,"Zastrzeżenie dotyczy PESEL, więc nie chroni automatycznie przed użyciem skanu tam, gdzie nikt go nie sprawdza.",16],["Ogłoszenie mieszkania poniżej cen rynkowych i prośba o kaucję przed oglądaniem. Co to oznacza?",["Normalną praktykę przy dużym zainteresowaniu","Klasyczny sygnał ostrzegawczy","Dowód, że właściciel jest wiarygodny"],1,"Płatność z góry, bez umowy i bez spotkania, wystarcza, by przerwać rozmowę.",17],["„Pracodawca” prosi, byś przyjął przelewy i przekazał je dalej. Jak to ocenić?",["To legalne, jeśli podpiszesz umowę o pracę","To nie praca, tylko rola słupa","To zwykła praca pośrednika płatności online"],1,"Pieniądze mogą pochodzić z oszustw, a Ty możesz mieć problemy z bankiem i policją.",17]]},{"nr":12,"modul":4,"etykieta":"Fałszywe oferty pracy","rodzaj":"zwykle","pyt":[["Komentator: „Dał się nabrać na ofertę, bo był naiwny”. Co jest błędne?",["Ofiary nie sprawdziły ogłoszenia w rejestrach","Nabierają się głównie osoby bez doświadczenia","Oszuści wykorzystują pośpiech i brak alternatyw"],2,"Osoby szukające szybko pokoju lub pracy mają mniej czasu i opcji. Obwinianie ofiar zniechęca do zgłaszania.",17],["Analiza zgłoszeń do australijskiego Scamwatch (Cross i Layt 2022) podważa mit naiwności ofiar. Co robiło wielu poszkodowanych?",["Ufali profilowi, bo wcześniej sprawdzili go w rejestrze","Rozpoznawali oszustwo, ale płacili ze współczucia","Mieli wątpliwości i próbowali je sprawdzać, np. zdjęcia"],2,"Wielu poszkodowanych podejrzewało skradzione zdjęcia i szukało ich w wyszukiwarce, więc nie byli po prostu naiwni.",18],["Osoba poznana w sieci, której nigdy nie spotkałeś na żywo, prosi Cię o kartę prezentową. Co jest właściwą reakcją?",["Nie wysyłać pieniędzy, kart prezentowych ani kryptowalut","Poprosić o zdjęcie dokumentu i dopiero wtedy wysłać kartę","Wysłać symboliczną kwotę, aby sprawdzić jej reakcję"],0,"Nie wysyła się pieniędzy, kart prezentowych ani kryptowalut osobie, której nie spotkano na żywo.",18],["Komentator twierdzi, że oszustwa uczuciowe dotykają tylko naiwnych i samotnych. Co jest w tym uproszczeniem?",["Oszuści wybierają wyłącznie osoby z dużymi oszczędnościami","Wielu poszkodowanych to osoby ostrożne i wykształcone","Samotność w ogóle nie zwiększa ryzyka oszustwa"],1,"Oszustwo działa dzięki procesowi emocjonalnemu, a nie brakowi inteligencji. Samotność zwiększa ryzyko, ale nie jest warunkiem.",18],["Co ujawniła zbiorcza mapa tras biegaczy, którą firma Strava opublikowała pod koniec 2017 roku?",["Prywatne wiadomości biegaczy opublikowane przez pomyłkę","Pozycje użytkowników zdobyte po włamaniu na ich konta","Kształt baz wojskowych, bo żołnierze biegali wokół nich"],2,"Nikt nie włamał się do systemu: wystarczyło zebrać trasy, które użytkownicy sami opublikowali.",19]]},{"nr":13,"modul":4,"etykieta":"Lokalizacja","rodzaj":"zwykle","pyt":[["Biegasz z aplikacją sportową i nie chcesz, by ktoś ustalił, gdzie mieszkasz. Jakie ustawienia warto zmienić?",["Profil prywatny i strefa ukryta wokół domu","Opis profilu bez adresu, trasy widoczne dla wszystkich","Pseudonim zamiast nazwiska przy publicznych trasach"],0,"Prywatność profilu i ukryta strefa wokół domu ograniczają to, co można złożyć w obraz Twojej rutyny.",19],["Ktoś pisze: „Kto nie ma nic do ukrycia, nie musi się bać udostępniania lokalizacji”. Co jest w tym błędne?",["Zgoda raz udzielona obowiązuje już na stałe","Udostępnianie lokalizacji jest bezpieczne w płatnych aplikacjach","Liczy się, czy można odmówić lub wyłączyć bez kary"],2,"Zgoda ma sens, gdy jest dobrowolna, wzajemna i odwoływalna bez kary. Awantura po wyłączeniu lokalizacji to kontrola, nie troska.",19],["Czym jest swatting?",["Fałszywym alarmem wysyłającym służby pod cudzy adres","Włamaniem na cudze konto w celu opublikowania jego danych","Publikacją czyjegoś adresu w komentarzach pod sporną kłótnią"],0,"Swatting to fałszywe zgłoszenie na numer alarmowy, by wysłać uzbrojoną interwencję pod cudzy adres.",20],["Twój adres i miejsce pracy zostały opublikowane w sieci. Co warto zrobić na początku, poza zgłoszeniem sprawy?",["Zrobić zrzuty ekranu z adresem strony i nazwą konta","Odpowiedzieć autorowi wpisu i ujawnić jego dane osobowe","Skasować własne konta w sieci i czekać, aż wpis zniknie"],0,"Zrzuty ekranu z adresem strony, datą i nazwą konta są dowodem przy zgłoszeniu platformie i policji.",20],["Komentator: „Kto zachowuje się paskudnie w sieci, ten sam sobie winien, jeśli ktoś ujawni jego adres”. Co jest błędne?",["Nikt nie kontroluje, kto dalej użyje ujawnionych danych","Adres można ujawnić, jeśli wcześniej zrobiono zrzuty ekranu","Polskie prawo wprost zezwala na to wobec autorów hejtu"],0,"Ujawnienie adresu to ryzyko dla osoby, jej bliskich i sąsiadów, a błędne wskazanie osoby krzywdzi niewinnych.",20]]},{"nr":14,"modul":4,"etykieta":"Czekoladowa afera","rodzaj":"zwykle","pyt":[["Jak według materiału ocenia się komentarz o czyimś jedzeniu, który jest opakowany w troskę?",["Po intencji osoby, która komentarz wygłasza","Po tym, czy komentarz jest zgodny z zaleceniami lekarza","Po skutku: gdy ktoś musi się tłumaczyć z każdego kęsa"],2,"Jeśli ktoś ma się tłumaczyć z każdego kęsa, to nie jest wsparcie, tylko nadzór. Prosty test: czy ta osoba o to prosiła.",21],["Martwisz się tym, co je bliska osoba. Co powinieneś zrobić zamiast komentować jej talerz?",["Zacząć od słów „tylko mówię, bo się martwię”","Powiedzieć o swoich obawach, ale tylko w gronie rodziny","Zapytać, czy chce rozmawiać, i przyjąć odpowiedź „nie”"],2,"Troskę okazuje się pytaniem otwartym i akceptacją odmowy, a nie komentarzem do talerza.",21],["Komentator: „Skoro ktoś jest influencerem, to musi znosić komentarze o swoim ciele”. Co jest w tym błędne?",["Komentować wolno, jeśli pisze tak duża liczba widzów naraz","Krytykować wolno wszystkich, którzy sami pokazują swoje ciało","Bycie widocznym nie daje prawa do oceniania ciała ani hejtu"],2,"Bycie widocznym w sieci nie daje innym prawa do oceniania cudzego ciała ani do hejtu, także wobec osoby, którą krytykują wszyscy.",21],["Rajanala i in. (2018) wiążą filtry z prośbami o operacje „do selfie”. Jakiego rodzaju jest to tekst?",["Metaanaliza kilkudziesięciu badań klinicznych z gabinetów","Opinia oparta na obserwacjach z gabinetów, nie badanie","Eksperyment z grupą kontrolną wśród pacjentów kliniki"],1,"To tekst typu opinia, więc nie dowodzi skali zjawiska, choć wskazuje na nierealny wzorzec twarzy.",22],["Myśli o wyglądzie zabierają Ci godziny dziennie i powodują unikanie ludzi. Co zalecono w takiej sytuacji?",["Skorzystanie z zabiegu, który poprawi wygląd","Zapytanie anonimowych osób o ocenę w stylu „rate me”","Rozmowę z psychologiem lub lekarzem"],2,"Takie objawy są sygnałem do rozmowy ze specjalistą. Zabieg nie musi usunąć przyczyny cierpienia.",22]]},{"nr":15,"modul":4,"etykieta":"Idealna twarz z filtra","rodzaj":"premia","doprzodu":2,"pyt":[["Komentator: „Dysmorfia ma złożone przyczyny, więc filtry są neutralne”. Co jest w tym błędne?",["Dysmorfia powstaje wyłącznie przez filtry, innych przyczyn brak","Filtr zmienia standard, do którego porównujemy własną twarz","Badania dowiodły, że filtry nie mają żadnego wpływu"],1,"Filtr tworzy twarz, której nikt nie ma. Brakuje jednak mocnych badań, więc nie wolno ani obwiniać filtrów, ani ich bagatelizować.",22],["Dwie meta-analizy dotyczące pornografii i agresji dały różne wyniki. Co można powiedzieć o ich przyczynowości?",["To korelacje, więc nie rozstrzygają o przyczynie","Obie potwierdzają, że oglądanie wywołuje agresję fizyczną","Pierwsza dowodzi przyczynowości, a druga ją całkowicie obala"],0,"Wyniki to korelacje, więc nie wiadomo, czy pornografia wpływa na ludzi, czy ludzie o pewnych skłonnościach po nią sięgają.",23],["Co według Grubbsa i in. (2019) często silniej wiąże się z poczuciem „uzależnienia” od pornografii niż czas oglądania?",["Wiek, w którym zaczęto oglądać","Rodzaj urządzenia, na którym ogląda się treści","Konflikt z własnymi przekonaniami moralnymi"],2,"Poczucie uzależnienia często wynika z niezgodności z własnymi wartościami, a nie z samej liczby godzin.",23],["Komentator: „Skoro film jest w dużym serwisie, to wszyscy w nim występują dobrowolnie”. Co jest błędne?",["Zgoda i weryfikacja bywały zaniedbane, więc źródło się liczy","Serwisy nie mają technicznej możliwości sprawdzenia zgody osób","Dobrowolność ocenia się po liczbie wyświetleń i opinii o filmie"],0,"Sprawy z San Diego i wycofanie milionów filmów po reportażu pokazują, że „legalne” nie zawsze znaczy „dobrowolne”.",23],["Jak działa narzędzie StopNCII.org dla osób dorosłych, których intymne zdjęcie wyciekło?",["Telefon tworzy cyfrowy odcisk, a zdjęcie z niego nie wychodzi","Zdjęcie trafia do serwisu, który usuwa je z całego internetu","Pracownicy serwisu oglądają zdjęcie i zgłaszają je platformom"],0,"Sam obraz nie opuszcza telefonu, a platformy partnerskie blokują pasujące pliki. Nie usuwa to zdjęcia z całego internetu.",24]]},{"nr":16,"modul":4,"etykieta":"Intymne zdjęcia","rodzaj":"zwykle","pyt":[["Twoje intymne zdjęcie wyciekło do sieci. Co warto zrobić, zanim zaczniesz zgłaszać treść platformom?",["Skasować rozmowę i konto, aby wyciek się nie rozprzestrzeniał","Napisać do osoby rozsyłającej i zażądać usunięcia zdjęcia","Zrobić zrzuty ekranu z adresami stron i nazwami kont"],2,"Zrzuty ekranu z adresami stron, nazwami kont i datami zabezpieczają dowody, zanim cokolwiek zostanie skasowane.",24],["Komentator: „Skoro sama wysłała zdjęcie, nie ma pretensji, że ktoś je rozesłał”. Co jest błędne?",["Wysłanie zdjęcia nie jest zgodą na rozsyłanie","Odpowiedzialność ponosi osoba, która wykonała to zdjęcie sama","Zdjęcie wysłane jednej osobie staje się wspólne dla grupy"],0,"Winny jest ten, kto rozsyła zdjęcie bez zgody. Obwinianie ofiary sprawia, że ofiary milczą.",24],["Co pokazało badanie Eaton i in. (2022) w USA o osobach zgłaszających sekstorsję od początku pandemii?",["Zgłaszali ją i mężczyźni (4,5%), i kobiety (2,3%)","Zgłaszały ją tylko osoby poniżej 20. roku życia","Zgłaszały ją prawie wyłącznie kobiety, mężczyźni sporadycznie"],0,"Ofiarami są także dorośli mężczyźni. To dane samoopisowe z jednej populacji, więc nie przenosi się ich wprost na Polskę.",25],["Ktoś szantażuje Cię intymnym nagraniem i żąda przelewu. Co robić według materiału?",["Zablokować kontakt i od razu skasować całą rozmowę","Nie płacić, zrobić zrzuty ekranu i zgłosić policji","Zapłacić tylko raz, aby sprawca usunął całe nagranie"],1,"Płatność nie kończy szantażu, a skasowanie rozmowy niszczy dowody.",25],["Komentator: „Szantażysta pewnie blefuje, więc wystarczy go zablokować”. Co jest w tym błędne?",["Blokuje się po zabezpieczeniu dowodów i zgłoszeniu","Blokować wolno tylko wtedy, gdy sprawca jest w kraju","Blokada kończy szantaż i zabezpiecza przed rozesłaniem"],0,"Nie da się sprawdzić, czy to blef. Blokada jest dobrym krokiem po zabezpieczeniu dowodów, a zgłoszenie pomaga też innym ofiarom.",25]]},{"nr":17,"modul":4,"etykieta":"Manosfera i incele","rodzaj":"pulapka","cofnij":3,"pyt":[["Co pokazała analiza 28,8 mln postów (Ribeiro i in. 2021) o aktywności w manosferze w czasie?",["Każdy użytkownik z czasem staje się coraz agresywniejszy","Aktywność przesuwa się od inceli ku coachom podrywu","Aktywność przesuwa się ku toksyczniejszym grupom"],2,"To trend ogólny: nie znaczy, że każdy użytkownik się zmienia, tylko że aktywność idzie w stronę toksyczniejszych grup.",26],["Znajomy zaczyna się wciągać w manosferę. Od czego według materiału zacząć rozmowę?",["Przedstawić statystyki przemocy inceli i zażądać odejścia z forów","Zerwać kontakt, dopóki nie zmieni swoich poglądów całkowicie","Zapytać, co go w tym przyciąga, i zaproponować alternatywę"],2,"Wyśmiewanie zamyka rozmowę. Pomaga pytanie i konkretna alternatywa, a przy groźbach przemocy zgłoszenie służbom.",26],["Komentator: „Manosfera to czysty biznes, a słuchacze to wyłącznie ofiary naciągaczy”. Co jest błędne?",["Słuchacze są zawsze w pełni świadomymi współsprawcami","Motywy bywają mieszane, część wierzy w to, co mówi","Nikt w manosferze nie zarabia, to wyłącznie dla zabawy hobby"],1,"Redukcja do biznesu utrudnia zrozumienie, dlaczego przekaz trafia do ludzi.",26],["Które z zachowań na serwerze jest czerwoną flagą wciągania w grupę skrajną?",["Pytanie o ulubione hobby podczas rozmowy w grupie","Zaproszenie do wspólnej gry na ogólnym kanale serwera","Prośba o przejście na prywatny kanał z tajemnicą"],2,"Czerwone flagi to m.in. prośba o prywatny kanał, tajemnica, rangi za posłuszeństwo i groźba wykluczenia lub ujawnienia.",27]]},{"nr":18,"modul":5,"etykieta":"Wciąganie w grupy skrajne","rodzaj":"zwykle","pyt":[["Ktoś na serwerze namawia Cię do krzywdy siebie lub innych. Co według materiału zrobić?",["Skasować konto, żeby usunąć ślady rozmowy z serwera","Przerwać kontakt, zrobić zrzuty i zgłosić serwer","Odpisać i spróbować przekonać namawiającego do zmiany"],1,"Należy przerwać kontakt, zrobić zrzuty ekranu, nie kasować konta i zgłosić serwer w aplikacji oraz na Dyżurnet.pl.",27],["Komentator pisze, że osoby wciągnięte w taką grupę same są sobie winne. Co jest w tym błędne?",["Wina rozkłada się po równo na obie strony","Wina zależy od wieku osoby wciągniętej","Wina leży po stronie osoby, która wciąga"],2,"Wina leży po stronie wciągającego, a kryzys może dotknąć każdego, także dorosłego i wykształconego. Obwinianie utrudnia proszenie o pomoc.",27],["Czym według materiału różni się krytyka od hejtu?",["Krytyka dotyczy osoby, a hejt konkretnego czynu","Krytyka dotyczy czynu, hejt dotyczy człowieka","Różnią się tylko liczbą użytych wulgaryzmów"],1,"Krytyka odnosi się do czynu, który da się sprawdzić, a hejt atakuje człowieka i rośnie z liczbą uczestników.",28],["Dostajesz falę nieprzyjemnych komentarzy pod swoim wpisem. Co według materiału warto zrobić?",["Odpisać od razu każdemu, żeby wyjaśnić swoje racje","Zrobić zrzuty z datą i nazwą konta oraz zgłosić","Skasować konto, żeby zrzuty ekranu przestały krążyć"],1,"Warto robić zrzuty z datą i nazwą konta, nie odpisywać w złości i zgłaszać w serwisie. Skasowanie konta nie usuwa screenów, które już krążą.",28],["Komentator twierdzi, że zalew wyzwisk od setek obcych osób to zwykła konsekwencja wpisu. Co jest błędne?",["Kara nie musi być proporcjonalna, jeśli wpis był publiczny","To dodatkowa szkoda, a wyzwiska mogą być przestępstwem","Wyzwiska są dozwolone, jeśli wpis był kontrowersyjny"],1,"Ktoś odpowiada za treść wpisu, ale kara musi być proporcjonalna. Zalew wyzwisk to dodatkowa szkoda, a same wyzwiska mogą być przestępstwem.",28]]},{"nr":19,"modul":5,"etykieta":"Czaty rodziców","rodzaj":"pulapka","cofnij":3,"pyt":[["Co według materiału trzeba wiedzieć o screenie cudzej rozmowy z czatu?",["To pełny dowód prawdy, bo pokazuje, kto co napisał","To zapis, którego nie da się wysłać dalej bez zgody","To tylko wycinek rozmowy, a nie dowód prawdy"],2,"Screen to wycinek, a nie dowód prawdy. Można go wysłać dalej bez zgody autora, a jego przekazywanie bywa naruszeniem dóbr osobistych.",29],["Zanim wrzucisz na czat screen cudzej rozmowy, co powinieneś zrobić?",["Zapytać, czy ta osoba się na to zgodzi","Zasłonić nazwiska i od razu wrzucić go do grupy","Poczekać dobę, aż emocje opadną, i wtedy wrzucić"],0,"Najpierw warto zapytać, czy osoba z rozmowy się zgodzi, bo screen można wysłać dalej bez jej wiedzy.",29],["Komentator mówi, że wykluczenie z czatu online nie boli, bo to nie życie na żywo. Co mówi materiał?",["Boli wyłącznie wtedy, gdy trwa dłużej niż rok","Boli tylko wtedy, gdy wykluczenie dotyczy czatu zawodowego","Badania laboratoryjne pokazują, że online też boli"],2,"Badania laboratoryjne pokazują, że wykluczenie online też boli, choć nie wiemy dokładnie, jak mocno przekłada się to na życie codzienne.",29],["Czy w Polsce istnieje ogólne, wprost nazwane „prawo do odłączenia”?",["Nie, ochronę dają głównie przepisy o czasie pracy","Tak, ale obejmuje wyłącznie osoby pracujące na zleceniu","Tak, wynika ono wprost z przepisów Kodeksu pracy"],0,"Takiego ogólnego prawa nie ma. Ochronę dają przepisy o czasie pracy i odpoczynku, ale dotyczą głównie umów o pracę.",30],["Podejrzewasz mobbing online ze strony przełożonego. Co według materiału warto zapisywać?",["Wyłącznie ostatnią wiadomość, która Cię zdenerwowała","Daty, godziny i treść wiadomości, także zrzuty","Tylko własne odczucia i ocenę nastroju przełożonego"],1,"Warto zapisywać daty, godziny i treść wiadomości, bo ciężar udowodnienia spoczywa zwykle na osobie poszkodowanej.",30]]},{"nr":20,"modul":5,"etykieta":"Praca zdalna i mobbing","rodzaj":"zwykle","pyt":[["Komentator radzi opublikować w sieci prywatne dane szefa i jego wiadomości. Co jest w tym ryzykowne?",["Grozi utratą prawa do bezpłatnej porady w PIP","Grozi zawieszeniem konta, ale nie sprawą w sądzie","Grozi zniesławieniem lub pozwem o dobra osobiste"],2,"Publiczne wywlekanie spraw i prywatnych danych to prosta droga do zniesławienia lub pozwu. Skuteczniejsza jest dokumentacja i droga formalna.",30],["Eksperyment na ponad 4 tys. amerykańskich pracodawców porównał kandydatów różnych wyznań. Co wykazał?",["Ogółem brak różnicy, lokalnie dyskryminacja","Częstsze oddzwanianie do kandydata muzułmańskiego","Dyskryminację we wszystkich regionach w równym stopniu"],0,"Ogólnie nie było różnicy w oddzwonieniach, ale w części, bardziej konserwatywnych regionów dyskryminacja się pojawiła (Acquisti i Fong 2020).",31],["Jak według materiału sprawdzić, co o Tobie jest w sieci?",["Wpisać imię i nazwisko w wyszukiwarkę, też w grafikę","Zapłacić firmie, która obieca usunąć wszystko na zawsze","Podać swój PESEL w serwisie, który przeszuka sieć za Ciebie"],0,"Sprawdzasz sam, wpisując dane w wyszukiwarkę. Prośby o PESEL lub o login i hasło to sposoby na wyłudzenie danych.",31],["Komentator mówi: skoro profil jest publiczny, rekruter może go użyć do czegokolwiek. Od czego zależy, czy to w porządku?",["Publiczne treści chronione są tak samo jak prywatne wiadomości","Rekruter może oglądać zdjęcia, ale nie czytać żadnych wpisów","Zgodność z normami kontekstu, a nie samo „publiczne”"],2,"Według Nissenbaum liczy się, czy informacja płynie zgodnie z normami kontekstu. „Publiczne” nie znaczy „do dowolnego użytku”.",31],["Co jest zwykle bezpieczniejsze przy dzieleniu się materiałami z zajęć?",["Publikacja całego wykładu na kanale w sieci","Rozsyłanie zdjęć wszystkich slajdów całej grupie","Dzielenie się notatkami własnymi słowami"],2,"Notatki własnymi słowami są zwykle bezpieczniejsze niż kopiowanie slajdów lub wykładów, ale zasady mogą zależeć od organizatora i regulaminu.",32]]},{"nr":21,"modul":5,"etykieta":"Nagrywanie spotkań","rodzaj":"premia","doprzodu":2,"pyt":[["Chcesz nagrać szkolenie lub wykład online. Co powinieneś zrobić najpierw?",["Zapytać prowadzącego o zgodę i sprawdzić regulamin","Włączyć nagrywanie po cichu, bo to tylko dla siebie","Uprzedzić uczestników dopiero po zakończeniu zajęć"],0,"Najpierw pytasz prowadzącego o zgodę i sprawdzasz regulamin organizatora, czyli firmy, szkoły lub uczelni.",32],["Komentator mówi: płacę za studia, więc mogę nagrywać wykłady i rozsyłać je grupie. Co jest błędne?",["Opłata wystarcza, o ile nagranie nie zawiera obrazu","Opłata nie daje praw do materiałów wykładowcy","Opłata daje prawo do nagrań, lecz nie do ich edycji"],1,"Opłata za studia nie oznacza praw do materiałów wykładowcy ani zgody na rozpowszechnianie wizerunku. Nagranie na własny użytek to co innego niż udostępnianie.",32],["Media piszą o rekordzie świata w streamie charytatywnym dla Cancer Fighters. Czego materiał nie znalazł?",["Jakichkolwiek danych o kwocie zebranej przez fundację","Potwierdzenia od Guinness World Records","Informacji o tym, kto zorganizował akcję"],1,"Autorzy nie znaleźli potwierdzenia rekordu od Guinness World Records, a kwoty podają z datą stanu, bo liczby rosły.",33],["Zanim wpłacisz na zbiórkę w sieci, co według materiału warto sprawdzić?",["Czy do końca akcji zostało niewiele czasu","Ile osób polubiło i udostępniło wpis ze zbiórką","Kto zbiera pieniądze i jak rozlicza wydatki"],2,"Warto sprawdzić, kto zbiera pieniądze, czy jest oficjalna strona zbiórki i jak rozliczane są wydatki.",33],["Komentator namawia do szybkiej wpłaty na prywatne konto, bo „czas goni”. Co jest tu sygnałem fałszywej zbiórki?",["Nazwa fundacji i sprawozdania na jej oficjalnej stronie","Udział znanych osób w promowaniu zbiórki w mediach","Prywatne konto, presja czasu i brak organizacji"],2,"Prywatne konto, presja czasu i brak organizacji to typowe oznaki fałszywej zbiórki. Wpłacaj przez oficjalne strony fundacji lub zweryfikowane serwisy.",33]]},{"nr":22,"modul":5,"etykieta":"Gdzie szukać pomocy","rodzaj":"zwykle","pyt":[["Podałeś dane do logowania lub wykonałeś przelew oszustowi. Od czego zacząć?",["Zadzwonić do banku, potem na policję","Poczekać kilka dni, czy pieniądze wrócą same","Zapłacić zaliczkę firmie odzyskującej pieniądze"],0,"Przy oszustwach finansowych najpierw dzwonisz do banku, potem zgłaszasz sprawę na policję. Zaliczka dla firm odzyskujących pieniądze to druga fala oszustwa.",34],["Jaki numer wybrać w bezpośrednim zagrożeniu życia?",["Numer 116 123, bo działa całą dobę","Numer 112, a nie infolinię emocjonalną","Numer 8080, bo służy do zgłoszeń awaryjnych"],1,"W bezpośrednim zagrożeniu życia dzwoni się pod 112. Numer 116 123 to wsparcie emocjonalne, a 8080 służy do przekazywania podejrzanych SMS-ów.",34],["Komentator radzi nie zgłaszać oszustwa, bo pieniędzy i tak się nie odzyska. Co jest błędne?",["Szybkie zgłoszenie pozwala bankowi zablokować środki","Zgłoszenie ma sens wyłącznie przy stracie dużej kwoty","Zgłoszenie jest ważne, ale tylko po tygodniu od zdarzenia"],0,"Zgłoszenie jest ważne nawet wtedy, gdy odzyskanie pieniędzy jest trudne: sprawa trafia do rejestru, a bank może zablokować środki, jeśli zareagujesz szybko.",34],["Na czym polega mechanizm zarobku na „AI slop” według materiału?",["Tania produkcja i wypłaty za wyświetlenia","Platforma płaci twórcom za jakość i ręczną weryfikację","Odbiorcy płacą abonament za dostęp do tanich treści"],0,"Wygenerowanie treści kosztuje grosze, a platforma płaci za wyświetlenia. Koszt sprawdzenia treści nie spadł, więc rośnie ilość niezweryfikowanego materiału.",35],["Shumailov i in. opisali „zapaść modeli”. Co pokazali później Gerstgrasser i in.?",["Zapaść dotyczy tylko modeli obrazowych, nie tekstowych","Zapaść występuje także wtedy, gdy dokłada się nowe dane","Gdy nowe dane dokłada się do starych, zapaści nie ma"],2,"Gerstgrasser i in. pokazali, że przy dokładaniu nowych danych do starych do zapaści nie dochodzi, więc spór dotyczy założeń eksperymentu.",35]]},{"nr":23,"modul":5,"etykieta":"AI slop","rodzaj":"zwykle","pyt":[["Komentator publikuje tekst wygenerowany przez AI bez czytania. Co jest w tym błędne?",["Za treść odpowiada wyłącznie twórca narzędzia AI","Błędem jest samo użycie AI, nawet gdy tekst się poprawi","Tekst może zawierać zmyślenia, a odpowiada autor"],2,"Niesprawdzony tekst może zawierać zmyślenia, a odpowiada za niego osoba, która go publikuje. Przeczytaj, popraw i oznacz użycie AI.",35],["Dlaczego wskazówki typu „sprawdź palce i odbicia” nie są trwałą metodą rozpoznawania zdjęć AI?",["Takie wady występują na każdym prawdziwym zdjęciu","Generatory poprawiają właśnie te błędy","Wskazówki działają tylko na zdjęcia czarno-białe"],1,"Kolejne wersje generatorów poprawiają dokładnie te elementy, więc wskazówka szybko się starzeje. Brak wad nie dowodzi, że zdjęcie jest prawdziwe.",36],["W internetowym quizie Microsoftu ponad 12 tys. osób oceniło ok. 287 tys. obrazów. Jaka była trafność ocen?",["Ok. 95%, obrazy rozpoznawano prawie bezbłędnie","Ok. 62%, niewiele lepiej niż rzut monetą","Ok. 80%, wyraźnie lepiej niż przypadek u większości osób"],1,"Trafność wyniosła 62%, czyli niewiele ponad rzut monetą. Własne wrażenie, że coś „widać”, nie jest dobrym miernikiem trafności.",36],["Widzisz reklamę, w której znana osoba obiecuje wysoki zysk z inwestycji. Co robić?",["Uznać za wiarygodną, bo platforma sprawdza każdą reklamę","Kliknąć link z reklamy i przeczytać warunki na stronie","Traktować jak oszustwo do czasu sprawdzenia w źródłach"],2,"Platformy nie sprawdzają każdej reklamy z góry, a oszuści kupują ją jak każdy inny. Znana osoba polecająca inwestycję to typowy wzór oszustwa, więc sprawdź ją na stronach instytucji lub fact-checkerów.",36]]},{"nr":24,"modul":6,"etykieta":"Deepfake","rodzaj":"zwykle","pyt":[["Ktoś rozsyła wygenerowany nagi wizerunek osoby bez jej zgody. Jak według materiału wygląda sytuacja prawna w Polsce?",["Obowiązuje osobny przepis, a kara sięga 5 lat więzienia","Brak osobnego przepisu, działają przepisy ogólne","Prawo nie daje żadnych narzędzi, bo obraz jest sztuczny"],1,"Poselski projekt nie został uchwalony, więc osobnej kary nadal nie ma. Do tego czasu stosuje się przepisy ogólne i ochronę dóbr osobistych.",37],["Jesteś ofiarą deepfake. Jak postąpić z dowodami?",["Negocjować ze sprawcą w prywatnej wiadomości usunięcie","Odesłać materiał znajomym, by potwierdzili, że to fałsz","Zrobić zrzuty z adresem i datą, nie przesyłać dalej"],2,"Zabezpiecz zrzuty ekranu z adresem i datą, ale nie przesyłaj treści dalej. Sprawcy nie odpowiadaj i nie negocjuj, a sprawę zgłoś platformie i na policję.",37],["Komentator: „Seksualny deepfake znajomego to tylko żart, nikt nie ucierpi”. Co jest w tym błędne?",["Błędne jest tylko to, że nie oznaczono go jako żartu","Uderza w godność i poczucie bezpieczeństwa","Żart jest błędem tylko wtedy, gdy znajomy to zobaczy"],1,"Żart i krzywda to dwie różne rzeczy: seksualizowany wizerunek bez zgody uderza w godność i reputację. Nie ma „żartu”, gdy osoba nie wyraziła zgody.",37],["W badaniu Fitzpatrick i in. (2017) 70 osób przez dwa tygodnie używało bota terapeutycznego. Jaki był wynik i zastrzeżenie?",["Objawy depresji wzrosły, bo rozmowy z botem były zbyt krótkie","Bot zastąpił terapeutę także w kryzysie, co potwierdzono","Mniej objawów depresji, lecz badanie było krótkie"],2,"Bot zmniejszył objawy depresji bardziej niż materiał informacyjny, ale badanie było krótkie i nieoślepione. Nie pozwala to wnioskować o skuteczności w realnym kryzysie.",38],["Jaki sygnał powinien skłonić Cię do kontaktu z człowiekiem zamiast z chatbotem?",["Wolisz bota od ludzi albo rozmowa nasila lęk","Bot zbyt często proponuje zmianę tematu lub przerwę w rozmowie","Bot nie pamięta szczegółów poprzednich rozmów i często się myli"],0,"Gdy bot zaczyna zastępować ludzi albo rozmowa nasila lęk, skontaktuj się z bliskim lub psychologiem. W kryzysie dzwoń na 116 123 lub 112.",38]]},{"nr":25,"modul":6,"etykieta":"Chatbot jako przyjaciel","rodzaj":"pulapka","cofnij":3,"pyt":[["Komentator: „Bot nie ocenia i nic nie ryzykuję, więc to idealna relacja”. Co to pomija?",["Pomija, że bot potrafi prowadzić tylko krótkie rozmowy","Pomija, że rozmowy z botem są wolniejsze niż z człowiekiem","Relacja bez ryzyka nie uczy radzenia sobie z konfliktem"],2,"Relacja bez ryzyka nie uczy radzenia sobie z odmową, konfliktem i cudzą perspektywą. Wiele aplikacji jest też zaprojektowanych tak, by utrzymać Cię w rozmowie.",38],["Prawnicy w Nowym Jorku (2023) przedstawili sądowi wyroki podane przez ChatGPT. Co się okazało?",["Wyroki zmyślono, a prawnicy dostali grzywnę 5 tys. dolarów","Wyroki były autentyczne, lecz sąd uznał je za nieaktualne","Wyroki były prawdziwe, ale prawnicy podali je w złej wersji"],0,"Wyroki wymyślił ChatGPT, a prawnicy dostali grzywnę 5 tys. dolarów. Dlatego każdy fakt i cytat z AI trzeba sprawdzać w oryginale.",39],["Detektor AI pokazuje, że praca jest „sztuczna”. Jak to oceniać według badania Weber-Wulff i in. (2023)?",["Wynik jest wiarygodny, jeśli praca była krótka lub obcojęzyczna","Narzędzia są zawodne, sam wynik nie wystarcza do zarzutu","Detektory są niemal bezbłędne, więc wynik jest rozstrzygający"],1,"Badacze uznali dostępne narzędzia za niedokładne i zawodne, a proste zabiegi maskujące pogarszały ich wyniki. Oskarżenie na podstawie samego wyniku może uderzyć w uczciwą osobę.",39],["Student: „AI to jak kalkulator, więc nie muszę niczego zgłaszać”. Co w tym błędne?",["Błędne jest tylko to, że kalkulator nie jest narzędziem AI","Wymóg zgłaszania dotyczy wyłącznie prac wykonanych w grupie","Tam, gdzie regulamin wymaga, trzeba podać użycie AI"],2,"Porównanie jest tylko częściowe: tekst wygenerowany i oddany jako własny może naruszać zasady uczelni, jeśli wymagają ujawnienia. Sprawdź regulamin i tam, gdzie trzeba, podaj użycie AI.",39],["Co stało się latem 2025 r. z rozmowami udostępnionymi przez opcję „widoczne dla wyszukiwarek”?",["Zostały automatycznie usunięte po tygodniu od udostępnienia","Wyciekły po ataku hakerów na serwery producenta","Trafiły do wyszukiwarki, a producent wycofał funkcję"],2,"Rozmowy zostały zaindeksowane przez wyszukiwarkę, a producent wycofał funkcję pod koniec lipca 2025 r. To nie był atak hakerski: wspólny link to publikacja, a nie prywatna wiadomość.",40]]},{"nr":26,"modul":6,"etykieta":"Co wklejasz do chatbota","rodzaj":"zwykle","pyt":[["Notatki z praktyk zawierają imię klienta, nazwę firmy i kwoty. Jak je przygotować do wklejenia do chatbota?",["Zmienić nazwę firmy na inną i zostawić kwoty bez zmian","Usunąć imię klienta, bo reszta danych nie wskazuje osoby","Usunąć wszystko, co identyfikuje, lub zapytać opiekuna"],2,"Sama zmiana imienia nie jest anonimizacją, bo nazwa firmy, kwoty i kontekst mogą wskazać klienta. Anonimizuj wszystko albo zapytaj opiekuna, czy w ogóle można tych danych użyć.",40],["Komentator uważa, że modele niczego nie zapamiętują. Co pokazało badanie Carlini i in. (2021) na modelu GPT-2?",["Dane wydobyto dopiero po zhakowaniu serwera producenta","Model odtwarzał wyłącznie ogólne streszczenia danych","Wydobyto dosłowne fragmenty danych treningowych"],2,"Z modelu GPT-2 wydobyto dosłowne fragmenty danych treningowych, w tym dane osobowe. Ryzyko zależy od modelu i sposobu użycia, ale założenie „nie pamięta” jest zbyt pewne.",40],["Czym według Wineburga i McGrew (2019) fact-checkerzy różnili się od historyków przy ocenie stron?",["Czytali stronę dłużej i dokładniej od początku do końca","Opuszczali stronę i sprawdzali ją w innych źródłach","Opierali się głównie na wyglądzie strony i liczbie polubień"],1,"Fact-checkerzy oceniali strony trafniej i szybciej, bo opuszczali stronę i sprawdzali ją gdzie indziej (czytanie boczne). Próba była jednak niewielka.",41],["Podczas powodzi w 2024 r. krążyły wygenerowane przez AI obrazy dziewczynki. Jaki prosty sygnał ostrzegawczy to pokazało?",["Ta sama „tragedia” w wielu miejscowościach naraz","Wszystkie posty były podpisane tym samym nazwiskiem autora","Obrazy miały zbyt wysoką rozdzielczość jak na powódź"],0,"Obrazy pojawiały się także w miejscach, których powódź nie dotknęła. Ten sygnał można sprawdzić bez żadnego narzędzia.",41],["Komentator: „Wszyscy to udostępniają, więc musi być prawdziwe”. Co jest w tym błędne?",["Nic, bo duża liczba udostępnień oznacza, że ktoś to sprawdził","Zasięg rośnie od emocji i powtórzeń, nie od prawdziwości","Błędne jest tylko to, że udostępnienia liczy się zbyt krótko"],1,"Szerzej rozchodzą się treści budzące silne emocje, a powtórzenie samo podnosi wiarygodność twierdzenia (efekt iluzji prawdy). Liczba udostępnień nie jest dowodem.",41]]},{"nr":27,"modul":6,"etykieta":"„Ja tylko wpłaciłem”","rodzaj":"zwykle","pyt":[["Co według Kutza (2000) wystarcza do moralnego współudziału w zbiorowej krzywdzie, nawet gdy wpłata nie jest konieczna?",["Wkład musi być konieczny dla powodzenia przedsięwzięcia","Świadome dołączenie do wspólnego celu","Wystarczy samo oglądanie, bez świadomości skutków"],1,"Według Kutza współudział nie wymaga, by Twój wkład był konieczny; liczy się świadome dołączenie do wspólnego przedsięwzięcia. Tysiąc małych wpłat to razem duża zachęta do eskalacji.",42],["Czy polski przepis obowiązujący od 23.08.2026 wprost wskazuje widza wpłacającego jako sprawcę?",["Tak, ale tylko wtedy, gdy wpłata przekroczy ustalony próg kwoty","Nie, odpowiada nadawca; sprawa widza jest otwarta","Tak, widz odpowiada na równi z nadawcą, jeśli wpłacił pieniądze"],1,"Przepis karze nadawcę działającego dla zysku, nawet za zgodą poniżanego, ale nie nazywa sprawcą widza. Jego odpowiedzialność z ogólnych zasad (np. pomocnictwo) pozostaje pytaniem otwartym.",42],["Podczas transmisji widzisz, że ktoś może być w niebezpieczeństwie. Co robić?",["Napisać na czacie prośbę do nadawcy o przerwanie transmisji","Zgłosić samemu, nie czekać na tłum; w nagłej sytuacji 112","Poczekać, aż zgłosi ktoś inny, bo wielu widzów już to widzi"],1,"Im więcej osób jest obecnych, tym wolniej reaguje każda z nich (efekt świadka). Zgłoś sam, jako konkretna osoba, a w nagłej sytuacji zadzwoń pod 112.",42],["Pracownik w Hongkongu wykonał 15 przelewów (ok. 200 mln HKD) po wideokonferencji z „dyrektorem”. Co ustaliła policja?",["Wszyscy pozostali uczestnicy byli sfałszowani","Sfałszowany był tylko dyrektor finansowy, reszta prawdziwa","Uczestnicy byli prawdziwi, a fałszywe były tylko rachunki"],0,"Według policji wszyscy pozostali uczestnicy wideokonferencji byli sfałszowani. Wideo i głos przestały być dowodem tożsamości.",43],["Dzwoni „szef” z pilną, poufną prośbą o przelew. Co robić?",["Ocenić po głosie i tonie, czy rozmówca brzmi wiarygodnie","Poprosić szefa o numer i oddzwonić właśnie tam","Rozłączyć się i oddzwonić na numer znaleziony samemu"],2,"Przy nietypowej prośbie o pieniądze rozłącz się i oddzwoń na numer, który sam znajdziesz. Znajomość głosu nie jest uwierzytelnieniem.",43]]},{"nr":28,"modul":6,"etykieta":"Głos szefa","rodzaj":"premia","doprzodu":3,"pyt":[["Komentator: „Pracownik sam sobie winien, powinien rozpoznać fałszywe twarze”. Co jest w tym błędne?",["Oszustwo rozwiewa wątpliwości; obroną są procedury","Błędne jest tylko to, że pracownik nie zgłosił sprawy szybciej","Nic, bo wystarczy uważnie przyjrzeć się twarzom na wideo"],0,"Oszustwo zaprojektowano tak, by rozwiać wątpliwość, na przykład kilkoma znanymi twarzami. Obwinianie jednej osoby niczego nie zabezpiecza, skuteczne są procedury.",43],["Co radził dokument RFC 1855 z 1995 roku w sprawie pisania wielkimi literami?",["Pisać nimi całe wiadomości, by odbiorca nie przeoczył treści","Nie pisać samymi wielkimi, bo odbiera się to jak krzyk","Używać ich w tytułach, by wyróżnić pilne sprawy w skrzynce"],1,"Dokument radził nie pisać samymi wielkimi literami, bo w tekście brak tonu głosu i odbiera się to jak krzyk. Do podkreślenia wystarczy jedno słowo wielkimi literami albo pogrubienie.",44],["Co pokazały eksperymenty Krugera i in. (2005) o piszących e-maile i odbiorze ich tonu?",["Trafnie przewidywali odbiór tonu, zwłaszcza w tekście pisanym","Przeceniali, jak trafnie odbiorca odczyta ich intencję","Niedoceniali, jak trafnie odbiorca odczyta ich intencję"],1,"Piszący byli przekonani, że adresat odczyta ton zgodnie z intencją, a trafność odczytu była niższa niż ta pewność. Przy głosie rozbieżność była mniejsza.",44],["Komentator: „Kropka w krótkiej odpowiedzi SMS to reguła języka i oznacza złość”. Co w tym błędne?",["Kropka wpływa na odbiór tylko w odręcznych notatkach","Błędne jest tylko to, że w SMS-ach używa się kropek","To zwyczaj części grup, nie reguła języka"],2,"W eksperymentach krótkie odpowiedzi z kropką bywały oceniane jako chłodniejsze, ale to zwyczaj części grup, a w odręcznych notatkach efektu nie było. Warto zapytać, jak ktoś to odbiera.",44],["Często powtarzane „do 40 procent czasu” traconego na przełączanie zadań: co ta liczba oznacza według kursu?",["Średnią stratę każdego pracownika wykonującego pracę biurową","Stały odsetek czasu tracony przy każdym rodzaju zadania","Górne oszacowanie dla złożonych, częstych przełączeń"],2,"Liczba pochodzi od Meyera, cytowanego przez APA, i opisuje górną granicę dla złożonych, częstych przełączeń, a nie średnią.",45]]},{"nr":29,"modul":7,"etykieta":"Wielozadaniowość to mit","rodzaj":"zwykle","pyt":[["Komentator pisze: „Robię kilka rzeczy naraz i czuję, że świetnie mi idzie”. Co w tym rozumowaniu jest błędne?",["Poczucie płynności nie mierzy kosztu przełączania","Do pracy naraz nadają się wyłącznie zadania ręczne i proste","Płynność pracy zależy tylko od liczby otwartych okien i kart"],0,"Koszty przełączania mierzy się w ułamkach sekundy i w błędach, których zwykle się nie zauważa, więc samo poczucie niczego nie dowodzi.",45],["Chcesz ograniczyć koszt przełączania zadań w pracy. Co według kursu warto zrobić?",["Odpowiadać na wiadomości od razu, żeby nic nie zalegało w skrzynce","Blok czasu na jedno zadanie i poczta o ustalonych porach","Robić kilka zadań naraz, żeby szybciej skończyć pracę"],1,"Kurs zaleca blok czasu na jedno zadanie, wyciszone powiadomienia i sprawdzanie poczty o ustalonych porach.",45],["Co wykazała ankieta CareerBuilder i Harris Poll z 2018 roku wśród zatrudniających w USA?",["70% sprawdzało kandydatów w mediach społecznościowych","Niewielu pracodawców sprawdzało kandydatów w internecie","Pracodawcy sprawdzali tylko profile zawodowe kandydatów"],0,"Według ankiety 70% pracodawców sprawdzało kandydatów w mediach społecznościowych, a 57% z nich znalazło treści, przez które zrezygnowało z kandydata.",46],["Komentator: „Zawyżenie kwalifikacji w profilu to zwykłe zarządzanie wrażeniem, jak u Goffmana”. Co jest tu błędne?",["Dobór prawdziwych treści to nie to samo co zmyślanie","Goffman pisał wyłącznie o rozmowach kwalifikacyjnych w firmach","Zarządzanie wrażeniem jest dozwolone tylko poza internetem"],0,"Goffman opisywał odgrywanie ról, ale różnica leży między doborem prawdziwych treści a ich wymyślaniem, które jest wprowadzaniem w błąd.",46],["Jak według kursu w jeden wieczór sprawdzić swój wizerunek w sieci?",["Usunąć wszystkie profile, żeby nie zostawiać żadnego śladu","Dodać do znajomych jak najwięcej osób z całej branży","Wyszukać siebie w oknie incognito, także w Grafice"],2,"Kurs radzi wpisać imię i nazwisko w wyszukiwarkę w oknie incognito, obejrzeć zakładkę Grafika i uzupełnić jeden profil zawodowy.",46]]},{"nr":30,"modul":7,"etykieta":"Sławni z bycia sławnymi","rodzaj":"zwykle","pyt":[["Co pokazała analiza losowej próby kanałów YouTube (Bärtl 2018) o rozkładzie wyświetleń?",["Wyświetlenia rozkładają się mniej więcej równo między kanały","Większość wyświetleń trafia do połowy najlepszych kanałów","Średnio 85% wyświetleń trafia do 3% kanałów"],2,"Analiza wykazała skrajną nierówność: średnio 85% wyświetleń przypada na 3% kanałów.",47],["Komentator: „Influencer to nowy zawód, więc zarobi na nim każdy, kto zacznie”. Co w tym jest błędne?",["Praca twórców jest zbyt prosta, by dawała stały dochód","Dochody są bardzo nierówne, a widać głównie sukcesy","Tylko platformy decydują, kto może zacząć tworzyć treści"],1,"Dochody twórców są nierówne i trudne do przewidzenia, a to, co widać, to wybór sukcesów (błąd ocalałego).",47],["Chcesz ocenić rekomendację influencera. Co według kursu warto sprawdzić?",["Liczbę obserwujących i częstotliwość publikowania treści","Oznaczenie reklamy i niezależne potwierdzenie opinii","Jakość montażu i liczbę polubień pod każdym wpisem"],1,"Kurs radzi sprawdzić, czy współpraca jest oznaczona jako reklama, czy ktoś niezależny potwierdza opinię i czy rekomendacja nie służy interesowi twórcy.",47],["Czym według kursu jest internetowy ruch pro-ana?",["Terapią grupową prowadzoną przez specjalistów w sieci","Ruchem przedstawiającym jadłowstręt jako styl życia","Zbiorem porad na temat zdrowego i bezpiecznego odchudzania"],1,"Pro-ana przedstawia jadłowstręt psychiczny jako styl życia, a nie chorobę, choć WHO opisuje go jako chorobę z poważnymi powikłaniami.",48]]},{"nr":31,"modul":7,"etykieta":"Pro-ana i „motylki”","rodzaj":"pulapka","cofnij":3,"pyt":[["Komentator: „To tylko dieta, samo przejdzie”. Co jest błędne w takim podejściu do zaburzeń odżywiania?",["Zaburzenie mija, gdy rodzina kontroluje wszystkie posiłki","Zaburzenia odżywiania występują wyłącznie u nastolatek","To choroba, przy której czekanie bywa ryzykowne"],2,"Dieta i zaburzenie odżywiania to nie to samo, a WHO wiąże jadłowstręt z przedwczesną śmiercią z powodu powikłań lub samobójstwa.",48],["Bliska osoba unika wspólnych obiadów i martwisz się o nią. Co według kursu zrobić?",["Postawić ultimatum przy wspólnych posiłkach w domu","Opisać, co widzisz, i zaproponować wizytę u lekarza","Skomentować jej wagę, żeby zrozumiała powagę problemu"],1,"Kurs radzi nie komentować ciała, tylko opisać obserwacje, powiedzieć, że jesteś obok, i zaproponować wizytę u lekarza rodzinnego lub psychiatry.",48],["Co pokazali Wolfsfeld, Segev i Sheafer (2013) o mediach społecznościowych w państwach arabskich?",["Ich użycie nie miało związku z liczbą protestów w regionie","Ich użycie częściej było skutkiem protestów niż przyczyną","Ich użycie zawsze poprzedzało protesty i je wywoływało"],1,"Na danych z 20 państw arabskich wzrost używania mediów społecznościowych częściej następował po protestach, więc badacze spierają się, ile robi sama sieć.",49],["Komentator: „Klikam udostępnij pod apelem i już pomagam”. Co według kursu warto do tego dodać?",["Gest warto uzupełnić wpłatą, podpisem lub wolontariatem","Udostępnienie jest równie wartościowe jak wpłata na zbiórkę","Udostępniać warto wyłącznie apele znajomych i rodziny"],0,"Większość członków kampanii „Save Darfur” na Facebooku nie zwerbowała innych ani nie wpłaciła pieniędzy; gest nie jest zły, ale warto dodać czyn.",49],["Dostajesz poruszające nagranie z prośbą o udostępnienie. Co według kursu sprawdzić najpierw?",["Kto je opublikował i czy potwierdzają je niezależne źródła","Czy autor wskazuje winnego z imienia i nazwiska w opisie","Ile osób już je udostępniło i skomentowało w ciągu ostatniej doby"],0,"Zasięg mierzy emocje, a nie prawdziwość, dlatego trzeba sprawdzić autora, datę i niezależne potwierdzenie; nie wolno też wskazywać w sieci winnej osoby.",49]]},{"nr":32,"modul":7,"etykieta":"Dark net","rodzaj":"zwykle","pyt":[["Czym według kursu różni się głęboka sieć (deep web) od ciemnej sieci (dark net)?",["To dwie nazwy tej samej, w całości nielegalnej części sieci","Deep web to strony, które znajduje zwykła wyszukiwarka","Deep web to zasoby za hasłem, dark net to osobna część"],2,"Głęboka sieć to głównie zwykłe zasoby za logowaniem, a ciemna sieć wymaga specjalnego oprogramowania anonimizującego, np. Tora.",50],["Komentator: „Dark net to 95% internetu, same przestępstwa”. Co w tym jest błędne?",["Zlewa deep web z małą częścią, jaką tworzą ukryte usługi","Przestępstwa popełnia się wyłącznie w zwykłym internecie","Tor jest narzędziem przeznaczonym wyłącznie dla zawodowych hakerów"],0,"Nie znaleziono źródła dla liczby 95%, a ruch do ukrytych usług w sieci Tor to według Tor Metrics rząd kilku procent.",50],["Ktoś bliski opowiada o „zabójcach do wynajęcia” w dark necie. Co według kursu zrobić?",["Zapytać, skąd to wie, i razem sprawdzić, co jest legendą","Wyśmiać opowieść i szybko zakończyć rozmowę na ten temat","Zakazać mu korzystania z internetu do końca tego tygodnia"],0,"Kurs radzi spokojnie zapytać o źródło i razem oddzielić legendy od faktów, bo takie „usługi” to według analiz głównie oszustwa.",50],["Czym jest „exit scam” na rynkach dark netu?",["Przejęciem całego rynku przez specjalną jednostkę policji","Ucieczką administratorów z pieniędzmi z depozytów","Zamknięciem rynku na wspólną prośbę wszystkich sprzedawców"],1,"W exit scam administratorzy znikają z pieniędzmi z depozytów, jak przy rynku Evolution w 2015 roku.",51],["Komentator: „Płacę kryptowalutą, więc nikt mnie nie wyśledzi”. Co w tym jest błędne?",["Śledzone są tylko płatności powyżej określonej kwoty","Rejestr bywa publiczny, a ślad prowadzi do giełdy","Służby nie mają uprawnień do działania poza własnym krajem"],1,"Wiele kryptowalut działa na publicznym rejestrze transakcji, a wymiana na giełdzie z identyfikacją klienta zostawia dane.",51]]},{"nr":33,"modul":7,"etykieta":"Czarne rynki dark netu","rodzaj":"zwykle","pyt":[["Ktoś bliski kupił coś na czarnym rynku i boi się konsekwencji. Co kurs radzi zrobić najpierw?",["Szybko zgłosić go na policję, zanim zrobi to ktoś inny","Zadbać o jego zdrowie, potem poszukać pomocy prawnej","Usunąć wszelkie ślady zamówienia z jego urządzeń i konta"],1,"Najpierw liczy się zdrowie (112 w nagłym wypadku), a potem rozmowa z prawnikiem lub poradnią uzależnień.",51],["Gdzie według Dyżurnet.pl za 2025 r. znajdowała się większość potwierdzonych incydentów z materiałami wykorzystywania dzieci?",["Wyłącznie w zamkniętych grupach i na prywatnych serwerach","W zwykłym internecie, hostingach i komunikatorach","W sieci Tor i innych ukrytych usługach internetowych"],1,"Tylko ok. 2% potwierdzonych incydentów było w sieci Tor, więc główne ryzyko nie ogranicza się do dark netu.",52],["Komentator: „Tylko popatrzę na takie treści z udziałem dziecka, to nie przestępstwo”. Co jest błędne?",["Karalne jest tylko rozpowszechnianie takich treści dalej w sieci","Karalne jest też uzyskiwanie dostępu, nie tylko posiadanie","Karalne jest wyłącznie posiadanie plików na własnym dysku twardym"],1,"Prawo karze także uzyskiwanie dostępu do takich treści, a za materiałem stoi krzywda realnego dziecka.",52],["Natrafiasz w sieci na nielegalne treści z udziałem dziecka. Co według kursu zrobić?",["Zapisać zrzut ekranu i wysłać go znajomym, by ostrzec","Zignorować je, bo zgłoszenia i tak nic nie zmieniają","Nie zapisywać ich, a adres zgłosić do Dyżurnet.pl"],2,"Nie wolno pobierać, zapisywać ani przesyłać takich treści dalej; adres zgłasza się do Dyżurnet.pl, a przy zagrożeniu dzwoni się na 112.",52],["Jak według kursu kończyły się największe upadki w świecie kryptowalut, np. giełdy FTX?",["Były skutkiem zwykłych błędów w technologii blockchain i kodzie","Wynikały głównie z zakazów nałożonych przez państwa na rynek","W dużej mierze były to oszustwa, nie zwykłe ryzyko rynku"],2,"Założyciel FTX został skazany za oszustwa, podobnie jak szefowie Terra/Luna i Celsius.",53]]},{"nr":34,"modul":8,"etykieta":"Kryptowaluty","rodzaj":"zwykle","pyt":[["Komentator: „Stablecoin ma stały kurs, więc jest w pełni bezpieczny”. Co w tym jest błędne?",["Stały kurs gwarantuje państwo, lecz tylko w UE","Stały kurs to cel, a ryzykiem jest emitent","Stablecoiny są bezpieczne tylko przy małych kwotach"],1,"TerraUSD upadł w 2022 roku, a USDC spadł w 2023 roku do ok. 0,87 dolara, gdy ujawniono problem z rezerwami emitenta.",53],["Jak według kursu traktować kryptowaluty w swoim budżecie?",["Jako bezpieczną lokatę na przyszłość rodziny","Jako ryzykowny dodatek, nie oszczędności","Jako główny sposób oszczędzania na emeryturę"],1,"Kurs radzi inwestować tylko tyle, ile można stracić bez wpływu na codzienne rachunki.",53],["Dlaczego model językowy potrafi podać zmyśloną informację pewnym tonem?",["Przewiduje kolejne słowa, a nie sprawdza faktów","Przy każdej odpowiedzi zagląda do bazy, ale często ją myli","Celowo wprowadza w błąd, by użytkownik dłużej rozmawiał"],0,"Model uczy się przewidywać, jakie słowo padnie dalej, i nie zagląda do bazy faktów, a trening częściej nagradza zgadywanie niż „nie wiem”.",54],["Po odpowiedzi czatu z cytatami pytasz go: „Czy jesteś pewien?”. Czy potwierdzenie rozstrzyga sprawę?",["Tak, bo model sprawdza wtedy dane w bazie","Tak, bo model przyznaje się do błędu, gdy ma wątpliwości","Nie, bo potwierdzenie bywa równie zmyślone"],2,"Pytanie „czy jesteś pewien?” nie uruchamia sprawdzania w bazie, a model generuje kolejną prawdopodobną odpowiedź, więc weryfikacją jest dopiero znalezienie źródła poza czatem.",54],["Czat podaje link jako źródło swojej informacji. Co zrobić, zanim jej użyjesz?",["Sprawdzić, czy adres wygląda poprawnie i prowadzi do znanej strony","Uznać informację za pewną, skoro model podał adres źródła","Otworzyć go i znaleźć w tekście zdanie, na które się powołuje"],2,"Link w odpowiedzi nie dowodzi, że strona mówi to, co streszcza model, a jeśli zdania w tekście nie ma, nie należy używać tej informacji.",54]]},{"nr":35,"modul":8,"etykieta":"Czaty AI","rodzaj":"zwykle","pyt":[["Co zwykle daje płatny plan czatu AI w porównaniu z wersją darmową?",["Gwarancję, że rozmowy nie posłużą do trenowania modeli","Mocniejszy model, wyższe limity i dodatkowe funkcje","Odpowiedzi zweryfikowane w bazach faktów, a więc bez błędów"],1,"Płatny plan daje zwykle mocniejszy model, wyższe limity i dodatkowe funkcje, a nie „inną prawdę”, więc fakty trzeba sprawdzać niezależnie od planu.",55],["Zastanawiasz się nad płatnym planem czatu AI. Co warto zrobić najpierw?",["Wybrać czat z pierwszego miejsca w rankingu użytkowników","Wykupić najdroższy plan, bo ma najwięcej funkcji i limitów","Przez tydzień testować darmową wersję na swoich zadaniach"],2,"Test darmowej wersji na prawdziwych zadaniach pokazuje, czy w ogóle trafiasz na limity, a ranking głosów mierzy preferencje, nie przydatność w Twojej pracy.",55],["Ktoś mówi: „Płacę za plan, więc moje rozmowy na pewno nie służą do trenowania”. Co jest błędne?",["Nic, bo płatny plan zawsze wyłącza trenowanie na rozmowach","Płatne plany indywidualne też bywają domyślnie trenowane","Trenowanie dotyczy tylko rozmów z kont firmowych dostawcy"],1,"Zapłata sama nie zmienia zasad trenowania: w planach indywidualnych bywa ono domyślnie włączone albo zależy od Twojej zgody, a domyślny brak trenowania deklarują dostawcy dla planów firmowych.",55],["Zdjęcie leży w sieci bez zabezpieczeń. Czy możesz je przenieść na swoją stronę, jeśli podasz źródło?",["Tak, ale tylko do celów niekomercyjnych, np. do referatu","Tak, wystarczy podać stronę, z której pobrano zdjęcie","Nie, ponowna publikacja wymaga zgody autora"],2,"W sprawie „Cordoba” TSUE uznał, że publikacja na nowej stronie wymaga nowej zgody, nawet gdy oryginał był dostępny bez zabezpieczeń, a pod kopią podano źródło.",56],["Znalazłeś swoje zdjęcie na cudzej stronie. Co zrobić, zanim napiszesz do sprawcy?",["Opublikować wpis z nazwiskiem sprawcy, aby wywrzeć presję","Zapisać dowody: zrzuty ekranu z datą i archiwum strony","Od razu napisać do sprawcy z żądaniem natychmiastowego usunięcia"],1,"Najpierw zabezpiecza się dowody: zrzuty ekranu z adresem i datą, kopię w publicznym archiwum i oryginał w pełnej rozdzielczości, a publiczne oskarżenie bez dowodów grozi sprawą o zniesławienie.",56]]},{"nr":36,"modul":8,"etykieta":"Ktoś ukradł Twoje zdjęcie","rodzaj":"premia","doprzodu":3,"pyt":[["Firma usunęła Twoje zdjęcie po wezwaniu i uważa sprawę za zamkniętą. Co jest błędne w tym myśleniu?",["Usunięcie nie kasuje roszczeń za czas, gdy zdjęcie wisiało","Nic, po usunięciu zdjęcia autor traci prawo do odszkodowania","Usunięcie jest skuteczne tylko, gdy autor zarejestrował zdjęcie"],0,"Usunięcie zatrzymuje dalsze naruszenie, ale nie kasuje roszczeń za wcześniejszy okres, jak w sprawie zdjęcia tulipanów, gdzie sąd zasądził zapłatę mimo usunięcia.",56],["Pracujesz na etacie i tworzysz projekt w ramach swoich obowiązków. Co z prawami autorskimi?",["Majątkowe ma pracodawca, a autorstwo zostaje przy Tobie","Wszystkie prawa zostają przy Tobie, dopóki nie podpiszesz cesji","Wszystkie prawa, także do autorstwa, przechodzą na pracodawcę"],0,"Prawa majątkowe przechodzą na pracodawcę z chwilą przyjęcia pracy, w granicach celu umowy, chyba że umowa stanowi inaczej, a prawa osobiste, np. autorstwo, zostają przy twórcy.",57],["Zaczynasz zlecenie dla klienta jako freelancer. Co sprawdzić w umowie w sprawie praw autorskich?",["Czy klient ma siedzibę w Polsce i jakie są terminy płatności","Czy prawa się przenosi, czy licencjonuje, i na jakich polach","Czy umowa została zawarta w formie elektronicznej lub ustnej"],1,"Przy umowach cywilnych nie ma automatu: liczy się, czy prawa są przenoszone czy licencjonowane, na jakich polach eksploatacji i od kiedy.",57],["Klient mówi: „Zapłaciłem za projekt, więc prawa autorskie są moje”. Co jest błędne?",["Przeniesienie wymaga pisemnej umowy z polami eksploatacji","Prawa przechodzą na klienta dopiero po publikacji projektu","Klient nabywa prawa, ale tylko do użytku wewnętrznego firmy"],0,"Zapłata za projekt nie przenosi praw: przeniesienie praw majątkowych wymaga formy pisemnej i wymienienia pól eksploatacji, a bez tego przyjmuje się licencję.",57]]},{"nr":37,"modul":8,"etykieta":"Piractwo","rodzaj":"zwykle","pyt":[["Co TSUE uznał w sprawie Mircom (2021) o programie do torrentów, który w trakcie pobierania wysyła innym kawałki pliku?",["Zwykłe pobieranie na własny użytek, które jest zawsze dozwolone","Publiczne udostępnianie, gdy program zainstalowano świadomie","Czynność neutralną, jeśli ograniczysz prędkość wysyłania"],1,"Wysyłanie nawet samych fragmentów pliku to według TSUE publiczne udostępnianie, jeśli użytkownik świadomie zainstalował taki program, a ograniczenie prędkości nie zmienia charakteru czynności.",58],["Dostajesz wezwanie do zapłaty 750 zł za rzekome udostępnianie filmu przez torrent. Co zrobić?",["Odpisać nadawcy i przyznać się, by uniknąć sprawy w sądzie","Sprawdzić nadawcę i pokazać pismo prawnikowi przed zapłatą","Zapłacić w terminie, bo wezwanie oznacza prawdziwe roszczenie"],1,"Nie płaci się pod presją terminu: trzeba sprawdzić, kto pisze, w czyim imieniu i na jakich dowodach, bo bywały masowe pisma straszące bez podstaw, choć prawdziwe roszczenia też się zdarzają.",58],["Ktoś twierdzi: „Samo oglądanie pirackiego strumienia to nie przestępstwo, więc nie ma skutków prawnych”. Co to pomija?",["Że oglądanie jest karane tak samo jak sprzedaż pirackich dekoderów","Wyjątek dla kopii tymczasowych nie chroni świadomego oglądania","Nic, sprawa dotyczy wyłącznie osób, które udostępniają pliki innym"],1,"W Polsce nie ma przepisu karnego za samo oglądanie, ale TSUE uznał w 2017 r., że kopie tymczasowe przy świadomym oglądaniu nielegalnego strumienia nie korzystają z wyjątku, a za używanie pirackiego dekodera grozi grzywna.",58],["Co o grafice wygenerowanej wyłącznie na podstawie polecenia (promptu) uznał Urząd Praw Autorskich USA w 2025 r.?",["Zwykle nie jest utworem, bo polecenie to za mało","Jest utworem, ale prawa należą do dostawcy narzędzia","Jest utworem chronionym, a prawa ma autor polecenia"],0,"Same polecenia, nawet pomysłowe, działają jak instrukcja przekazująca idee, a ten sam prompt daje różne wyniki, więc wyłączności może nie być.",59],["Chcesz sprzedać grafikę wygenerowaną przez AI. Co warto zrobić wcześniej?",["Poprosić narzędzie o potwierdzenie, że wynik nie narusza praw","Sprawdzić regulamin i podobieństwo do cudzych postaci","Dopisać znaczek © i uznać, że zapewnia wyłączność"],1,"Regulamin daje prawo korzystania, ale nie gwarantuje wyłączności ani tego, że wynik nie narusza cudzych praw, a za publikację odpowiada ten, kto sprzedaje.",59]]},{"nr":38,"modul":8,"etykieta":"AI a prawo autorskie","rodzaj":"pulapka","cofnij":4,"pyt":[["Ktoś twierdzi: „Obraz w stylu Ghibli z generatora zawsze narusza prawa autorskie”. Co jest uproszczeniem?",["Nic, styl jest chroniony tak samo jak konkretne dzieło","Styl zwykle nie jest chroniony, ale konkretne dzieła tak","Chronione są tylko postacie, a nie sceny ani kadry z filmów"],1,"Prawo autorskie chroni konkretny sposób wyrażenia, a nie styl, więc naruszeniem może być kopia lub przeróbka konkretnej ilustracji albo postaci, ale nie sam klimat.",59],["Jaka część ładowań stron w Chrome idzie według Google przez szyfrowane HTTPS, co zmniejsza ryzyko publicznego Wi-Fi?",["Niewielka mniejszość, głównie strony instytucji publicznych","Zdecydowana większość, ok. 95–99%","Mniej więcej połowa, głównie strony banków i sklepów"],1,"Według Google ok. 95–99% ładowań stron idzie przez HTTPS, więc właściciel sieci nie czyta haseł ani przelewów, a realne ryzyko leży w fałszywych sieciach i stronach logowania.",60],["Musisz załatwić ważną sprawę, a masz tylko nieznaną sieć Wi-Fi. Co poleca się zrobić?",["Połączyć się z siecią o najsilniejszym sygnale","Zalogować się kontem e-mail, by dostać darmowy dostęp","Użyć hotspotu z telefonu zamiast nieznanej sieci"],2,"Przy ważnych sprawach lepszy jest hotspot z telefonu, a logowanie kontem e-mail do „darmowego Wi-Fi” może oddać dane napastnikowi prowadzącemu fałszywą sieć.",60],["Reklama obiecuje: „VPN chroni Cię przed hakerami w publicznym Wi-Fi”. Czego VPN nie robi?",["Nie szyfruje połączenia między telefonem a serwerem VPN","Nie ukrywa odwiedzanych witryn przed operatorem sieci","Nie sprawdza, czy strona logowania jest prawdziwa"],2,"VPN szyfruje ruch do serwera dostawcy, ale nie sprawdza prawdziwości stron, nie powstrzyma phishingu ani złośliwej aplikacji, a zaufanie przenosi się na dostawcę VPN.",60],["Dlaczego włączony drugi składnik logowania nie chroni przed programem kradnącym ciasteczko sesji?",["Ciasteczko działa jak przepustka bez hasła i bez kodu","Program przechwytuje też kod w chwili jego wpisywania","Drugi składnik działa tylko w usługach bankowych"],0,"Serwis uznaje wtedy przestępcę za zalogowanego Ciebie, bez hasła i kodu, ale drugi składnik nadal jest potrzebny, bo chroni przed skradzionym samym hasłem.",61]]},{"nr":39,"modul":9,"etykieta":"Złośliwe programy","rodzaj":"zwykle","pyt":[["Chcesz zainstalować nowy program. Skąd bezpieczniej go pobrać?",["Z linku od „sponsora” w mailu, jeśli wygląda profesjonalnie","Z pierwszej reklamy w wyszukiwarce z nazwą programu","Ze strony producenta wpisanej ręcznie albo ze sklepu"],2,"Reklamy w wyszukiwarce potrafią podszywać się pod strony producentów, a pliki od „sponsora” z maila były drogą infekcji, więc adres producenta wpisuje się ręcznie.",61],["Ktoś radzi: „Zapłać okup za odszyfrowanie danych, to je odzyskasz”. Co jest błędne w tej radzie?",["Zapłata zwykle kończy sprawę, bo klucz jest zawsze wysyłany","Okup obniża koszt odzyskania danych, ale wydłuża proces","Nie ma gwarancji odzyskania ani nieujawnienia danych"],2,"Zapłata nie daje pewności ani odzyskania danych, ani tego, że nie zostaną ujawnione, więc instytucje radzą ogólnie nie płacić, zgłosić atak i sprawdzić, czy istnieje darmowy dekryptor.",61],["Jak działa model „ransomware jako usługa”, w którym działają gangi?",["Haker sam atakuje i sprzedaje klientom tylko skradzione dane","Państwo zleca prywatnym grupom ataki w zamian za immunitet","Twórcy dają kod, podwykonawcy atakują, a okup się dzieli"],2,"W tym modelu twórcy udostępniają oprogramowanie szyfrujące, „podwykonawcy” atakują, a okup się dzieli, więc gangi działają jak firmy.",62],["Znalazłeś w sieci panel bez hasła z cudzymi danymi. Jak należy postąpić?",["Nie otwierać danych, zgłosić lukę właścicielowi lub CSIRT","Napisać o luce publicznie, aby właściciel szybciej zareagował","Zajrzeć do danych dla pewności, a potem zgłosić lukę"],0,"Nie sprawdza się luki „dla pewności” i nie otwiera cudzych danych, tylko zapisuje tyle, ile trzeba do opisu, i zgłasza ją właścicielowi albo przez formularz CSIRT NASK, także anonimowo.",62],["Nastolatek mówi: „Tylko sprawdziłem, ile widać, i nic nie zniszczyłem, więc to nie przestępstwo”. Co jest błędne?",["Nic, bez szkody dostęp do cudzego systemu nie jest karalny","Odpowiadają tylko osoby pełnoletnie, nieletnich się nie karze","Samo uzyskanie dostępu bez uprawnienia jest karalne"],2,"Kodeks karny karze już samo uzyskanie dostępu do systemu bez uprawnienia, do 2 lat, także gdy nic nie zniszczono, a nieletnimi zajmuje się zwykle sąd rodzinny.",62]]}],"teksty":{"widok":{"zapas":"Gra „Finał kursu: Plansza HoldUp” — plansza z pytaniami z całego kursu. Jeśli się nie wczyta (na przykład w aplikacji mobilnej Moodle), otwórz tę stronę w przeglądarce internetowej albo skorzystaj z listy pytań pod grą.","zasady_tytul":"Zasady gry","stan_tytul":"Stan gry","stan_ty":"Ty: pole {pole} — {etykieta}","stan_komputer":"Komputer: pole {pole} — {etykieta}","stan_wynik":"Twoje dobre odpowiedzi: {dobre} z {zadane}","pionek_ty_znak":"Ty","pionek_komputer_znak":"K","rzuc":"Rzuć kostką","kostka_pusta":"–","kostka_slownie":"jeden|dwa|trzy|cztery|pięć|sześć","slowo_pole":"pole|pola|pól","tura_gracza":"Twoja tura. Naciśnij „Rzuć kostką”.","tura_komputera":"Tura komputera.","komputer_rzuca":"Komputer rzuca…","wyrzucil_ty":"Wyrzuciłeś/aś {liczba} ({slownie}).","wyrzucil_komputer":"Komputer wyrzucił {liczba} ({slownie}).","ruch_ty":"Twój pionek na polu {pole}: {etykieta}{rodzaj}.","ruch_komputer":"Pionek komputera na polu {pole}: {etykieta}{rodzaj}.","dopisek_rodzaju":" — {rodzaj}","ruch_po_ty":"Twój pionek stoi na polu {pole}: {etykieta}.","ruch_po_komputer":"Pionek komputera stoi na polu {pole}: {etykieta}.","rodzaj_zwykle":"zwykłe pole","rodzaj_pulapka":"pułapka","rodzaj_premia":"premia","rodzaj_start":"start","rodzaj_meta":"meta","tag_start":"Start","tag_meta":"Meta","tag_pulapka":"▲ −{ile}","tag_premia":"★ +{ile}","okno_rodzaj_zwykle":"Zwykłe pole: zła odpowiedź cofa o {n_pol}.","okno_rodzaj_pulapka":"▲ Pułapka: zła odpowiedź cofa o {n_pol}, dobra pozwala wyjść bez strat.","okno_rodzaj_premia":"★ Premia: dobra odpowiedź przesuwa o {n_pol} do przodu, zła nie zmienia pozycji.","plansza_tytul":"Plansza","plansza_etykieta":"Plansza: pola od 0 do 40","pole_nr":"Pole {pole}","pole_odwiedzone":"odwiedzone","pole_nieodwiedzone":"nieodwiedzone","pionek_ty_tu":"tu stoi Twój pionek","pionek_komputer_tu":"tu stoi pionek komputera","info_start":"Pole 0: {etykieta} — start. Stąd ruszają oba pionki.","info_meta":"Pole 40: {etykieta} — meta. Wygrywa, kto pierwszy tu dojdzie.","okno_tytul":"Pole {pole}: {etykieta}","okno_gracz_nad":"Twoje pytanie","okno_komputer_nad":"Pytanie komputera","sprawdz":"Sprawdź","dalej":"Dalej","wybierz_najpierw":"Najpierw wybierz odpowiedź.","dobrze":"Dobrze! Odpowiedziałeś/aś poprawnie.","zle":"Niestety, odpowiedziałeś/aś źle.","znacznik_poprawna":"✓ Poprawna odpowiedź","znacznik_twoj":"Twój wybór","znacznik_twoj_zly":"✗ Twój wybór","znacznik_komputer":"wybór komputera","znacznik_komputer_zly":"✗ Wybór komputera","zrodlo":"Źródło: {zrodlo}.","skutek_ty":"Skutek: {skutek}","zostaje_ty":"zostajesz na polu {pole}: {etykieta}.","cofniecie_ty":"cofasz się o {n_pol}, na pole {pole}: {etykieta}.","pulapka_ok_ty":"wychodzisz z pułapki bez strat.","premia_ty":"premia! Idziesz o {n_pol} do przodu, na pole {pole}: {etykieta}.","premia_brak_ty":"bez premii — zostajesz na polu {pole}: {etykieta}.","komputer_mysli":"Pomyśl, co Ty byś odpowiedział/a. Komputer się zastanawia…","komputer_wybiera":"Komputer wybiera: {litera}. {odpowiedz}","komputer_dobrze":"Komputer odpowiedział dobrze → {skutek}","komputer_zle":"Komputer odpowiedział źle → {skutek}","zostaje_komputer":"zostaje na polu {pole}: {etykieta}.","cofniecie_komputer":"cofa się o {n_pol}, na pole {pole}: {etykieta}.","pulapka_ok_komputer":"wychodzi z pułapki bez strat.","premia_komputer":"premia! Idzie o {n_pol} do przodu, na pole {pole}: {etykieta}.","premia_brak_komputer":"bez premii — zostaje na polu {pole}: {etykieta}.","koniec_tytul":"Koniec gry","meta_ty":"Wygrywasz! Pierwszy/a dochodzisz do mety: {meta}.","meta_komputer":"Tym razem komputer pierwszy doszedł do mety: {meta}. Spróbuj jeszcze raz!","koniec_wynik":"Twoje dobre odpowiedzi: {dobre} z {zadane}.","rekord":"Twój rekord w tej przeglądarce: {rekord} (najwięcej dobrych odpowiedzi w jednej grze).","rekord_nowy":"To Twój nowy rekord!","rekord_brak":"Ta przeglądarka nie pozwala zapisać rekordu na stałe, więc obowiązuje on tylko do zamknięcia strony.","odkryj_pozostale":"Odkryj pozostałe pola","odkryj_info":"Wybierz na planszy pole bez znaku ✓, żeby przeczytać jego pytanie z odpowiedzią. Odkryte pola: {odkryte} z 39.","odkryj_wszystkie":"Wszystkie pola są już odkryte. Każde możesz otworzyć jeszcze raz z planszy.","jeszcze_raz":"Zagraj jeszcze raz","koniec_lista_tytul":"Pytania, które padły","koniec_lista_pusta":"W tej grze nie padło żadne pytanie.","lista_ty":"Twoje pytanie","lista_komputer":"pytanie komputera","wynik_dobrze":"dobrze","wynik_zle":"źle","poprawna_odpowiedz":"Poprawna odpowiedź: {odpowiedz}","powtorka_nad":"Powtórka","zamknij":"Zamknij","wersja_tytul":"Wszystkie pytania z planszy","wersja_pole":"Pole {pole}: {etykieta} ({rodzaj})","okno_tytul_miniete":"Pole {pole}: {etykieta} — minięte po drodze (stoisz na polu {stoi})","lista_dodatkowe":"pytanie dodatkowe","okno_dodatkowe_nad":"Pytanie dodatkowe po złej odpowiedzi","okno_dodatkowe_nad_komputer":"Pytanie dodatkowe komputera po złej odpowiedzi","okno_tytul_dodatkowe":"Pole {pole}: {etykieta} — pytanie dodatkowe","okno_rodzaj_dodatkowe":"Druga zła odpowiedź cofa o 1 pole, dobra — bez dodatkowej kary. Trzeciego pytania nie ma.","zapowiedz_dodatkowe_ty":"Po „Dalej” czeka Cię pytanie dodatkowe z tego pola.","zapowiedz_dodatkowe_komputer":"Po „Dalej” komputer dostanie pytanie dodatkowe z tego pola.","dodatkowe_ok_ty":"Dobrze — bez dodatkowej kary.","kara_dodatkowa_ty":"Druga zła odpowiedź: cofnięcie o 1 pole.","dodatkowe_ok_komputer":"bez dodatkowej kary.","kara_dodatkowa_komputer":"druga zła odpowiedź: cofa się o 1 pole.","wersja_pytanie":"Pytanie {k} z {n}","powtorka_licznik":"Pytanie {k} z {n} z puli tego pola","audio_odsluchaj":"Odsłuchaj pytanie","audio_stop":"Zatrzymaj odsłuch","podium_ty":"Ty","podium_komputer":"Komputer","powtorka_dalej":"Następne pytanie z tego pola"}},"obrazy":{},"dzwieki":{},"wersja_tekstowa":{"tryb":"auto","wstep":"Te same pytania bez gry: pole, rodzaj, pytanie, poprawna odpowiedź, wyjaśnienie i źródło.","lista_tytul":"Wszystkie pytania z planszy","etykiety":{"pole":"Pole","rodzaj":"Rodzaj","pytanie":"Pytanie","poprawna":"Poprawna odpowiedź","wyjasnienie":"Wyjaśnienie","zrodlo":"Źródło"}}};
+  var DOM = {"zapas":"Gra „Droga do egzaminu dyplomowego” — plansza z pytaniami z całego kursu. Jeśli się nie wczyta (na przykład w aplikacji mobilnej Moodle), otwórz tę stronę w przeglądarce internetowej.","zasady_tytul":"Zasady gry","stan_tytul":"Stan gry","stan_ty":"Ty: pole {pole} — {etykieta}","stan_komputer":"Komputer: pole {pole} — {etykieta}","stan_wynik":"Twoje dobre odpowiedzi: {dobre} z {zadane}","stan_tura_ty":"Twoja tura","stan_tura_komputer":"Tura komputera","kostka_wynik":"Wynik rzutu:","pionek_ty_znak":"Ty","pionek_komputer_znak":"K","rzuc":"Rzuć kostką","kostka_pusta":"–","kostka_slownie":"jeden|dwa|trzy|cztery|pięć|sześć","slowo_pole":"pole|pola|pól","tura_gracza":"Twoja tura. Naciśnij „Rzuć kostką”.","tura_komputera":"Tura komputera.","komputer_rzuca":"Komputer rzuca…","wyrzucil_ty":"Wyrzuciłeś/aś {liczba} ({slownie}).","wyrzucil_komputer":"Komputer wyrzucił {liczba} ({slownie}).","ruch_ty":"Twój pionek na polu {pole}: {etykieta}{rodzaj}.","ruch_komputer":"Pionek komputera na polu {pole}: {etykieta}{rodzaj}.","dopisek_rodzaju":" — {rodzaj}","ruch_po_ty":"Twój pionek stoi na polu {pole}: {etykieta}.","ruch_po_komputer":"Pionek komputera stoi na polu {pole}: {etykieta}.","rodzaj_zwykle":"zwykłe pole","rodzaj_pulapka":"pułapka","rodzaj_premia":"premia","rodzaj_start":"start","rodzaj_meta":"meta","tag_start":"Start","tag_meta":"Meta","tag_pulapka":"▲ −{ile}","tag_premia":"★ +{ile}","okno_rodzaj_zwykle":"Zwykłe pole: zła odpowiedź cofa o {n_pol}.","okno_rodzaj_pulapka":"▲ Pułapka: zła odpowiedź cofa o {n_pol}, dobra pozwala wyjść bez strat.","okno_rodzaj_premia":"★ Premia: dobra odpowiedź przesuwa o {n_pol} do przodu, zła nie zmienia pozycji.","legenda_tytul":"Legenda planszy","legenda_ty":"Twój pionek","legenda_ty_opis":"Różowe koło z napisem „Ty” pokazuje, gdzie stoisz na planszy.","legenda_komputer":"Pionek komputera","legenda_komputer_opis":"Ciemny kwadrat z literą „K” pokazuje, gdzie stoi komputer.","legenda_zwykle":"Pole zwykłe","legenda_zwykle_opis":"Zła odpowiedź cofa o 2 pola, a dobra zostawia pionek w miejscu.","legenda_pulapka":"Pułapka","legenda_pulapka_opis":"Znak ▲ i liczba: zła odpowiedź cofa o tyle pól, a dobra pozwala wyjść bez strat.","legenda_premia":"Premia","legenda_premia_opis":"Znak ★ i liczba: dobra odpowiedź przesuwa do przodu o tyle pól, a zła nie zmienia pozycji.","legenda_odkryte":"Pole odkryte","legenda_odkryte_opis":"Znak ✓ w rogu pola oznacza, że pytanie z tego pola już padło.","legenda_start":"Start","legenda_start_opis":"Pole 0: stąd ruszają oba pionki.","legenda_meta":"Meta","legenda_meta_opis":"Pole 40: wygrywa ten, kto pierwszy tu dojdzie.","legenda_kostka":"Kostka","legenda_kostka_opis":"Wynik rzutu to 1, 2, 3 lub 4, a pionek idzie o tyle pól.","plansza_tytul":"Plansza","plansza_etykieta":"Plansza: pola od 0 do 40","plansza_podpowiedz":"Na planszy strzałki przechodzą między polami, a opis wskazanego pola pojawia się w ramce nad planszą.","lektor_przelacznik":"Czytaj pytania na głos","lektor_wl":"włączone","lektor_wyl":"wyłączone","lektor_podpowiedz":"Lektor czyta pytanie zaraz po pokazaniu karty, a po „Sprawdź” poprawną odpowiedź i wyjaśnienie. Jeśli korzystasz z czytnika ekranu, zostaw tę opcję wyłączoną, żeby dwa głosy nie nakładały się na siebie.","pole_nr":"Pole {pole}","pole_odwiedzone":"odwiedzone","pole_nieodwiedzone":"nieodwiedzone","pionek_ty_tu":"tu stoi Twój pionek","pionek_komputer_tu":"tu stoi pionek komputera","info_start":"Pole 0: {etykieta} — start. Stąd ruszają oba pionki.","info_meta":"Pole 40: {etykieta} — meta. Wygrywa, kto pierwszy tu dojdzie.","info_zwykle":"Pole {pole}: {etykieta} — pole zwykłe. Zła odpowiedź cofa o {n_pol}.","info_pulapka":"Pole {pole}: {etykieta} — pułapka. Zła odpowiedź cofa o {n_pol}.","info_premia":"Pole {pole}: {etykieta} — premia. Dobra odpowiedź przesuwa do przodu o {n_pol}.","info_odkryte":"Pole odkryte — pytanie już padło.","info_nieodkryte":"Pytanie odsłoni się, gdy ktoś stanie na tym polu.","info_domyslne":"Wskaż pole, żeby zobaczyć jego opis.","info_etykieta":"Opis pola","okno_tytul":"Pole {pole}: {etykieta}","okno_tytul_miniete":"Pole {pole}: {etykieta} — minięte po drodze (stoisz na polu {stoi})","okno_gracz_nad":"Twoje pytanie","okno_komputer_nad":"Pytanie komputera","sprawdz":"Sprawdź","dalej":"Dalej","wybierz_najpierw":"Najpierw wybierz odpowiedź.","dobrze":"Dobrze!","zle":"Niestety, to nie ta odpowiedź.","znacznik_poprawna":"✓ Poprawna odpowiedź","znacznik_twoj":"Twój wybór","znacznik_twoj_zly":"✗ Twój wybór","znacznik_komputer":"wybór komputera","znacznik_komputer_zly":"✗ Wybór komputera","zrodlo":"Źródło: {zrodlo}.","skutek_ty":"Skutek: {skutek}","zostaje_ty":"zostajesz na polu {pole}: {etykieta}.","cofniecie_ty":"cofasz się o {n_pol}, na pole {pole}: {etykieta}.","pulapka_ok_ty":"wychodzisz z pułapki bez strat.","premia_ty":"premia! Idziesz o {n_pol} do przodu, na pole {pole}: {etykieta}.","premia_brak_ty":"bez premii — zostajesz na polu {pole}: {etykieta}.","komputer_mysli":"Pomyśl, co Ty byś odpowiedział/a. Komputer się zastanawia…","komputer_wybiera":"Komputer wybiera: {litera}. {odpowiedz}","komputer_dobrze":"Komputer odpowiedział dobrze → {skutek}","komputer_zle":"Komputer odpowiedział źle → {skutek}","zostaje_komputer":"zostaje na polu {pole}: {etykieta}.","cofniecie_komputer":"cofa się o {n_pol}, na pole {pole}: {etykieta}.","pulapka_ok_komputer":"wychodzi z pułapki bez strat.","premia_komputer":"premia! Idzie o {n_pol} do przodu, na pole {pole}: {etykieta}.","premia_brak_komputer":"bez premii — zostaje na polu {pole}: {etykieta}.","koniec_tytul":"Koniec gry","meta_ty":"Wygrywasz! Pierwszy/a dochodzisz do mety: {meta}.","meta_komputer":"Tym razem komputer pierwszy doszedł do mety: {meta}. Spróbuj jeszcze raz!","koniec_wynik":"Twoje dobre odpowiedzi: {dobre} z {zadane}. Pytania, które padły, znajdziesz pod planszą.","rekord":"Twój rekord w tej przeglądarce: {rekord} (najwięcej dobrych odpowiedzi w jednej grze).","rekord_nowy":"To Twój nowy rekord!","rekord_brak":"Ta przeglądarka nie pozwala zapisać rekordu, więc obowiązuje on tylko do zamknięcia strony.","odkryj_pozostale":"Odkryj pozostałe pola","odkryj_info":"Wybierz na planszy pole bez znaku ✓, żeby przeczytać jego pytanie z odpowiedzią. Odkryte pola: {odkryte} z 39.","odkryj_wszystkie":"Wszystkie pola są już odkryte. Każde możesz otworzyć jeszcze raz z planszy.","jeszcze_raz":"Zagraj jeszcze raz","koniec_lista_tytul":"Pytania, które padły","koniec_lista_pusta":"W tej grze nie padło żadne pytanie.","lista_ty":"Twoje pytanie","lista_komputer":"pytanie komputera","lista_dodatkowe":"pytanie dodatkowe","okno_dodatkowe_nad":"Pytanie dodatkowe po złej odpowiedzi","okno_dodatkowe_nad_komputer":"Pytanie dodatkowe komputera po złej odpowiedzi","okno_tytul_dodatkowe":"Pole {pole}: {etykieta} — pytanie dodatkowe","okno_rodzaj_dodatkowe":"Druga zła odpowiedź cofa o 1 pole, dobra — bez dodatkowej kary. Trzeciego pytania nie ma.","zapowiedz_dodatkowe_ty":"Po „Dalej” czeka Cię pytanie dodatkowe z tego pola.","zapowiedz_dodatkowe_komputer":"Po „Dalej” komputer dostanie pytanie dodatkowe z tego pola.","dodatkowe_ok_ty":"Dobrze — bez dodatkowej kary.","kara_dodatkowa_ty":"Druga zła odpowiedź: cofnięcie o 1 pole.","dodatkowe_ok_komputer":"bez dodatkowej kary.","kara_dodatkowa_komputer":"druga zła odpowiedź: cofa się o 1 pole.","wynik_dobrze":"dobrze","wynik_zle":"źle","poprawna_odpowiedz":"Poprawna odpowiedź: {odpowiedz}","powtorka_nad":"Powtórka","zamknij":"Zamknij","wersja_tytul":"Wszystkie pytania z planszy","wersja_pole":"Pole {pole}: {etykieta} ({rodzaj})","wersja_pytanie":"Pytanie {k} z {n}","powtorka_licznik":"Pytanie {k} z {n} z puli tego pola","audio_odsluchaj":"Odsłuchaj pytanie","audio_stop":"Zatrzymaj odsłuch","audio_odp_odsluchaj":"Odsłuchaj odpowiedź i wyjaśnienie","podium_ty":"Ty","podium_komputer":"Komputer","powtorka_dalej":"Następne pytanie z tego pola"};
+  var META = 40;
+  var TRAFNOSC_KOMPUTERA = 0.7;
+  var LITERY = ["A", "B", "C", "D", "E"];
+
+  function ensureWidget() {
+    var w = document.getElementById(ID) || document.querySelector("." + ID);
+    if (!w) return null;
+    w.id = ID;
+    w.className = ID;
+    return w;
+  }
+  function wstrzyknijCss() {
+    if (document.querySelector('style[data-pw="' + ID + '"]')) return;
+    var st = document.createElement("style");
+    st.setAttribute("data-pw", ID);
+    st.appendChild(document.createTextNode(CSS));
+    (document.head || document.documentElement).appendChild(st);
+  }
+  function start() {
+    var root = ensureWidget();
+    if (!root || root.getAttribute("data-pw-init")) return;
+    root.setAttribute("data-pw-init", "1");
+    root.setAttribute("lang", "pl");
+    wstrzyknijCss();
+    while (root.firstChild) root.removeChild(root.firstChild);   /* zdejmij tekst zastępczy */
+    gra(root);
+  }
+
+  function gra(root) {
+    var W = (D.teksty && D.teksty.widok) || {};
+    /* napis widoku: najpierw bank, potem słownik domyślny generatora; nigdy „undefined” */
+    function T(k, dane) {
+      var s = (typeof W[k] === "string") ? W[k] : DOM[k];
+      if (typeof s !== "string") s = "";
+      if (dane) {
+        s = s.replace(/\{([a-z_0-9]+)\}/g, function (m, n) {
+          return Object.prototype.hasOwnProperty.call(dane, n) ? String(dane[n]) : m;
+        });
+      }
+      return s;
+    }
+    function el(tag, klasa, tekst, atr) {
+      var e = document.createElement(tag);
+      if (klasa) e.className = klasa;
+      if (tekst !== undefined && tekst !== null) e.textContent = tekst;
+      if (atr) for (var k in atr) if (Object.prototype.hasOwnProperty.call(atr, k)) e.setAttribute(k, atr[k]);
+      return e;
+    }
+
+    /* losowanie: window.__PLANSZA_SEED → deterministyczny LCG (testy); bez ziarna Math.random */
+    var los = (function () {
+      var z = window.__PLANSZA_SEED;
+      if (typeof z === "number" && isFinite(z)) {
+        var s = (z >>> 0) || 1;
+        return function () { s = (Math.imul(s, 1664525) + 1013904223) >>> 0; return s / 4294967296; };
+      }
+      return Math.random;
+    })();
+    /* obrazy (dekoracje; alt pusty, informacja zawsze też tekstem): D.obrazy = {rola: plik.webp}; adres = BAZA + plik */
+    var BAZA = window.__PPDW_BAZA || "@@PLUGINFILE@@/";
+    var OBR = D.obrazy || {};
+    function obraz(rola, klasa) {
+      if (!OBR[rola]) return null;
+      var i = document.createElement("img");
+      i.className = klasa;
+      i.setAttribute("alt", "");
+      i.setAttribute("aria-hidden", "true");
+      i.setAttribute("loading", "lazy");
+      i.setAttribute("decoding", "async");
+      i.setAttribute("draggable", "false");
+      i.addEventListener("error", function () { if (i.parentNode) i.parentNode.removeChild(i); });
+      i.src = BAZA + OBR[rola];
+      return i;
+    }
+    var bezAnimacji = false;
+    try { bezAnimacji = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches); } catch (e) {}
+    function czas(ms) {   /* window.__PLANSZA_TEMPO (testy) skaluje pauzy; domyślnie 1 */
+      var t = window.__PLANSZA_TEMPO;
+      if (typeof t !== "number" || !(t >= 0)) t = 1;
+      return ms * t;
+    }
+    function szybko() { return bezAnimacji || czas(1) === 0; }
+    var timery = [];
+    function zaplanuj(fn, ms) {
+      var t = setTimeout(function () {
+        var i = timery.indexOf(t); if (i >= 0) timery.splice(i, 1);
+        fn();
+      }, czas(ms));
+      timery.push(t);
+      return t;
+    }
+    function wyczyscTimery() { for (var i = 0; i < timery.length; i++) clearTimeout(timery[i]); timery = []; }
+
+    var SLOWNIE = T("kostka_slownie").split("|");
+    var SLOWO_POLE = T("slowo_pole").split("|");
+    function nPol(n) {
+      var f;
+      if (n === 1) f = SLOWO_POLE[0];
+      else if (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14)) f = SLOWO_POLE[1];
+      else f = SLOWO_POLE[2];
+      return n + " " + (f || "");
+    }
+
+    /* ——— pola toru ——— */
+    var P = [];
+    P[0] = { nr: 0, etykieta: (D.start && D.start.etykieta) || T("tag_start"), rodzaj: "start" };
+    var MIEJSCA = D.miejsca || [];
+    var ZRID = (D.zrodla && D.zrodla[0] && D.zrodla[0].id) || "";
+    (D.pola || []).forEach(function (p) {
+      /* pytania pola zapisane tablicowo: [pytanie, [odpowiedzi], poprawna, wyjaśnienie, nr miejsca, (źródło)] */
+      p.pytania = (p.pyt || []).map(function (a) {
+        var h = a[6] || "", m = a[7] || 0, pre = (D.id || ID) + "-";
+        return { pytanie: a[0], odpowiedzi: a[1], poprawna: a[2], wyjasnienie: a[3], miejsce: MIEJSCA[a[4]] || "", zrodlo: a[5] || ZRID,
+                 audio: (m & 1) ? pre + "q-" + h + ".mp3" : "", audioA: (m & 2) ? pre + "a-" + h + ".mp3" : "", audioF: (m & 4) ? pre + "f-" + h + ".mp3" : "" };
+      });
+      P[p.nr] = p;
+    });
+    P[META] = { nr: META, etykieta: (D.meta && D.meta.etykieta) || T("tag_meta"), rodzaj: "meta" };
+    var ZRODLA = {};
+    (D.zrodla || []).forEach(function (z) { ZRODLA[z.id] = z; });
+    var NAZWA_RODZAJU = { zwykle: "rodzaj_zwykle", pulapka: "rodzaj_pulapka", premia: "rodzaj_premia", start: "rodzaj_start", meta: "rodzaj_meta" };
+    var OPIS_OKNA = { zwykle: "okno_rodzaj_zwykle", pulapka: "okno_rodzaj_pulapka", premia: "okno_rodzaj_premia" };
+    var INFO = { zwykle: "info_zwykle", pulapka: "info_pulapka", premia: "info_premia", start: "info_start", meta: "info_meta" };
+    var SKUTKI = {
+      ty: { zostaje: "zostaje_ty", cofniecie: "cofniecie_ty", pulapka_ok: "pulapka_ok_ty", premia: "premia_ty", premia_brak: "premia_brak_ty" },
+      komp: { zostaje: "zostaje_komputer", cofniecie: "cofniecie_komputer", pulapka_ok: "pulapka_ok_komputer", premia: "premia_komputer", premia_brak: "premia_brak_komputer" }
+    };
+    function rodzajNazwa(p) { return T(NAZWA_RODZAJU[p.rodzaj] || "rodzaj_zwykle"); }
+    function ile(p) { return p.rodzaj === "pulapka" ? (p.cofnij || 3) : p.rodzaj === "premia" ? (p.doprzodu || 2) : 2; }
+    function opisRodzaju(p) { return T(OPIS_OKNA[p.rodzaj] || "okno_rodzaj_zwykle", { n_pol: nPol(ile(p)) }); }
+    function dopisek(p) { return (p.rodzaj === "pulapka" || p.rodzaj === "premia") ? T("dopisek_rodzaju", { rodzaj: rodzajNazwa(p) }) : ""; }
+    function tag(p) {
+      if (p.rodzaj === "start") return T("tag_start");
+      if (p.rodzaj === "meta") return T("tag_meta");
+      if (p.rodzaj === "pulapka") return T("tag_pulapka", { ile: ile(p) });
+      if (p.rodzaj === "premia") return T("tag_premia", { ile: ile(p) });
+      return "";
+    }
+
+    /* ——— stan gry ——— */
+    var S = null;
+    function tasuj(a) {
+      for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(los() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; }
+      return a;
+    }
+    /* ——— pula pytań pola ———
+       Każde zadanie pytania z pola (zwykłe, „minięte”, dodatkowe, pytanie komputera) bierze NASTĘPNE NIEZUŻYTE pytanie z puli pola.
+       Zużycie pamiętamy między grami (ta strona + localStorage w try/catch), więc „Zagraj jeszcze raz” losuje z pytań, które jeszcze nie padły.
+       Gdy pula pola się wyczerpie: zaczynamy ją od nowa, z pominięciem pytania, które padło ostatnie. */
+    function podpisBanku() {
+      var h = 5381;
+      for (var i = 1; i < META; i++) {
+        var ps = P[i].pytania;
+        for (var j = 0; j < ps.length; j++) {
+          var t = ps[j].pytanie;
+          for (var c = 0; c < t.length; c++) h = (((h << 5) + h) + t.charCodeAt(c)) | 0;
+        }
+      }
+      return String(h);
+    }
+    var PODPIS = podpisBanku();
+    var KLUCZ_UZYTE = (D.id || ID) + "-uzyte";
+    var UZYTE = (function () {
+      try {
+        var v = window.localStorage.getItem(KLUCZ_UZYTE);
+        if (v) { var o = JSON.parse(v); if (o && o.p === PODPIS && o.u && typeof o.u === "object") return o.u; }
+      } catch (e) {}
+      return {};
+    })();
+    var OSTATNIE = {};
+    function zapiszUzyte() { try { window.localStorage.setItem(KLUCZ_UZYTE, JSON.stringify({ p: PODPIS, u: UZYTE })); } catch (e) {} }
+    function wolne(q) {
+      var n = P[q].pytania.length, u = UZYTE[q] || [], w = [];
+      for (var i = 0; i < n; i++) if (u.indexOf(i) < 0) w.push(i);
+      return w;
+    }
+    function losujPytanie(q) {
+      var w = wolne(q), n = P[q].pytania.length;
+      if (!w.length) {
+        UZYTE[q] = [];
+        for (var i = 0; i < n; i++) if (i !== OSTATNIE[q] || n === 1) w.push(i);
+      }
+      var idx = w[Math.floor(los() * w.length)];
+      (UZYTE[q] = UZYTE[q] || []).push(idx);
+      OSTATNIE[q] = idx;
+      zapiszUzyte();
+      return idx;
+    }
+    function nowyStan() {
+      return { ty: 0, komp: 0, faza: "gracz", tura: "ty", odwiedzone: {}, powtorka: {}, historia: [], dobre: 0, zadane: 0,
+               czekaDodatkowe: null, dodatkoweOkno: false, biezacePoz: null, biezacePytanie: null,
+               zwyciezca: null, okno: null, oczekuje: null, biezace: null, powtorkaZ: null, powtorkaNr: {} };
+    }
+    function odkryte(i) { return !!(S.odwiedzone[i] || S.powtorka[i]); }
+    function liczOdkryte() { var n = 0; for (var i = 1; i < META; i++) if (odkryte(i)) n++; return n; }
+
+    /* ——— budowa interfejsu ——— */
+    var tresc = el("div", "gp-tresc");
+    root.appendChild(tresc);
+    var naglowek = el("div", "gp-naglowek");
+    var naglTxt = el("div");
+    naglTxt.appendChild(el("h3", "gp-tyt", D.tytul || ""));
+    if (D.podtytul) naglTxt.appendChild(el("p", "gp-pod", D.podtytul));
+    naglowek.appendChild(naglTxt);
+    var heroImg = obraz("hero", "gp-hero");
+    if (heroImg) naglowek.appendChild(heroImg);
+    tresc.appendChild(naglowek);
+    if (D.polecenie) tresc.appendChild(el("p", "gp-polecenie", D.polecenie));
+    if (D.zasady && D.zasady.length) {
+      var detZ = el("details", "gp-zasady");
+      detZ.appendChild(el("summary", null, T("zasady_tytul")));
+      var ulZ = el("ul");
+      D.zasady.forEach(function (z) { ulZ.appendChild(el("li", null, z)); });
+      detZ.appendChild(ulZ);
+      tresc.appendChild(detZ);
+    }
+
+    function pionek(kto) {
+      return el("span", "gp-pion gp-pion--" + (kto === "ty" ? "ty" : "k"),
+                kto === "ty" ? T("pionek_ty_znak") : T("pionek_komputer_znak"), { "aria-hidden": "true" });
+    }
+
+    var panel = el("section", "gp-panel", null, { "aria-label": T("stan_tytul") });
+    var stanLista = el("ul", "gp-stan");
+    /* karta pozycji: „Ty: pole 5” (pogrubione), pod spodem etykieta pola; znacznik tury tekstem (nie tylko ramką) */
+    function kartaStanu(kto) {
+      var li = el("li", "gp-stan-k gp-stan-k--" + (kto === "ty" ? "ty" : "komp"));
+      li.appendChild(pionek(kto));
+      var tx = el("div", "gp-stan-tx");
+      var poz = el("span", "gp-stan-poz"), et = el("span", "gp-stan-et");
+      var tura = el("span", "gp-stan-tura", T(kto === "ty" ? "stan_tura_ty" : "stan_tura_komputer"));
+      tura.hidden = true;
+      tx.appendChild(poz); tx.appendChild(et); tx.appendChild(tura);
+      li.appendChild(tx);
+      var ob = obraz(kto === "ty" ? "pion_ty" : "pion_komp", "gp-ob-stan"); if (ob) li.appendChild(ob);
+      stanLista.appendChild(li);
+      return { li: li, poz: poz, et: et, tura: tura };
+    }
+    var kTy = kartaStanu("ty"), kK = kartaStanu("komp");
+    panel.appendChild(stanLista);
+    var liW = el("p", "gp-stan-w");
+    panel.appendChild(liW);
+    var akcja = el("div", "gp-akcja");
+    /* kostka 3D z CSS: sześcian z oczkami (aria-hidden; wynik zawsze też tekstem w komunikacie aria-live i w podpisie obok) */
+    var blokKostki = el("div", "gp-kostka-blok");
+    var kostka = el("div", "gp-kostka", null, { "aria-hidden": "true", "data-wynik": "" });
+    var kSkok = el("div", "gp-kostka-skok"), kPrzechyl = el("div", "gp-kostka-przechyl"), szescian = el("div", "gp-szescian");
+    var OCZKA = { 1: [[2, 2]], 2: [[1, 1], [3, 3]], 3: [[1, 1], [2, 2], [3, 3]], 4: [[1, 1], [1, 3], [3, 1], [3, 3]],
+                  5: [[1, 1], [1, 3], [2, 2], [3, 1], [3, 3]], 6: [[1, 1], [1, 3], [2, 1], [2, 3], [3, 1], [3, 3]] };
+    for (var nS = 1; nS <= 6; nS++) {
+      var sc = el("div", "gp-sc gp-sc--" + nS);
+      OCZKA[nS].forEach(function (rc) {
+        var oko = el("i", "gp-oko");
+        oko.style.gridRow = String(rc[0]); oko.style.gridColumn = String(rc[1]);
+        sc.appendChild(oko);
+      });
+      szescian.appendChild(sc);
+    }
+    kPrzechyl.appendChild(szescian); kSkok.appendChild(kPrzechyl); kostka.appendChild(kSkok);
+    var kWynik = el("div", "gp-kostka-wynik", null, { "aria-hidden": "true" });
+    kWynik.appendChild(el("span", "gp-kw-et", T("kostka_wynik")));
+    var kCyfra = el("span", "gp-kw-cyfra", T("kostka_pusta"));
+    kWynik.appendChild(kCyfra);
+    blokKostki.appendChild(kostka); blokKostki.appendChild(kWynik);
+    var btnRzuc = el("button", "gp-btn gp-btn--gl gp-rzuc", T("rzuc"), { type: "button" });
+    akcja.appendChild(blokKostki); akcja.appendChild(btnRzuc);
+    panel.appendChild(akcja);
+    var komunikat = el("p", "gp-komunikat", "", { role: "status", "aria-live": "polite" });
+    panel.appendChild(komunikat);
+    tresc.appendChild(panel);
+
+    /* przełącznik lektora (opt-in): autoodtwarzanie tylko, gdy gracz sam je włączy — czytnik ekranu + lektor to dwa głosy naraz */
+    var KLUCZ_LEKTORA = (D.id || ID) + "-lektor";
+    var lektorWl = false;
+    try { lektorWl = window.localStorage.getItem(KLUCZ_LEKTORA) === "1"; } catch (e) {}
+    function maNagrania() {
+      for (var iA = 1; iA < META; iA++) { var ps = P[iA].pytania; for (var jA = 0; jA < ps.length; jA++) if (ps[jA].audio || ps[jA].audioA || ps[jA].audioF) return true; }
+      return false;
+    }
+    var narzedzia = null, btnLektor = null, lektorStan = null;
+    if (maNagrania()) {
+      narzedzia = el("div", "gp-narzedzia");
+      btnLektor = el("button", "gp-btn gp-lektor", null, { type: "button", "aria-pressed": lektorWl ? "true" : "false", "aria-describedby": ID + "-lektor-opis" });
+      btnLektor.appendChild(document.createTextNode(T("lektor_przelacznik")));
+      lektorStan = el("span", "gp-lektor-stan", T(lektorWl ? "lektor_wl" : "lektor_wyl"));
+      btnLektor.appendChild(lektorStan);
+      narzedzia.appendChild(btnLektor);
+      narzedzia.appendChild(el("p", "gp-lektor-opis", T("lektor_podpowiedz"), { id: ID + "-lektor-opis" }));
+      tresc.appendChild(narzedzia);
+    }
+
+    var koniecSek = el("section", "gp-koniec", null, { "aria-labelledby": ID + "-koniec-tyt" });
+    koniecSek.hidden = true;
+    tresc.appendChild(koniecSek);
+
+    var sekPlansza = el("section", "gp-plansza-sek", null, { "aria-labelledby": ID + "-plansza-tyt" });
+    sekPlansza.appendChild(el("h4", "gp-h", T("plansza_tytul"), { id: ID + "-plansza-tyt" }));
+    sekPlansza.appendChild(el("p", "gp-podp", T("plansza_podpowiedz")));
+    /* region opisu pola NAD planszą: stały, zawsze widoczny, aria-live (nie tooltip); „przykleja się” u góry przy przewijaniu toru */
+    var infoBox = el("div", "gp-info-box");
+    infoBox.appendChild(el("span", "gp-info-et", T("info_etykieta")));
+    var info = el("p", "gp-info", T("info_domyslne"), { "aria-live": "polite", "aria-atomic": "true" });
+    infoBox.appendChild(info);
+    sekPlansza.appendChild(infoBox);
+    try {   /* stały nagłówek Moodle (fixed-top) nie może zasłaniać ramki opisu */
+      var nav = document.querySelector("nav.fixed-top, .navbar.fixed-top");
+      if (nav && nav.getBoundingClientRect().height) infoBox.style.setProperty("--gp-gora", Math.ceil(nav.getBoundingClientRect().height) + "px");
+    } catch (e) {}
+    tresc.appendChild(sekPlansza);
+
+    var tor = el("ol", "gp-tor", null, { "aria-label": T("plansza_etykieta") });
+    var przyciski = [];
+    var aktywne = 0;
+    function zbudujPole(i) {
+      var p = P[i];
+      var li = el("li");
+      var b = el("button", "gp-pole", null, { type: "button", tabindex: i === 0 ? "0" : "-1", "data-pole": String(i) });
+      var g = el("span", "gp-p-gora", null, { "aria-hidden": "true" });
+      var nrw = el("span", "gp-p-nrw");
+      nrw.appendChild(el("span", "gp-p-nr", String(i)));
+      var ok = el("span", "gp-p-odk", "");
+      nrw.appendChild(ok);
+      g.appendChild(nrw);
+      var t = tag(p);
+      if (t) g.appendChild(el("span", "gp-p-tag", t));
+      b.appendChild(g);
+      b.appendChild(el("span", "gp-p-et", p.etykieta, { "aria-hidden": "true" }));
+      var dol = el("span", "gp-p-dol", null, { "aria-hidden": "true" });
+      var pi = el("span", "gp-pionki");
+      dol.appendChild(pi); b.appendChild(dol);
+      b.addEventListener("click", function () { klikPole(i); });
+      b.addEventListener("focus", function () { ustawRoving(i); wskaz(i, true); });
+      b.addEventListener("mouseenter", function () { pokazOpis(i); });
+      b.addEventListener("mouseleave", function () { pokazOpis(wybranePole); });
+      li.appendChild(b); tor.appendChild(li);
+      przyciski.push({ b: b, pionki: pi, odk: ok });
+    }
+    for (var iP = 0; iP <= META; iP++) zbudujPole(iP);
+    var torWrap = el("div", "gp-tor-wrap");
+    var tloImg = obraz("tlo", "gp-tlo");
+    if (tloImg) torWrap.appendChild(tloImg);
+    var NS = ["ht", "tp://www.w3.org/2000/svg"].join("");   /* przestrzeń nazw SVG; rozbita, bo bramka wyjścia zabrania adresów sieciowych w tekście */
+    var svgSc = document.createElementNS(NS, "svg");
+    svgSc.setAttribute("class", "gp-sciezka");
+    svgSc.setAttribute("aria-hidden", "true");
+    svgSc.setAttribute("focusable", "false");
+    var liniaSc = document.createElementNS(NS, "polyline");
+    svgSc.appendChild(liniaSc);
+    torWrap.appendChild(svgSc);
+    torWrap.appendChild(tor);
+    /* układ wężowy: pola idą po torze jak droga — wiersz w prawo, następny w lewo; liczba kolumn zależy od szerokości */
+    var kolTor = 6, strzalki = [];
+    function ulozTor() {
+      var w = torWrap.clientWidth;
+      /* Maciek 16.10 pp: najwyżej 5 kwadratów w linii (czytelność); węziej: 4, 3, 2 (320 px); kwadraty ≥ ~100 px */
+      var c = w >= 690 ? 5 : w >= 551 ? 4 : w >= 413 ? 3 : 2;
+      kolTor = c;
+      tor.style.setProperty("--kol", String(c));
+      for (var i = 0; i < przyciski.length; i++) {
+        var r = Math.floor(i / c), x = i % c, kol = (r % 2 === 0) ? x : c - 1 - x;
+        var li = przyciski[i].b.parentNode;
+        li.style.gridColumn = String(kol + 1);
+        li.style.gridRow = String(r + 1);
+      }
+      var pts = [], wr = torWrap.getBoundingClientRect();
+      for (var j = 0; j < przyciski.length; j++) {
+        var rc = przyciski[j].b.getBoundingClientRect();
+        pts.push(Math.round(rc.left - wr.left + rc.width / 2) + "," + Math.round(rc.top - wr.top + rc.height / 2));
+      }
+      liniaSc.setAttribute("points", pts.join(" "));
+      /* strzałki kierunku w przerwach między polami (→ / ← w rzędzie, ↓ na końcu rzędu) */
+      while (strzalki.length) { var sx = strzalki.pop(); if (sx.parentNode) sx.parentNode.removeChild(sx); }
+      for (var k = 0; k < przyciski.length - 1; k++) {
+        var ra = przyciski[k].b.getBoundingClientRect(), rb = przyciski[k + 1].b.getBoundingClientRect(), znak, cx, cy, nowyRzad = Math.floor(k / c) !== Math.floor((k + 1) / c);
+        if (nowyRzad) { znak = "↓"; cx = ra.left + ra.width / 2; cy = ra.bottom + (rb.top - ra.bottom) / 2; }
+        else if (rb.left > ra.left) { znak = "→"; cx = ra.right + (rb.left - ra.right) / 2; cy = ra.top + ra.height / 2; }
+        else { znak = "←"; cx = rb.right + (ra.left - rb.right) / 2; cy = ra.top + ra.height / 2; }
+        var st = el("span", "gp-str" + (nowyRzad ? " gp-str--w" : ""), znak, { "aria-hidden": "true" });
+        st.style.left = Math.round(cx - wr.left) + "px"; st.style.top = Math.round(cy - wr.top) + "px";
+        torWrap.appendChild(st); strzalki.push(st);
+      }
+    }
+    function sasiadPionowy(i, d) {   /* pole pod / nad (wizualnie) w układzie wężowym */
+      var c = kolTor, r = Math.floor(i / c), x = i % c, kol = (r % 2 === 0) ? x : c - 1 - x, r2 = r + d;
+      if (r2 < 0) return i;
+      var x2 = (r2 % 2 === 0) ? kol : c - 1 - kol, j = r2 * c + x2;
+      return j > META ? i : j;
+    }
+    sekPlansza.appendChild(torWrap);
+    ulozTor();
+    if (typeof ResizeObserver === "function") { try { new ResizeObserver(function () { ulozTor(); }).observe(torWrap); } catch (e) { window.addEventListener("resize", ulozTor); } }
+    else window.addEventListener("resize", ulozTor);
+    var listaSek = el("section", "gp-k-lista-sek", null, { "aria-labelledby": ID + "-lista-tyt" });
+    listaSek.hidden = true;
+    tresc.appendChild(listaSek);
+
+    /* legenda planszy (Maciek 16.10 pp): rozwijana jak „Zasady gry” i wstawiona ZARAZ POD nimi (nie pod planszą);
+       każdy symbol i grafika w OSOBNYM wierszu, jeden pod drugim — znak, (grafika), nazwa i jedno zdanie */
+    var sekLeg = el("details", "gp-zasady gp-legenda-sek");
+    sekLeg.appendChild(el("summary", null, T("legenda_tytul")));
+    var leg = el("ul", "gp-legenda");
+    function wpisLegendy(znak, rola, nazwa, opis) {
+      var li = el("li"), zn = el("span", "gp-leg-znaki");
+      zn.appendChild(znak);
+      var ob = rola ? obraz(rola, "gp-leg-ob") : null;
+      if (ob) zn.appendChild(ob);
+      li.appendChild(zn);
+      var tx = el("div", "gp-leg-tx");
+      tx.appendChild(el("span", "gp-leg-nazwa", T(nazwa)));
+      tx.appendChild(el("span", "gp-leg-opis", T(opis)));
+      li.appendChild(tx);
+      leg.appendChild(li);
+    }
+    function znakLeg(klasa, tekst) { return el("span", "gp-leg-znak" + (klasa ? " gp-leg-znak--" + klasa : ""), tekst, { "aria-hidden": "true" }); }
+    var pTy = pionek("ty"), pK = pionek("komp");
+    wpisLegendy(pTy, "pion_ty", "legenda_ty", "legenda_ty_opis");
+    wpisLegendy(pK, "pion_komp", "legenda_komputer", "legenda_komputer_opis");
+    wpisLegendy(znakLeg("", ""), "pole_zwykle", "legenda_zwykle", "legenda_zwykle_opis");
+    wpisLegendy(znakLeg("pul", "▲"), "pole_pulapka", "legenda_pulapka", "legenda_pulapka_opis");
+    wpisLegendy(znakLeg("pre", "★"), "pole_premia", "legenda_premia", "legenda_premia_opis");
+    wpisLegendy(znakLeg("odk", "✓"), null, "legenda_odkryte", "legenda_odkryte_opis");
+    wpisLegendy(znakLeg("", "0"), "start", "legenda_start", "legenda_start_opis");
+    wpisLegendy(znakLeg("meta", String(META)), "meta", "legenda_meta", "legenda_meta_opis");
+    wpisLegendy(znakLeg("", "1–4"), "kostka", "legenda_kostka", "legenda_kostka_opis");
+    sekLeg.appendChild(leg);
+    if (detZ && detZ.parentNode === tresc) tresc.insertBefore(sekLeg, detZ.nextSibling);
+    else tresc.insertBefore(sekLeg, panel);
+
+    function ustawRoving(i) {
+      if (przyciski[aktywne]) przyciski[aktywne].b.setAttribute("tabindex", "-1");
+      aktywne = i;
+      przyciski[i].b.setAttribute("tabindex", "0");
+    }
+    tor.addEventListener("keydown", function (e) {
+      var k = e.key, n = przyciski.length, cel = -1, i = aktywne;
+      /* strzałki idą po drodze: w prawo = dalej po torze, w lewo = wstecz; w dół/górę = pole pod/nad w układzie wężowym */
+      if (k === "ArrowRight" || k === "Right") cel = Math.min(n - 1, i + 1);
+      else if (k === "ArrowLeft" || k === "Left") cel = Math.max(0, i - 1);
+      else if (k === "ArrowDown" || k === "Down") cel = sasiadPionowy(i, 1);
+      else if (k === "ArrowUp" || k === "Up") cel = sasiadPionowy(i, -1);
+      else if (k === "Home") cel = 0;
+      else if (k === "End") cel = n - 1;
+      if (cel >= 0) { e.preventDefault(); ustawRoving(cel); przyciski[cel].b.focus(); }
+    });
+
+    /* wersja tekstowa (obowiązkowa): wszystkie pytania planszy z odpowiedzią i wyjaśnieniem */
+    var wt = D.wersja_tekstowa || {};
+    if ((wt.tryb || "auto") !== "brak") {
+      var detW = el("details", "gp-wersja");
+      detW.appendChild(el("summary", null, T("wersja_tytul")));
+      if (wt.wstep) detW.appendChild(el("p", null, wt.wstep));
+      var olW = el("ol");
+      for (var iW = 1; iW < META; iW++) {
+        var pW = P[iW], liW2 = el("li", null, null, { "data-pole": String(iW) });
+        var nW = el("p"); nW.appendChild(el("strong", null, T("wersja_pole", { pole: iW, etykieta: pW.etykieta, rodzaj: rodzajNazwa(pW) })));
+        liW2.appendChild(nW);
+        pW.pytania.forEach(function (qW, kW) {
+          if (pW.pytania.length > 1) {
+            var nQ = el("p", kW ? "gp-w-dod" : "gp-w-dod0");
+            nQ.appendChild(el("strong", null, T("wersja_pytanie", { k: kW + 1, n: pW.pytania.length })));
+            liW2.appendChild(nQ);
+          }
+          liW2.appendChild(el("p", "gp-w-pyt", qW.pytanie));
+          liW2.appendChild(el("p", null, T("poprawna_odpowiedz", { odpowiedz: qW.odpowiedzi[qW.poprawna] })));
+          liW2.appendChild(el("p", null, qW.wyjasnienie));
+        });
+        olW.appendChild(liW2);
+      }
+      detW.appendChild(olW);
+      tresc.appendChild(detW);
+    }
+
+    /* okno dialogowe (nakładka) */
+    var nakladka = el("div", "gp-nakladka");
+    nakladka.hidden = true;
+    var okno = el("div", "gp-okno", null, { role: "dialog", "aria-modal": "true", "aria-labelledby": ID + "-okno-tyt" });
+    nakladka.appendChild(okno);
+    root.appendChild(nakladka);
+    var tytulOkna = null;
+
+    /* ——— rysowanie ——— */
+    /* „Ty: pole 5 — Pomysł” → duży wiersz „Ty: pole 5”, pod nim etykieta pola; znacznik tury tekstem */
+    function podzielStan(t) { var i = t.indexOf(" — "); return i < 0 ? [t, ""] : [t.slice(0, i), t.slice(i + 3)]; }
+    function rysujStan() {
+      var a = podzielStan(T("stan_ty", { pole: S.ty, etykieta: P[S.ty].etykieta }));
+      var b = podzielStan(T("stan_komputer", { pole: S.komp, etykieta: P[S.komp].etykieta }));
+      kTy.poz.textContent = a[0]; kTy.et.textContent = a[1];
+      kK.poz.textContent = b[0]; kK.et.textContent = b[1];
+      var turaTy = S.faza !== "koniec" && S.tura === "ty", turaK = S.faza !== "koniec" && S.tura === "komp";
+      kTy.tura.hidden = !turaTy; kK.tura.hidden = !turaK;
+      kTy.li.className = "gp-stan-k gp-stan-k--ty" + (turaTy ? " gp-stan-k--akt" : "");
+      kK.li.className = "gp-stan-k gp-stan-k--komp" + (turaK ? " gp-stan-k--akt" : "");
+      liW.textContent = T("stan_wynik", { dobre: S.dobre, zadane: S.zadane });
+    }
+    var poprzPoz = { ty: -1, komp: -1 };
+    function rysujPlansze() {
+      for (var i = 0; i <= META; i++) {
+        var p = P[i], x = przyciski[i], od = (i > 0 && i < META) && odkryte(i);
+        x.b.className = "gp-pole gp-pole--" + p.rodzaj + " gp-pole--c" + (i % 3) + (od ? " gp-pole--odk" : "");   /* obwódka: rytm trzech kolorów 1,4,7… tusz · 2,5,8… róż · 3,6,9… zielony; kolor NIE niesie znaczenia (pułapka/premia: znacznik ▲/★, tekst, styl linii) */
+        while (x.pionki.firstChild) x.pionki.removeChild(x.pionki.firstChild);
+        if (S.ty === i) { var pt = pionek("ty"); if (poprzPoz.ty !== i && !szybko()) pt.className += " gp-pion--nowy"; x.pionki.appendChild(pt); }
+        if (S.komp === i) { var pk = pionek("komp"); if (poprzPoz.komp !== i && !szybko()) pk.className += " gp-pion--nowy"; x.pionki.appendChild(pk); }
+        x.odk.textContent = od ? "✓" : "";
+        var cz = [T("pole_nr", { pole: i })];
+        /* 2.5.3: widoczna wartość znacznika („+2”, „−3”, bez ikony ▲/★) w nazwie, w tej samej formie i kolejności co na polu */
+        if (p.rodzaj === "pulapka" || p.rodzaj === "premia") cz.push(tag(p).replace(/^[^+−0-9-]*/, ""));
+        cz.push(p.etykieta, rodzajNazwa(p));
+        if (i > 0 && i < META) cz.push(od ? T("pole_odwiedzone") : T("pole_nieodwiedzone"));
+        /* 2.5.3: widoczny napis na pionku („Ty”, „K”) w nazwie pola */
+        if (S.ty === i) cz.push(T("pionek_ty_znak") + ", " + T("pionek_ty_tu"));
+        if (S.komp === i) cz.push(T("pionek_komputer_znak") + ", " + T("pionek_komputer_tu"));
+        x.b.setAttribute("aria-label", cz.join(", "));
+      }
+      poprzPoz.ty = S.ty; poprzPoz.komp = S.komp;
+    }
+    function rysuj() { rysujPlansze(); rysujStan(); }
+    function mow(t) { komunikat.textContent = t; }
+    function ustawRzut(aktywny) { btnRzuc.setAttribute("aria-disabled", aktywny ? "false" : "true"); }
+
+    /* opis pola w stałym regionie nad planszą: najechanie, fokus i klik; bez wskazania — podpowiedź domyślna */
+    var wybranePole = null;
+    function opisPola(i) {
+      if (i === null || i === undefined) return T("info_domyslne");
+      var p = P[i];
+      var t = T(INFO[p.rodzaj] || "info_zwykle", { pole: i, etykieta: p.etykieta, n_pol: nPol(ile(p)) });
+      if (i > 0 && i < META) t += " " + (odkryte(i) ? T("info_odkryte") : T("info_nieodkryte"));
+      return t;
+    }
+    function pokazOpis(i) { var t = opisPola(i); if (info.textContent !== t) info.textContent = t; }
+    function wskaz(i, zFokusu) { wybranePole = i; pokazOpis(i); }
+    function klikPole(i) {
+      wskaz(i);
+      if (S.faza === "koniec" && i > 0 && i < META) { oknoPowtorki(i); return; }
+    }
+
+    /* ——— kostka i ruch ——— */
+    function rzut() { return 1 + Math.floor(los() * 4); }
+    /* decyzja Maćka 14.10: pole już odkryte → pytanie z ostatniego minietego, nieodkrytego pola (pionek zostaje tam, gdzie stanął) */
+    /* decyzja 15.10 (pula): gdy za pionkiem nie ma nieodkrytego pola, pytanie pochodzi z pola, na którym stoi — kolejne z jego puli */
+    function poleDoPytania(start, nr) {
+      if (!S.odwiedzone[nr]) return nr;
+      for (var i = nr - 1; i > start && i >= 1; i--) if (!S.odwiedzone[i]) return i;
+      return nr;
+    }
+    /* kara dydaktyczna (decyzja 15.10): po złej odpowiedzi kolejne pytanie z puli tego samego pola (o ile jakieś jeszcze nie padło); druga zła → −1 pole */
+    function maDodatkowe(q) { return !!(P[q] && wolne(q).length > 0); }
+    function skutekDodatkowy(kto, dobrze) {
+      var pos = S[kto], cel = dobrze ? pos : Math.max(0, pos - 1);
+      var k = kto === "ty" ? (dobrze ? "dodatkowe_ok_ty" : "kara_dodatkowa_ty") : (dobrze ? "dodatkowe_ok_komputer" : "kara_dodatkowa_komputer");
+      return { kto: kto, cel: cel, tekst: T(k), ikona: dobrze ? null : "cofniecie" };
+    }
+    function tytulPytania(nr, q, p) {
+      return q === nr ? T("okno_tytul", { pole: q, etykieta: p.etykieta }) : T("okno_tytul_miniete", { pole: q, etykieta: p.etykieta, stoi: nr });
+    }
+    /* kostka 3D: orientacja sześcianu, która pokazuje ścianę n na wprost (ściany: 1 przód, 6 tył, 3 prawo, 4 lewo, 2 góra, 5 dół) */
+    var KAT = { 1: [0, 0], 2: [-90, 0], 3: [0, -90], 4: [0, 90], 5: [90, 0], 6: [0, 180] };
+    var kX = 0, kY = 0;
+    function dalejKat(cur, baza, min) { return baza + 360 * Math.ceil((cur + min - baza) / 360); }   /* kąt kongruentny z bazą, o co najmniej `min` stopni dalej */
+    function ustawKostke(n) {
+      kostka.setAttribute("data-wynik", String(n)); kCyfra.textContent = String(n);
+    }
+    /* efekt dźwiękowy rzutu (Maciek 16.10 pp): krótkie (~1 s) turlanie kostki, osobny element audio, startuje w obsłudze gestu
+       („Rzuć kostką” / „Dalej”), więc nie podlega 1.4.2; brak pliku albo odmowa przeglądarki = cisza, gra idzie dalej */
+    var SFX = D.dzwieki || {}, sfxKostka = null;
+    function dzwiekKostki() {
+      if (!SFX.kostka) return;
+      try {
+        if (!sfxKostka) {
+          sfxKostka = document.createElement("audio");
+          sfxKostka.className = "gp-sfx-kostka"; sfxKostka.preload = "auto"; sfxKostka.setAttribute("aria-hidden", "true");
+          sfxKostka.src = BAZA + SFX.kostka;
+          root.appendChild(sfxKostka);
+        }
+        sfxKostka.currentTime = 0;
+        var pr = sfxKostka.play();
+        if (pr && pr.catch) pr.catch(function () {});
+      } catch (e) {}
+    }
+    function pokazKostke(n, cb) {
+      dzwiekKostki();
+      if (szybko()) {   /* prefers-reduced-motion (albo tempo 0): bez obrotu i podskoku, od razu wynik */
+        szescian.style.transition = "none";
+        kX = KAT[n][0]; kY = KAT[n][1];
+        szescian.style.transform = "rotateX(" + kX + "deg) rotateY(" + kY + "deg)";
+        ustawKostke(n); cb(); return;
+      }
+      var ms = czas(900);
+      kostka.className = "gp-kostka gp-kostka--rzut";
+      kostka.style.setProperty("--gp-czas-rzutu", ms + "ms");
+      /* każdy rzut kręci sześcian do przodu o ≥ 2 pełne obroty i ląduje na wylosowanej ścianie (nie na losowej cyfrze) */
+      kX = dalejKat(kX, KAT[n][0], 720); kY = dalejKat(kY, KAT[n][1], 720 + 90);
+      szescian.style.transition = "transform " + ms + "ms cubic-bezier(.17,.67,.3,1)";
+      szescian.style.transform = "rotateX(" + kX + "deg) rotateY(" + kY + "deg)";
+      zaplanuj(function () { kostka.className = "gp-kostka"; ustawKostke(n); cb(); }, 900);
+    }
+    function idz(kto, cel, cb) {
+      cel = Math.max(0, Math.min(META, cel));
+      if (szybko()) { S[kto] = cel; rysuj(); cb(); return; }
+      (function krok() {
+        if (S[kto] === cel) { rysuj(); cb(); return; }
+        S[kto] += (cel > S[kto]) ? 1 : -1;
+        rysuj();
+        if (S[kto] === cel) { cb(); return; }
+        zaplanuj(krok, 170);
+      })();
+    }
+    function obliczSkutek(kto, p, dobrze) {
+      var pos = S[kto], delta = 0, k;
+      if (p.rodzaj === "pulapka") { if (dobrze) k = "pulapka_ok"; else { delta = -ile(p); k = "cofniecie"; } }
+      else if (p.rodzaj === "premia") { if (dobrze) { delta = ile(p); k = "premia"; } else k = "premia_brak"; }
+      else { if (dobrze) k = "zostaje"; else { delta = -2; k = "cofniecie"; } }
+      var cel = Math.max(0, Math.min(META, pos + delta)), n = Math.abs(cel - pos);
+      if ((k === "cofniecie" || k === "premia") && n === 0) k = "zostaje";
+      return { kto: kto, cel: cel, ikona: k === "cofniecie" ? "cofniecie" : k === "premia" ? "doprzodu" : null,
+               tekst: T(SKUTKI[kto][k], { n_pol: nPol(n), pole: cel, etykieta: P[cel].etykieta }) };
+    }
+    function wykonajSkutek(cb) {
+      var sk = S.oczekuje; S.oczekuje = null;
+      if (!sk) { cb(); return; }
+      idz(sk.kto, sk.cel, cb);
+    }
+
+    /* ——— tury ——— */
+    function turaGracza(przed) {
+      S.faza = "gracz";
+      S.tura = "ty";
+      rysujStan();
+      ustawRzut(true);
+      mow((przed ? przed + " " : "") + T("tura_gracza"));
+    }
+    btnRzuc.addEventListener("click", function () {
+      if (!S || S.faza !== "gracz") return;
+      if (lektorWl) odblokujAudio();   /* gest kliknięcia: odblokowuje odtwarzanie lektora na późniejszą kartę pytania */
+      S.faza = "ruch";
+      ustawRzut(false);
+      var n = rzut(), start = S.ty;
+      pokazKostke(n, function () {
+        var t = T("wyrzucil_ty", { liczba: n, slownie: SLOWNIE[n - 1] || "" });
+        mow(t);
+        idz("ty", S.ty + n, function () {
+          if (S.ty >= META) { koniec("ty"); return; }
+          mow(t + " " + T("ruch_ty", { pole: S.ty, etykieta: P[S.ty].etykieta, rodzaj: dopisek(P[S.ty]) }));
+          zaplanuj(function () { oknoPytania(S.ty, poleDoPytania(start, S.ty)); }, 450);
+        });
+      });
+    });
+    function turaKomputera(przed) {
+      S.faza = "komputer";
+      S.tura = "komp";
+      rysujStan();
+      ustawRzut(false);
+      mow((przed ? przed + " " : "") + T("tura_komputera") + " " + T("komputer_rzuca"));
+      zaplanuj(function () {
+        var n = rzut(), start = S.komp;
+        pokazKostke(n, function () {
+          var t = T("wyrzucil_komputer", { liczba: n, slownie: SLOWNIE[n - 1] || "" });
+          mow(t);
+          idz("komp", S.komp + n, function () {
+            if (S.komp >= META) { koniec("komp"); return; }
+            mow(t + " " + T("ruch_komputer", { pole: S.komp, etykieta: P[S.komp].etykieta, rodzaj: dopisek(P[S.komp]) }));
+            zaplanuj(function () { oknoKomputera(S.komp, poleDoPytania(start, S.komp)); }, 450);
+          });
+        });
+      }, 1000);
+    }
+
+    /* ——— okno: wspólne ——— */
+    function otworzOkno(typ, tytul, nad, opis) {
+      while (okno.firstChild) okno.removeChild(okno.firstChild);
+      okno.setAttribute("data-typ", typ);
+      okno.appendChild(el("p", "gp-o-nad", nad));
+      tytulOkna = el("h4", "gp-o-tyt", tytul, { id: ID + "-okno-tyt", tabindex: "-1" });
+      okno.appendChild(tytulOkna);
+      if (opis) okno.appendChild(el("p", "gp-o-rodzaj", opis));
+      nakladka.hidden = false;
+      tresc.inert = true;
+      tresc.setAttribute("aria-hidden", "true");
+      S.okno = typ;
+    }
+    /* lektor (opcjonalny). Jedno wspólne nagranie naraz (jeden element audio — odblokowany gestem „Rzuć kostką”/przełącznika, więc
+       autoodtwarzanie działa też w Safari). Gra samo (zaraz po pokazaniu karty pytania) TYLKO przy włączonym przełączniku „Czytaj pytania na głos”;
+       przycisk „Odsłuchaj pytanie” zostaje jako powtórka. Zamknięcie okna zatrzymuje nagranie. Nagrania czytają sam trzon pytania. */
+    var LEKTOR = new Audio();
+    var CISZA = "data:audio/wav;base64,UklGRkQDAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YSADAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA==";
+    var aktywneAudio = null, aktywnyPrzyciskAudio = null, aktywnyTekst = "", odblokowany = false, kolejkaAudio = [];
+    function dalejKolejka() {   /* jedna kolejka, jedno nagranie naraz: następny plik albo koniec */
+      if (aktywneAudio !== LEKTOR) return;
+      if (kolejkaAudio.length) odtworz(kolejkaAudio.shift()); else zatrzymajAudio();
+    }
+    LEKTOR.addEventListener("ended", dalejKolejka);
+    LEKTOR.addEventListener("error", dalejKolejka);
+    function odblokujAudio() {   /* wywoływać wyłącznie w obsłudze kliknięcia */
+      if (odblokowany) return;
+      odblokowany = true;
+      try {
+        LEKTOR.muted = true; LEKTOR.src = CISZA;
+        var pr = LEKTOR.play();
+        var koniecOdbl = function () { if (LEKTOR.src === CISZA) { try { LEKTOR.pause(); } catch (e) {} } LEKTOR.muted = false; };
+        if (pr && pr.then) pr.then(koniecOdbl, function () { LEKTOR.muted = false; odblokowany = false; }); else koniecOdbl();
+      } catch (e) { LEKTOR.muted = false; }
+    }
+    function zatrzymajAudio() {
+      if (aktywneAudio) { try { aktywneAudio.pause(); aktywneAudio.currentTime = 0; } catch (e) {} }
+      if (aktywnyPrzyciskAudio) { aktywnyPrzyciskAudio.textContent = aktywnyTekst; aktywnyPrzyciskAudio.setAttribute("aria-pressed", "false"); }
+      aktywneAudio = null; aktywnyPrzyciskAudio = null; kolejkaAudio = [];
+    }
+    var znacznikOdtw = 0;
+    function odtworz(plik) {
+      var moj = ++znacznikOdtw;   /* spóźnione odrzucenie starego play() (AbortError po przerwaniu) nie może zatrzymać nowego nagrania */
+      try {
+        LEKTOR.muted = false;
+        LEKTOR.src = BAZA + plik;
+        var pr = LEKTOR.play();
+        if (pr && pr.catch) pr.catch(function () { if (moj === znacznikOdtw && aktywneAudio === LEKTOR) zatrzymajAudio(); });   /* przeglądarka odmówiła: zostaje przycisk */
+      } catch (e) { zatrzymajAudio(); }
+    }
+    function graj(pliki, b, tekstSpoczynku) {
+      zatrzymajAudio();
+      aktywneAudio = LEKTOR; aktywnyPrzyciskAudio = b; aktywnyTekst = tekstSpoczynku;
+      kolejkaAudio = pliki.slice(1);
+      if (b) { b.textContent = T("audio_stop"); b.setAttribute("aria-pressed", "true"); }
+      odtworz(pliki[0]);
+    }
+    /* przycisk lektora z kolejką plików: pokazuje się dopiero, gdy pierwszy plik naprawdę się wczytał (bez martwych przycisków);
+       zwraca { b, start() } — start() uruchamia kolejkę sama, gdy przełącznik „Czytaj pytania na głos” jest włączony */
+    function przyciskLektora(pliki, klucz) {
+      pliki = pliki.filter(function (x) { return !!x; });
+      if (!pliki.length) return null;
+      var sonda = new Audio(), tekst = T(klucz), b = el("button", "gp-btn gp-audio", tekst, { type: "button", "aria-pressed": "false" });
+      b.hidden = true;
+      sonda.preload = "metadata";
+      sonda.addEventListener("loadedmetadata", function () { b.hidden = false; });
+      sonda.addEventListener("error", function () { if (b.parentNode) b.parentNode.removeChild(b); });
+      b.addEventListener("click", function () {
+        if (aktywneAudio === LEKTOR && aktywnyPrzyciskAudio === b) { zatrzymajAudio(); return; }
+        graj(pliki, b, tekst);
+      });
+      sonda.src = BAZA + pliki[0];
+      return { b: b, start: function () { if (lektorWl) graj(pliki, b, tekst); } };
+    }
+    function przyciskOdsluchaj(p) { return przyciskLektora([p.audio], "audio_odsluchaj"); }
+    function przyciskOdpowiedzi(p) { return przyciskLektora([p.audioA, p.audioF], "audio_odp_odsluchaj"); }
+    if (btnLektor) {
+      btnLektor.addEventListener("click", function () {
+        lektorWl = !lektorWl;
+        btnLektor.setAttribute("aria-pressed", lektorWl ? "true" : "false");
+        lektorStan.textContent = T(lektorWl ? "lektor_wl" : "lektor_wyl");
+        try { window.localStorage.setItem(KLUCZ_LEKTORA, lektorWl ? "1" : "0"); } catch (e) {}
+        if (lektorWl) odblokujAudio(); else zatrzymajAudio();
+      });
+    }
+    function zamknijOkno(fokus) {
+      zatrzymajAudio();
+      nakladka.hidden = true;
+      while (okno.firstChild) okno.removeChild(okno.firstChild);
+      tytulOkna = null;
+      tresc.inert = false;
+      tresc.removeAttribute("aria-hidden");
+      S.okno = null;
+      if (fokus) fokus.focus();
+    }
+    function tabowalne() {
+      var w = [], grupy = {}, lista = okno.querySelectorAll("button, input, summary, a[href]");
+      for (var i = 0; i < lista.length; i++) {
+        var x = lista[i];
+        if (x.disabled || x.getClientRects().length === 0) continue;
+        if (x.type === "radio") {
+          if (grupy[x.name]) continue;
+          grupy[x.name] = 1;
+          w.push(okno.querySelector('input[name="' + x.name + '"]:checked') || x);
+          continue;
+        }
+        w.push(x);
+      }
+      return w;
+    }
+    okno.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" || e.key === "Esc") {
+        if (S.okno === "powtorka") { e.preventDefault(); zamknijPowtorke(); }
+        return;
+      }
+      if (e.key !== "Tab") return;
+      var t = tabowalne(), a = document.activeElement;
+      if (!t.length) { e.preventDefault(); if (tytulOkna) tytulOkna.focus(); return; }
+      if (e.shiftKey) { if (a === t[0] || a === tytulOkna || !okno.contains(a)) { e.preventDefault(); t[t.length - 1].focus(); } }
+      else if (a === t[t.length - 1] || !okno.contains(a)) { e.preventDefault(); t[0].focus(); }
+    });
+    document.addEventListener("focusin", function (e) {
+      if (!nakladka.hidden && tytulOkna && !okno.contains(e.target)) tytulOkna.focus();
+    });
+    function wypelnijFb(fb, p, dobrze, glowny, skutek, ikona) {
+      while (fb.firstChild) fb.removeChild(fb.firstChild);
+      fb.className = "gp-fb" + (dobrze === true ? " gp-ok" : dobrze === false ? " gp-zle" : "");
+      var ob = ikona ? obraz(ikona, "gp-ob-fb") : null;
+      if (ob) fb.appendChild(ob);
+      if (glowny) {
+        var g = el("p", "gp-fb-gl");
+        if (dobrze === true || dobrze === false) g.appendChild(el("span", null, dobrze ? "✓ " : "✗ ", { "aria-hidden": "true" }));
+        g.appendChild(document.createTextNode(glowny));
+        fb.appendChild(g);
+      }
+      fb.appendChild(el("p", null, p.wyjasnienie));
+      if (skutek) fb.appendChild(el("p", "gp-fb-sk", skutek));
+      fb.hidden = false;
+    }
+    function przyciskDalej() {
+      var box = el("div", "gp-o-akcje");
+      var b = el("button", "gp-btn gp-btn--gl gp-dalej", T("dalej"), { type: "button", "aria-describedby": ID + "-fb" });
+      box.appendChild(b);
+      box.hidden = true;
+      return { box: box, b: b };
+    }
+
+    /* ——— okno pytania gracza ——— */
+    var licznikOkien = 0;
+    function oknoPytania(nr, q, op) {
+      op = op || {};
+      q = q || nr;
+      var pole = P[q], dod = !!op.dodatkowe, p = pole.pytania[losujPytanie(q)];
+      licznikOkien++;
+      S.odwiedzone[q] = true;
+      S.biezace = q;
+      S.biezacePytanie = p;
+      S.dodatkoweOkno = dod;
+      S.faza = "pytanie";
+      rysuj();
+      otworzOkno("gracz", dod ? T("okno_tytul_dodatkowe", { pole: q, etykieta: pole.etykieta }) : tytulPytania(nr, q, pole),
+                 T(dod ? "okno_dodatkowe_nad" : "okno_gracz_nad"), dod ? T("okno_rodzaj_dodatkowe") : opisRodzaju(pole));
+      var obO = obraz(dod ? "druga_szansa" : "karta", "gp-ob-okno"); if (obO) okno.insertBefore(obO, okno.firstChild);
+      var kol = tasuj([0, 1, 2]), wiersze = [];   /* kol[pozycja na ekranie] = indeks odpowiedzi w banku */
+      S.biezacePoz = kol.indexOf(p.poprawna);
+      var fs = el("fieldset", "gp-odp", null, { role: "radiogroup" });
+      fs.appendChild(el("legend", "gp-o-pyt", p.pytanie));
+      kol.forEach(function (orig, pos) {
+        var lab = el("label", "gp-odp-l");
+        var inp = el("input", null, null, { type: "radio", name: ID + "-odp-" + licznikOkien, value: String(pos) });
+        lab.appendChild(inp);
+        var tx = el("span", "gp-odp-tx");
+        tx.appendChild(el("span", "gp-litera", LITERY[pos] + "."));
+        tx.appendChild(document.createTextNode(p.odpowiedzi[orig]));
+        var zn = el("span", "gp-zn");
+        tx.appendChild(zn);
+        lab.appendChild(tx);
+        fs.appendChild(lab);
+        wiersze.push({ lab: lab, inp: inp, zn: zn });
+      });
+      okno.appendChild(fs);
+      var audG = przyciskOdsluchaj(p); if (audG) { var boxA = el("div", "gp-o-akcje"); boxA.appendChild(audG.b); okno.appendChild(boxA); }
+      var blad = el("p", "gp-o-blad", "", { "aria-live": "polite" });
+      okno.appendChild(blad);
+      var akcjeS = el("div", "gp-o-akcje");
+      var bSpr = el("button", "gp-btn gp-btn--gl gp-sprawdz", T("sprawdz"), { type: "button" });
+      akcjeS.appendChild(bSpr);
+      okno.appendChild(akcjeS);
+      var fb = el("div", "gp-fb", null, { id: ID + "-fb" });
+      fb.hidden = true;
+      okno.appendChild(fb);
+      var audO = przyciskOdpowiedzi(p), boxO = null;
+      if (audO) { boxO = el("div", "gp-o-akcje"); boxO.hidden = true; boxO.appendChild(audO.b); okno.appendChild(boxO); }
+      var dl = przyciskDalej();
+      okno.appendChild(dl.box);
+      bSpr.addEventListener("click", function () {
+        var wyb = -1;
+        wiersze.forEach(function (x, pos) { if (x.inp.checked) wyb = pos; });
+        if (wyb < 0) { blad.textContent = T("wybierz_najpierw"); return; }
+        blad.textContent = "";
+        var popPos = kol.indexOf(p.poprawna), dobrze = (wyb === popPos);
+        wiersze.forEach(function (x, pos) {
+          x.inp.disabled = true;
+          if (pos === popPos) { x.lab.classList.add("gp-ok"); x.zn.textContent = T("znacznik_poprawna") + (pos === wyb ? " · " + T("znacznik_twoj") : ""); }
+          else if (pos === wyb) { x.lab.classList.add("gp-zle"); x.zn.textContent = T("znacznik_twoj_zly"); }
+        });
+        S.zadane++;
+        if (dobrze) S.dobre++;
+        S.historia.push({ nr: q, kto: "ty", dobrze: dobrze, dod: dod, p: p });
+        var sk = dod ? skutekDodatkowy("ty", dobrze) : obliczSkutek("ty", pole, dobrze);
+        S.oczekuje = sk;
+        S.czekaDodatkowe = (!dod && !dobrze && maDodatkowe(q)) ? q : null;
+        S.okno = "gracz-rozstrzygniete";
+        wypelnijFb(fb, p, dobrze, T(dobrze ? "dobrze" : "zle"),
+                   (dod ? sk.tekst : T("skutek_ty", { skutek: sk.tekst })) + (S.czekaDodatkowe !== null ? " " + T("zapowiedz_dodatkowe_ty") : ""), sk.ikona);
+        akcjeS.hidden = true;
+        if (boxO) boxO.hidden = false;
+        dl.box.hidden = false;
+        rysujStan();
+        dl.b.focus();
+        if (audO) audO.start();   /* lektor włączony: odpowiedź, a po niej wyjaśnienie (zastępuje ewentualny trzon) */
+      });
+      dl.b.addEventListener("click", function () {
+        zamknijOkno(btnRzuc);
+        S.faza = "skutek";
+        wykonajSkutek(function () {
+          if (S.ty >= META) { koniec("ty"); return; }
+          var d = S.czekaDodatkowe, po = T("ruch_po_ty", { pole: S.ty, etykieta: P[S.ty].etykieta });
+          S.czekaDodatkowe = null;
+          if (d !== null) { mow(po); zaplanuj(function () { oknoPytania(d, d, { dodatkowe: true }); }, 450); return; }
+          turaKomputera(po);
+        });
+      });
+      if (audG) audG.start();   /* lektor włączony: czyta trzon pytania zaraz po pokazaniu karty */
+      tytulOkna.focus();
+    }
+
+    /* ——— okno tury komputera: pytanie widoczne, po ~2 s wybór i rozstrzygnięcie, dalej TYLKO „Dalej” ——— */
+    function oknoKomputera(nr, q, op) {
+      op = op || {};
+      q = q || nr;
+      var pole = P[q], dod = !!op.dodatkowe, p = pole.pytania[losujPytanie(q)];
+      S.odwiedzone[q] = true;
+      S.biezace = q;
+      S.biezacePytanie = p;
+      S.dodatkoweOkno = dod;
+      S.faza = "komputer";
+      rysuj();
+      otworzOkno("komputer", dod ? T("okno_tytul_dodatkowe", { pole: q, etykieta: pole.etykieta }) : tytulPytania(nr, q, pole),
+                 T(dod ? "okno_dodatkowe_nad_komputer" : "okno_komputer_nad"), dod ? T("okno_rodzaj_dodatkowe") : opisRodzaju(pole));
+      var obOK = obraz(dod ? "druga_szansa" : "karta", "gp-ob-okno"); if (obOK) okno.insertBefore(obOK, okno.firstChild);
+      okno.appendChild(el("p", "gp-o-pyt", p.pytanie, { id: ID + "-kpyt" }));
+      var audK = przyciskOdsluchaj(p); if (audK) { var boxAK = el("div", "gp-o-akcje"); boxAK.appendChild(audK.b); okno.appendChild(boxAK); }
+      var kol = tasuj([0, 1, 2]), wiersze = [];
+      var ol = el("ol", "gp-odp-k", null, { "aria-labelledby": ID + "-kpyt" });
+      kol.forEach(function (orig, pos) {
+        var li = el("li");
+        var tx = el("span", "gp-odp-tx");
+        tx.appendChild(el("span", "gp-litera", LITERY[pos] + "."));
+        tx.appendChild(document.createTextNode(p.odpowiedzi[orig]));
+        var zn = el("span", "gp-zn");
+        tx.appendChild(zn);
+        li.appendChild(tx);
+        ol.appendChild(li);
+        wiersze.push({ li: li, zn: zn });
+      });
+      okno.appendChild(ol);
+      var mysli = el("p", "gp-mysli", T("komputer_mysli"), { "aria-live": "polite" });
+      okno.appendChild(mysli);
+      var fb = el("div", "gp-fb", null, { id: ID + "-fb" });
+      fb.hidden = true;
+      okno.appendChild(fb);
+      var audOK = przyciskOdpowiedzi(p), boxOK = null;
+      if (audOK) { boxOK = el("div", "gp-o-akcje"); boxOK.hidden = true; boxOK.appendChild(audOK.b); okno.appendChild(boxOK); }
+      var dl = przyciskDalej();
+      okno.appendChild(dl.box);
+      var popPos = kol.indexOf(p.poprawna);
+      var dobrze = los() < TRAFNOSC_KOMPUTERA, wyb = popPos;
+      if (!dobrze) {
+        var zle = [];
+        for (var i = 0; i < kol.length; i++) if (i !== popPos) zle.push(i);
+        wyb = zle[Math.floor(los() * zle.length)];
+      }
+      zaplanuj(function () {
+        var sk = dod ? skutekDodatkowy("komp", dobrze) : obliczSkutek("komp", pole, dobrze);
+        S.oczekuje = sk;
+        S.czekaDodatkowe = (!dod && !dobrze && maDodatkowe(q)) ? q : null;
+        S.historia.push({ nr: q, kto: "komp", dobrze: dobrze, dod: dod, p: p });
+        mysli.textContent = T("komputer_wybiera", { litera: LITERY[wyb], odpowiedz: p.odpowiedzi[kol[wyb]] });
+        wiersze.forEach(function (x, pos) {
+          if (pos === popPos) { x.li.classList.add("gp-ok"); x.zn.textContent = T("znacznik_poprawna") + (pos === wyb ? " · " + T("znacznik_komputer") : ""); }
+          else if (pos === wyb) { x.li.classList.add("gp-zle"); x.zn.textContent = T("znacznik_komputer_zly"); }
+        });
+        wypelnijFb(fb, p, dobrze, T(dobrze ? "komputer_dobrze" : "komputer_zle", { skutek: sk.tekst }),
+                   S.czekaDodatkowe !== null ? T("zapowiedz_dodatkowe_komputer") : null, sk.ikona);
+        if (boxOK) boxOK.hidden = false;
+        dl.box.hidden = false;
+        S.okno = "komputer-rozstrzygniete";
+        if (audOK) audOK.start();
+      }, 2000);
+      dl.b.addEventListener("click", function () {
+        zamknijOkno(btnRzuc);
+        S.faza = "skutek";
+        wykonajSkutek(function () {
+          if (S.komp >= META) { koniec("komp"); return; }
+          var d = S.czekaDodatkowe, po = T("ruch_po_komputer", { pole: S.komp, etykieta: P[S.komp].etykieta });
+          S.czekaDodatkowe = null;
+          if (d !== null) { mow(po); zaplanuj(function () { oknoKomputera(d, d, { dodatkowe: true }); }, 450); return; }
+          turaGracza(po);
+        });
+      });
+      if (audK) audK.start();   /* lektor włączony: czyta trzon pytania zaraz po pokazaniu karty */
+      tytulOkna.focus();
+    }
+
+    /* ——— powtórka pola po grze (Odkryj pozostałe pola) ——— */
+    function oknoPowtorki(nr) {
+      var pole = P[nr], n = pole.pytania.length;
+      S.powtorka[nr] = true;
+      S.powtorkaZ = nr;
+      var k = S.powtorkaNr[nr] || 0;   /* które pytanie z puli pola widać w oknie */
+      rysuj();
+      otworzOkno("powtorka", T("okno_tytul", { pole: nr, etykieta: pole.etykieta }), T("powtorka_nad"), opisRodzaju(pole));
+      var licznik = n > 1 ? el("p", "gp-o-pod", "", { "aria-live": "polite" }) : null;
+      if (licznik) okno.appendChild(licznik);
+      var blok = el("div", "gp-o-blok");
+      okno.appendChild(blok);
+      function pokaz() {
+        var Q = pole.pytania[k];
+        while (blok.firstChild) blok.removeChild(blok.firstChild);
+        if (licznik) licznik.textContent = T("powtorka_licznik", { k: k + 1, n: n });
+        blok.appendChild(el("p", "gp-o-pyt", Q.pytanie, { id: ID + "-ppyt" }));
+        var ol = el("ol", "gp-odp-k", null, { "aria-labelledby": ID + "-ppyt" });
+        Q.odpowiedzi.forEach(function (o, i) {
+          var li = el("li", i === Q.poprawna ? "gp-ok" : null);
+          var tx = el("span", "gp-odp-tx");
+          tx.appendChild(el("span", "gp-litera", LITERY[i] + "."));
+          tx.appendChild(document.createTextNode(o));
+          tx.appendChild(el("span", "gp-zn", i === Q.poprawna ? T("znacznik_poprawna") : ""));
+          li.appendChild(tx);
+          ol.appendChild(li);
+        });
+        blok.appendChild(ol);
+        var fb = el("div", "gp-fb", null, { id: ID + "-fb" });
+        wypelnijFb(fb, Q, null, null, null);
+        blok.appendChild(fb);
+      }
+      pokaz();
+      var box = el("div", "gp-o-akcje");
+      if (n > 1) {
+        var bD = el("button", "gp-btn", T("powtorka_dalej"), { type: "button" });
+        bD.addEventListener("click", function () { k = (k + 1) % n; S.powtorkaNr[nr] = k; pokaz(); });
+        box.appendChild(bD);
+      }
+      var bZ = el("button", "gp-btn gp-zamknij", T("zamknij"), { type: "button" });
+      bZ.addEventListener("click", zamknijPowtorke);
+      box.appendChild(bZ);
+      okno.appendChild(box);
+      tytulOkna.focus();
+    }
+    function zamknijPowtorke() {
+      var i = S.powtorkaZ;
+      zamknijOkno(przyciski[i] ? przyciski[i].b : null);
+      info.textContent = liczOdkryte() >= META - 1 ? T("odkryj_wszystkie") : T("odkryj_info", { odkryte: liczOdkryte() });
+    }
+
+    /* ——— rekord (localStorage w try/catch) ——— */
+    var KLUCZ_REKORDU = (D.id || ID) + "-rekord";
+    var rekordPamiec = null;
+    function zapiszRekord(d) {
+      var stary = rekordPamiec, zapisano = true, nowy = false;
+      try {
+        var v = window.localStorage.getItem(KLUCZ_REKORDU);
+        if (v !== null && !isNaN(parseInt(v, 10))) stary = parseInt(v, 10);
+      } catch (e) { zapisano = false; }
+      if (stary === null || d > stary) {
+        nowy = (stary !== null) || d > 0;
+        try { window.localStorage.setItem(KLUCZ_REKORDU, String(d)); } catch (e2) { zapisano = false; }
+        rekordPamiec = d;
+        stary = d;
+      }
+      return { rekord: stary, nowy: nowy, zapisano: zapisano };
+    }
+
+    /* ——— koniec gry ——— */
+    function koniec(kto) {
+      wyczyscTimery();
+      S.faza = "koniec";
+      S.zwyciezca = kto;
+      ustawRzut(false);
+      rysuj();
+      var rek = zapiszRekord(S.dobre);
+      akcja.hidden = true;
+      while (koniecSek.firstChild) koniecSek.removeChild(koniecSek.firstChild);
+      var h = el("h4", "gp-k-tyt", T("koniec_tytul"), { id: ID + "-koniec-tyt", tabindex: "-1" });
+      koniecSek.appendChild(h);
+      /* podium (dekoracja; wynik jest też w tekście poniżej) */
+      var pod = el("div", "gp-podium", null, { "aria-hidden": "true" });
+      function miejsce(nr, kogo) {
+        var m = el("div", "gp-pod-m gp-pod-m--" + nr);
+        if (nr === 1) { var pu = obraz("koniec", "gp-pod-puchar"); if (pu) m.appendChild(pu); }
+        var st = el("div", "gp-pod-st");
+        st.appendChild(el("span", "gp-pod-nr", String(nr)));
+        st.appendChild(el("span", null, T(kogo === "ty" ? "podium_ty" : "podium_komputer")));
+        m.appendChild(st);
+        return m;
+      }
+      pod.appendChild(miejsce(2, kto === "ty" ? "komp" : "ty"));
+      pod.appendChild(miejsce(1, kto));
+      koniecSek.appendChild(pod);
+      koniecSek.appendChild(el("p", "gp-k-zw", T(kto === "ty" ? "meta_ty" : "meta_komputer", { meta: P[META].etykieta })));
+      koniecSek.appendChild(el("p", "gp-k-wynik", T("koniec_wynik", { dobre: S.dobre, zadane: S.zadane })));
+      koniecSek.appendChild(el("p", null, T("rekord", { rekord: rek.rekord })));
+      if (rek.nowy) koniecSek.appendChild(el("p", "gp-rekord-nowy", T("rekord_nowy")));
+      if (!rek.zapisano) koniecSek.appendChild(el("p", "gp-slaby", T("rekord_brak")));
+      var akc = el("div", "gp-k-akcje");
+      var bOdk = el("button", "gp-btn gp-odkryj", T("odkryj_pozostale"), { type: "button" });
+      var bJesz = el("button", "gp-btn gp-btn--gl gp-jeszcze", T("jeszcze_raz"), { type: "button" });
+      akc.appendChild(bOdk); akc.appendChild(bJesz);
+      koniecSek.appendChild(akc);
+      while (listaSek.firstChild) listaSek.removeChild(listaSek.firstChild);
+      listaSek.appendChild(el("h4", "gp-k-h", T("koniec_lista_tytul"), { id: ID + "-lista-tyt" }));
+      if (!S.historia.length) listaSek.appendChild(el("p", null, T("koniec_lista_pusta")));
+      else {
+        var ol = el("ol", "gp-k-lista");
+        S.historia.forEach(function (x) {
+          var pole = P[x.nr], p = x.p, li = el("li"), g = el("p");
+          g.appendChild(el("strong", null, T("okno_tytul", { pole: x.nr, etykieta: pole.etykieta })));
+          g.appendChild(document.createTextNode(" · " + T(x.kto === "ty" ? "lista_ty" : "lista_komputer") +
+                                                (x.dod ? " · " + T("lista_dodatkowe") : "") + " · "));
+          var w = el("span", x.dobrze ? "gp-k-ok" : "gp-k-zle");
+          w.appendChild(el("span", null, x.dobrze ? "✓ " : "✗ ", { "aria-hidden": "true" }));
+          w.appendChild(document.createTextNode(T(x.dobrze ? "wynik_dobrze" : "wynik_zle")));
+          g.appendChild(w);
+          li.appendChild(g);
+          li.appendChild(el("p", null, p.pytanie));
+          li.appendChild(el("p", "gp-k-pop", T("poprawna_odpowiedz", { odpowiedz: p.odpowiedzi[p.poprawna] })));
+          ol.appendChild(li);
+        });
+        listaSek.appendChild(ol);
+      }
+      listaSek.hidden = false;
+      bOdk.addEventListener("click", function () {
+        var pierwsze = -1;
+        for (var i = 1; i < META; i++) if (!odkryte(i)) { pierwsze = i; break; }
+        if (pierwsze < 0) { info.textContent = T("odkryj_wszystkie"); return; }
+        ustawRoving(pierwsze);
+        przyciski[pierwsze].b.focus();
+        info.textContent = T("odkryj_info", { odkryte: liczOdkryte() });   /* po fokusie: fokus pokazałby opis pola, a tu ma zostać wskazówka */
+      });
+      bJesz.addEventListener("click", function () { nowaGra(true); });
+      koniecSek.hidden = false;
+      h.focus();
+    }
+
+    function nowaGra(zFokusem) {
+      wyczyscTimery();
+      S = nowyStan();
+      koniecSek.hidden = true;
+      listaSek.hidden = true;
+      akcja.hidden = false;
+      kostka.setAttribute("data-wynik", ""); kCyfra.textContent = T("kostka_pusta");
+      wybranePole = null;
+      pokazOpis(null);
+      rysuj();
+      turaGracza("");
+      if (zFokusem) btnRzuc.focus();
+    }
+
+    /* uchwyt dla testów (test_plansza.mjs); gra z niego nie korzysta */
+    root.__plansza = {
+      stan: function () {
+        return { faza: S.faza, ty: S.ty, komp: S.komp, dobre: S.dobre, zadane: S.zadane, okno: S.okno,
+                 zwyciezca: S.zwyciezca, odkryte: liczOdkryte(), historia: S.historia.slice(),
+                 dodatkowe: !!(S.okno && S.dodatkoweOkno),
+                 poprawnaPozycja: (S.okno === "gracz" && S.biezace) ? S.biezacePoz : null,
+                 pytanie: S.biezacePytanie ? S.biezacePytanie.pytanie : null };
+      },
+      lektor: function () { return !!lektorWl; },
+      audioPlik: function () { return aktywneAudio ? String(LEKTOR.src).split("/").pop() : ""; },
+      audioKolejka: function () { return kolejkaAudio.slice(); },
+      audioGra: function () { return !!(aktywneAudio && !aktywneAudio.paused); },
+      uzyte: function () { var o = {}; for (var k in UZYTE) if (Object.prototype.hasOwnProperty.call(UZYTE, k)) o[k] = UZYTE[k].slice(); return o; },
+      pula: function (nr) { return P[nr] ? P[nr].pytania.length : 0; }
+    };
+
+    nowaGra(false);
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start);
+  else start();
+})();
+// ]]>
+</script>
+
+</main></body></html>

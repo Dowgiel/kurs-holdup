@@ -1,0 +1,1920 @@
+<!DOCTYPE html>
+<html lang="pl" data-gm-motyw="jasny">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="generator" content="gry-moodle 0.9.0">
+<title>Po infekcji: ułóż kroki we właściwej kolejności</title>
+<style>
+/* ——— rdzen.css ——— */
+/* gry-moodle 0.2.0 — NIE EDYTUJ W KURSIE, poprawiaj w PLUGIN/gry-moodle (~/.claude/local-marketplace-maciek/plugins/gry-moodle) */
+/* rdzen.css — warstwa wspólna: tokeny motywu, [hidden], klasy pomocnicze, fokus, tryby systemowe.
+   Paleta domyślna = paleta zmierzona kursu ZZR (13/13 par WCAG AA, `ZZR/_produkcja/scorm/kontrast.py`).
+   Kurs nadpisuje tokeny polem `motyw` banku (generator dopisuje własny arkusz po tym). */
+
+:root {
+  --tlo:            #F7F4EF;
+  --tlo-karta:      #FFFFFF;
+  --tlo-glebia:     #0E4F63;
+  --tekst:          #1C2B33;
+  --tekst-slaby:    #4A5C66;
+  --glowny:         #0E4F63;
+  --akcent:         #B8432A;
+  --akcent-ciemny:  #8F3320;
+  --pozytyw:        #1F6B55;
+  --uwaga:          #8A5A00;
+  --ramka:          #D8D0C4;   /* separatory dekoracyjne */
+  --ramka-kontrolka:#8A8175;   /* granice pól i przycisków — 1.4.11 */
+  --na-glebi:       #DCE9EE;   /* tekst i linie na tle sceny */
+  --na-glownym:     #FFFFFF;   /* tekst na wypełnieniu --glowny / --akcent */
+  --tlo-ok:         #F1F8F5;
+  --tlo-zle:        #FDF3F1;
+  --gm-nakladka:    rgba(14, 79, 99, .84);
+  --promien: 10px;
+}
+
+/* Motyw ciemny — tylko gdy strona go zamówi (data-gm-motyw="ciemny" albo "auto" + ustawienie systemu).
+   Paczka ZZR-owa i pilot jadą w jasnym, jak oryginał. */
+:root[data-gm-motyw="ciemny"] {
+  --tlo: #121A1F; --tlo-karta: #1B262D; --tlo-glebia: #0B2E3A; --tekst: #E8EEF1; --tekst-slaby: #B4C2CA;
+  --glowny: #8FD0E3; --akcent: #F0997F; --akcent-ciemny: #F6B6A2; --pozytyw: #7FD1B4; --uwaga: #E8C26A;
+  --ramka: #33434D; --ramka-kontrolka: #8C9DA7; --na-glebi: #DCE9EE; --na-glownym: #0B1B22;
+  --tlo-ok: #16302A; --tlo-zle: #3A2019; --gm-nakladka: rgba(6, 22, 28, .86);
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-gm-motyw="auto"] {
+    --tlo: #121A1F; --tlo-karta: #1B262D; --tlo-glebia: #0B2E3A; --tekst: #E8EEF1; --tekst-slaby: #B4C2CA;
+    --glowny: #8FD0E3; --akcent: #F0997F; --akcent-ciemny: #F6B6A2; --pozytyw: #7FD1B4; --uwaga: #E8C26A;
+    --ramka: #33434D; --ramka-kontrolka: #8C9DA7; --na-glebi: #DCE9EE; --na-glownym: #0B1B22;
+    --tlo-ok: #16302A; --tlo-zle: #3A2019; --gm-nakladka: rgba(6, 22, 28, .86);
+  }
+}
+
+/* Atrybut hidden chowa ZAWSZE. Reguła przeglądarki [hidden]{display:none} przegrywa z każdą regułą autora,
+   która ustawia display (decyduje pochodzenie reguły, nie swoistość) — TOP 15 #7, MK REGULA_HIDDEN.
+   Wariant .gm [hidden] jest dla formatu Strona, gdzie arkusz siedzi w cudzej stronie. */
+[hidden], .gm [hidden] { display: none !important; }
+
+/* tylko dla czytnika ekranu */
+.gm-sr {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+}
+
+/* ——— klasy, których używa silnik (dawniej klasy strony-gospodarza ZZR: przycisk, reakcja, slaby,
+   tylko-czytnik). Z prefiksem gm-, żeby nie zderzały się z komponentami kursu (L13). ——— */
+.gm-przycisk {
+  display: inline-flex; align-items: center; gap: .5em;
+  min-height: 44px; padding: .7em 1.3em;           /* 2.5.8 */
+  background: var(--akcent); color: var(--na-glownym);
+  border: 2px solid var(--akcent);
+  border-radius: var(--promien);
+  font: inherit; font-weight: 600; cursor: pointer;
+  text-decoration: none;
+}
+.gm-przycisk:hover { background: var(--akcent-ciemny); border-color: var(--akcent-ciemny); }
+.gm-przycisk[aria-disabled="true"], .gm-przycisk:disabled {
+  background: var(--tlo); color: var(--tekst-slaby);
+  border-color: var(--ramka-kontrolka); cursor: not-allowed;
+}
+.gm-przycisk--cichy { background: transparent; color: var(--akcent); border-color: var(--ramka-kontrolka); }
+.gm-przycisk--cichy:hover { background: var(--tlo); color: var(--akcent-ciemny); }
+
+.gm-reakcja {
+  border-left: 4px solid var(--glowny);
+  background: var(--tlo);
+  padding: .9em 1.1em; border-radius: 0 var(--promien) var(--promien) 0;
+  margin: .8em 0 0;
+}
+.gm-reakcja--ok  { border-left-color: var(--pozytyw); }
+.gm-reakcja--zle { border-left-color: var(--akcent); }
+.gm-reakcja--uwaga { border-left-color: var(--uwaga); }
+.gm-reakcja p:first-child { margin-top: 0; }
+.gm-reakcja p:last-child  { margin-bottom: 0; }
+
+.gm-slaby { color: var(--tekst-slaby); font-size: .92em; }
+
+/* ——— widoczny fokus (2.4.7, 2.4.11). Nigdy bez zamiennika. ——— */
+.gm-przycisk:focus-visible, .gra :focus-visible {
+  outline: 3px solid var(--akcent-ciemny);
+  outline-offset: 2px;
+}
+
+/* ——— tryby systemowe ——— */
+@media (prefers-reduced-motion: reduce) {
+  .gra *, .gra *::before, .gra *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+@media (forced-colors: active) {
+  .gm-przycisk, .gm-reakcja { border: 2px solid ButtonText; }
+  .gm-przycisk:focus-visible, .gra :focus-visible { outline-color: Highlight; }
+}
+
+/* ——— strona.css ——— */
+/* gry-moodle 0.2.0 — NIE EDYTUJ W KURSIE, poprawiaj w PLUGIN/gry-moodle (~/.claude/local-marketplace-maciek/plugins/gry-moodle) */
+/* formaty/wspolne/strona.css — strona wokół gry w formatach SCORM (paczka) i samodzielny HTML:
+   nagłówek, karty, wersja tekstowa z pytaniami, lista źródeł. Wzór: ZZR `szablon/zasoby/styl.css` (paleta 13/13 AA).
+   Klasy z prefiksem gm- (L13). Tokeny kolorów — z rdzen.css. W formacie Strona ten arkusz NIE jest używany. */
+
+:root {
+  --cien: 0 1px 3px rgba(28, 43, 51, .10), 0 6px 16px rgba(28, 43, 51, .06);
+  --odstep: clamp(16px, 4vw, 32px);
+  --szerokosc: 62rem;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+
+body.gm-strona {
+  margin: 0;
+  background: var(--tlo);
+  color: var(--tekst);
+  font: 400 clamp(16px, 1rem + .2vw, 18px)/1.65 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  letter-spacing: normal;   /* 1.4.12 — odstępy nie mogą być zablokowane */
+  word-spacing: normal;
+}
+
+.gm-strona :focus-visible { outline: 3px solid var(--akcent-ciemny); outline-offset: 2px; border-radius: 4px; }
+.gm-strona :focus:not(:focus-visible) { outline: none; }
+
+/* pomijanie nawigacji (2.4.1) */
+.gm-pomin {
+  position: absolute; left: -9999px;
+  background: var(--tlo-karta); color: var(--akcent-ciemny);
+  padding: 12px 20px; border-radius: var(--promien); font-weight: 600;
+  border: 2px solid var(--ramka-kontrolka);
+}
+.gm-pomin:focus { left: var(--odstep); top: 12px; z-index: 50; }
+
+/* szkielet */
+.gm-pas { background: var(--tlo-glebia); color: var(--tlo-karta); padding: var(--odstep); }
+.gm-pas h1 { margin: 0; font-size: clamp(1.35rem, 1.1rem + 1.4vw, 2rem); line-height: 1.25; }
+.gm-pas p  { margin: .4em 0 0; color: var(--na-glebi); }
+.gm-stopka { margin-top: 3rem; }
+.gm-stopka p { margin: 0; font-size: .92em; }
+
+.gm-strona main { max-width: var(--szerokosc); margin: 0 auto; padding: var(--odstep); }
+.gm-strona h2 { color: var(--glowny); font-size: clamp(1.2rem, 1rem + 1vw, 1.6rem); line-height: 1.3; margin: 2em 0 .6em; }
+.gm-strona h3 { color: var(--glowny); font-size: clamp(1.05rem, .95rem + .6vw, 1.3rem); margin: 1.6em 0 .5em; }
+.gm-strona h2:first-child, .gm-strona h3:first-child { margin-top: 0; }
+.gm-strona p, .gm-strona li { max-width: 68ch; }
+.gm-strona a { color: var(--akcent); text-underline-offset: 3px; overflow-wrap: anywhere; }
+.gm-strona a:hover { color: var(--akcent-ciemny); }
+
+.gm-karta {
+  background: var(--tlo-karta);
+  border: 1px solid var(--ramka);
+  border-radius: var(--promien);
+  box-shadow: var(--cien);
+  padding: var(--odstep);
+  margin: 1.5em 0;
+}
+/* „scena pierwsza” (ARCH §4.2, L43): karta z grą bez górnego marginesu — w ramce SCORM 500 px liczy się każdy piksel */
+.gm-karta--gra { margin-top: 0; }
+.gm-karta--gra > h2 { margin-bottom: .3em; }
+
+/* pytania wersji tekstowej */
+.gm-pytanie-blok { margin: 1.8em 0 0; padding-top: 1.2em; border-top: 1px solid var(--ramka); }
+fieldset.gm-pytanie { border: 0; margin: 0; padding: 0; min-width: 0; }   /* min-width:0 — 320 px bez przewijania */
+.gm-pytanie legend { font-weight: 600; color: var(--glowny); padding: 0; }
+.gm-pytanie__sprawdz { margin-top: .6em; }
+.gm-odpowiedz {
+  display: flex; align-items: flex-start; flex-wrap: wrap; gap: .7em;
+  min-height: 44px; padding: .7em .9em;
+  border: 2px solid var(--ramka-kontrolka);
+  border-radius: var(--promien);
+  margin: .5em 0; cursor: pointer; background: var(--tlo-karta);
+}
+.gm-odpowiedz > span:not(.gm-odpowiedz__znak) { flex: 1 1 12ch; min-width: 0; }
+.gm-odpowiedz:hover { background: var(--tlo); }
+.gm-odpowiedz input { margin: .25em 0 0; width: 1.15em; height: 1.15em; accent-color: var(--akcent); flex: none; }
+.gm-odpowiedz--ok  { border-color: var(--pozytyw); background: var(--tlo-ok); }
+.gm-odpowiedz--zle { border-color: var(--akcent);  background: var(--tlo-zle); }
+.gm-odpowiedz:has(input:checked:not(:disabled)) { border-color: var(--glowny); }
+@supports selector(:has(*)) {
+  .gm-odpowiedz:has(input:focus-visible) { outline: 3px solid var(--akcent-ciemny); outline-offset: 2px; }
+  .gm-odpowiedz input:focus-visible { outline: none; }
+}
+/* stan odpowiedzi nie samym kolorem (1.4.1) — znacznik tekstowy */
+.gm-odpowiedz__znak { font-weight: 700; margin-left: auto; flex: none; }
+.gm-odpowiedz--ok  .gm-odpowiedz__znak { color: var(--pozytyw); }
+.gm-odpowiedz--zle .gm-odpowiedz__znak { color: var(--akcent); }
+.gm-postep { margin-bottom: 0; }
+
+/* pełna lista elementów gry w wersji tekstowej */
+.gm-lista-elementow { margin-top: 1.8em; }
+.gm-lista-elementow > summary { cursor: pointer; font-weight: 600; color: var(--glowny); min-height: 44px; padding: .5em 0; }
+.gm-lista-elementow ol { padding-left: 1.4em; }
+.gm-lista-elementow li { margin: .6em 0; }
+
+/* źródła */
+.gm-zrodla { margin: 0; padding: 0; list-style: none; }
+.gm-zrodla li { padding: .6em 0; border-top: 1px solid var(--ramka); max-width: 68ch; }
+.gm-zrodla li:first-child { border-top: 0; }
+
+/* 1.4.10 Reflow: 320 px bez poziomego przewijania */
+@media (max-width: 26rem) {
+  :root { --odstep: 16px; }
+  .gm-strona .gm-przycisk { width: 100%; justify-content: center; }
+  .gm-odpowiedz__znak { width: 100%; margin-left: 0; text-align: right; }
+}
+
+/* ——— cwiczenie.css ——— */
+/* gry-moodle 0.2.0 — NIE EDYTUJ W KURSIE, poprawiaj w PLUGIN/gry-moodle (~/.claude/local-marketplace-maciek/plugins/gry-moodle) */
+/* cwiczenia/cwiczenie.css — warstwa ćwiczeń: nagłówek, polecenie, ekran startowy z poziomami, informacja zwrotna,
+   kafle liczb, podsumowanie z tabelą. Kolory WYŁĄCZNIE z tokenów rdzen.css (kurs nadpisuje je polem `motyw` banku).
+   Tokeny opcjonalne: --fokus (obrys fokusu; domyślnie --akcent-ciemny), --wyroznik (akcent ostrzegawczy;
+   domyślnie --akcent), --tlo-blok (tło bloków i kafli; domyślnie --tlo-karta), --nad (napis nad tytułem; domyślnie --na-glebi). Bez `opacity` (B8 — znosi wyjątek kontrastu); stany nie samym kolorem (1.4.1). */
+
+.gm-cw { display: block; min-width: 0; }
+.gm-cw *, .gm-cw *::before, .gm-cw *::after { box-sizing: border-box; }
+.gm-cw p, .gm-cw ul, .gm-cw ol, .gm-cw li, .gm-cw figure,
+.gm-cw h2, .gm-cw h3, .gm-cw h4, .gm-cw h5, .gm-cw h6 { margin: 0; padding: 0; }
+.gm-cw fieldset { margin: 0; }   /* bez padding: 0 — reset (0,1,1) przebijałby klasy pól (0,1,0) */
+
+/* nagłówek (format Strona: pas z „nad” i tytułem) */
+.gm-cw__glowa { background: var(--tlo-glebia); color: var(--na-glebi); padding: 14px 20px;
+  display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; }
+.gm-cw__nad { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; font-weight: 700; color: var(--nad, var(--na-glebi)); }
+.gm-cw__tytul { width: 100%; font-size: 20px; font-weight: 700; line-height: 1.25; color: var(--na-glownym); }
+.gm-cw__cialo { padding: 20px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.gm-cw__cialo > * { min-width: 0; }
+/* scorm/html: ćwiczenie siedzi w karcie strony, która ma własny odstęp — bez drugiego wcięcia */
+.gm-cw[data-gm-tytul="ukryj"] > .gm-cw__cialo { padding: 0; }
+.gm-cw__polecenie { font-weight: 600; color: var(--tekst); max-width: 62ch; }
+
+/* ekran — kolumna z auto-marginesami (skill widgety-moodle-strona: max-width zawsze z marginesami auto) */
+.gm-cw__ekran { display: flex; flex-direction: column; gap: 14px; min-width: 0; width: 100%; max-width: 46rem;
+  margin-left: auto; margin-right: auto; container-type: inline-size; }
+.gm-cw__ekran > * { min-width: 0; }
+.gm-cw__lead { font-size: 17px; max-width: 62ch; }
+.gm-cw p.gm-cw__uwaga { font-size: 14px; color: var(--tekst-slaby); border-left: 3px solid var(--ramka-kontrolka);
+  padding: 8px 12px; background: var(--tlo-blok, var(--tlo-karta)); }
+
+/* wybór poziomu */
+.gm-cw__poziomy { border: 1px solid var(--ramka); border-radius: 6px; padding: 12px 14px; background: var(--tlo-blok, var(--tlo-karta));
+  margin: 0; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.gm-cw__pyt { font-weight: 700; }
+.gm-cw__opcja { display: flex; align-items: flex-start; gap: 10px; border: 2px solid var(--ramka-kontrolka); border-radius: 6px;
+  padding: 9px 12px; cursor: pointer; background: var(--tlo-karta); min-height: 44px; margin: 0; }
+.gm-cw__opcja:hover { background: var(--tlo); }
+.gm-cw__opcja:has(.gm-cw__radio:checked) { border-color: var(--tekst); background: var(--tlo); }
+.gm-cw__opcja:focus-within { outline: 3px solid var(--fokus, var(--akcent-ciemny)); outline-offset: 2px; }
+.gm-cw__radio { width: 20px; height: 20px; accent-color: var(--wyroznik, var(--akcent)); margin: 2px 0 0; flex: none; }
+.gm-cw__opt { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.gm-cw__optnazwa { font-weight: 700; }
+.gm-cw__opttekst { color: var(--tekst-slaby); font-size: 14px; }
+
+/* szczegóły zasad */
+.gm-cw__szczegoly { border: 1px solid var(--ramka); border-radius: 6px; background: var(--tlo-blok, var(--tlo-karta)); padding: 0 14px; }
+.gm-cw__szczegoly summary { cursor: pointer; font-weight: 700; min-height: 44px; display: flex; align-items: center;
+  justify-content: space-between; gap: 10px; padding: 6px 0; list-style: none; }
+.gm-cw__szczegoly summary::-webkit-details-marker { display: none; }
+.gm-cw__szczegoly summary::after { content: ""; flex: none; width: 9px; height: 9px; border-right: 2px solid var(--tekst);
+  border-bottom: 2px solid var(--tekst); transform: rotate(45deg); margin: -4px 4px 0 10px; }
+.gm-cw__szczegoly[open] summary::after { transform: rotate(-135deg); margin-top: 4px; }
+.gm-cw__szczegoly ul { padding-bottom: 12px; }
+
+/* listy z kwadratowym znacznikiem */
+.gm-cw ul.gm-cw__lista { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.gm-cw ul.gm-cw__lista > li { padding-left: 18px; position: relative; }
+.gm-cw ul.gm-cw__lista > li::before { content: ""; position: absolute; left: 0; top: .62em; width: 7px; height: 7px;
+  background: var(--wyroznik, var(--akcent)); border-radius: 1px; }
+.gm-cw ul.gm-cw__lista--odstep { gap: 14px; }
+.gm-cw__lista--odstep li > * + * { margin-top: 4px; }
+.gm-cw__wyj { color: var(--tekst-slaby); }
+
+/* przyciski warstwy */
+.gm-cw .gm-przycisk { justify-content: center; text-align: center; }
+.gm-cw .gm-przycisk:focus-visible, .gm-cw :focus-visible { outline: 3px solid var(--fokus, var(--akcent-ciemny)); outline-offset: 2px; }
+.gm-cw__duzy { font-size: 18px; min-height: 52px; width: 100%; }
+.gm-cw__przyciski { display: flex; flex-wrap: wrap; gap: 10px; }
+
+/* kafle liczb (HUD i podsumowanie) */
+.gm-cw__hud { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.gm-cw__hud--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.gm-cw__hud--1 { grid-template-columns: minmax(0, 1fr); }
+@container (min-width: 28rem) { .gm-cw__hud--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.gm-cw__kafel { border: 1px solid var(--ramka); background: var(--tlo-blok, var(--tlo-karta)); border-radius: 6px; padding: 8px 10px; min-width: 0;
+  display: flex; flex-direction: column; gap: 2px; justify-content: flex-start; }
+.gm-cw__kafel-n { font-size: 13px; font-weight: 700; color: var(--tekst-slaby); line-height: 20px; }
+.gm-cw__kafel-w { font-size: 22px; font-weight: 700; line-height: 1.15; color: var(--tekst); font-variant-numeric: tabular-nums; }
+
+/* informacja zwrotna (czeka na „Dalej”) */
+.gm-cw__info { border: 2px solid var(--ramka-kontrolka); border-left-width: 6px; background: var(--tlo-karta); border-radius: 8px;
+  padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+.gm-cw__info--ok { border-color: var(--pozytyw); background: var(--tlo-ok); }
+.gm-cw__info--zle { border-color: var(--wyroznik, var(--akcent)); background: var(--tlo-zle); }
+.gm-cw__info:focus { outline: none; }
+
+/* pytanie z „Sprawdź” */
+.gm-cw__pytanie { border: 0; padding: 0; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.gm-cw__legenda { font-weight: 700; padding: 0; font-size: 1em; }
+.gm-cw__odp { display: flex; align-items: flex-start; gap: 10px; min-height: 44px; padding: 9px 12px; margin: 0;
+  border: 2px solid var(--ramka-kontrolka); border-radius: 8px; background: var(--tlo-karta); cursor: pointer; }
+.gm-cw__odp input { width: 20px; height: 20px; margin: 2px 0 0; flex: none; accent-color: var(--wyroznik, var(--akcent)); }
+.gm-cw__odp > span { flex: 1 1 auto; min-width: 0; }
+.gm-cw__odp--ok { border-color: var(--pozytyw); background: var(--tlo-ok); }
+.gm-cw__odp--zle { border-color: var(--wyroznik, var(--akcent)); background: var(--tlo-zle); }
+.gm-cw__odp > .gm-cw__znak { flex: none; font-weight: 700; }
+.gm-cw__brak { font-weight: 700; color: var(--tekst); border-left: 4px solid var(--uwaga); padding-left: 10px; }
+
+/* podsumowanie */
+.gm-cw__koniec { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.gm-cw__koniec > * { min-width: 0; }
+.gm-cw__wynik-h { font-size: 22px; font-weight: 700; line-height: 1.25; }
+.gm-cw__wynik-h:focus { outline: none; }
+.gm-cw__wynik-h:focus-visible { outline: 2px solid var(--tekst); outline-offset: 3px; }
+.gm-cw .gm-cw__sekcja { font-size: 17px; font-weight: 700; padding-top: 6px; }
+.gm-cw__tabela { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+.gm-cw__tabela caption { text-align: left; font-weight: 700; padding-bottom: 6px; }
+.gm-cw__tabela th, .gm-cw__tabela td { border: 1px solid var(--ramka); padding: 6px 8px; text-align: left; vertical-align: top; }
+/* wersja tekstowa w widgecie (format Strona) */
+.gm-cw__wt { border-top: 1px solid var(--ramka); padding-top: 10px; }
+.gm-cw__wt > summary { cursor: pointer; font-weight: 700; min-height: 44px; padding: 10px 0; }
+.gm-cw__wt > * + * { margin-top: 10px; }
+.gm-cw ol.gm-cw__wt-lista { padding-left: 1.6em; display: flex; flex-direction: column; gap: 8px; }
+.gm-cw__awaria { border-left: 4px solid var(--uwaga); padding: 10px 12px; background: var(--tlo-karta); }
+
+@media (max-width: 420px) {
+  .gm-cw__cialo { padding: 15px; gap: 10px; }
+  .gm-cw__glowa { padding: 12px 15px; }
+  .gm-cw__ekran { gap: 10px; }
+  .gm-cw__kafel { padding: 6px 8px; }
+  .gm-cw__kafel-w { font-size: 20px; }
+}
+@media (forced-colors: active) {
+  .gm-cw__opcja, .gm-cw__odp, .gm-cw__info { border-color: CanvasText; }
+}
+
+/* ——— kolejnosc.css ——— */
+/* gry-moodle 0.5.0 — NIE EDYTUJ W KURSIE, poprawiaj w PLUGIN/gry-moodle (~/.claude/local-marketplace-maciek/plugins/gry-moodle) */
+/* mechaniki/kolejnosc/kolejnosc.css — ćwiczenie „ułóż we właściwej kolejności”: lista kroków z przyciskami ruchu.
+   Kolory tylko z tokenów rdzenia i warstwy (--tlo-blok, --wyroznik, --fokus z zapasem); bez #hex i bez `opacity` (B8).
+   Ocena kroku nie samym kolorem (1.4.1): znak ✓/✗ + tekst dla czytnika + grubsza ramka. Cele ≥ 44 px (2.5.8).
+   Wąski ekran (kontener < 26rem): przyciski ruchu pod tekstem kroku, tekst ma pełną szerokość (ME: strzałki uciekały
+   poza kartę przy 320 px — poprawka w KONTRAKT.md ME). */
+
+.gm-ko__plansza { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.gm-ko__ster { display: flex; justify-content: flex-end; }
+.gm-cw p.gm-ko__polecenie { font-weight: 600; }
+
+.gm-cw ol.gm-ko__lista { list-style: none; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.gm-cw .gm-ko__krok { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto auto; align-items: center; gap: 8px 10px;
+  border: 2px solid var(--ramka-kontrolka); border-radius: 8px; background: var(--tlo-blok, var(--tlo-karta)); padding: 8px 10px;
+  min-width: 0; }
+.gm-ko__nr { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 50%;
+  border: 2px solid var(--ramka-kontrolka); font-weight: 700; font-variant-numeric: tabular-nums; color: var(--tekst); }
+.gm-ko__tekst { min-width: 0; overflow-wrap: anywhere; color: var(--tekst); line-height: 1.35; }
+.gm-ko__ocena { min-width: 1.2em; font-weight: 700; text-align: center; }
+.gm-ko__ocena:empty { min-width: 0; }
+.gm-ko__ruchy { display: flex; gap: 6px; }
+.gm-cw .gm-ko__ruch { min-width: 44px; min-height: 44px; padding: 4px 10px; color: var(--tekst); background: var(--tlo-karta); }
+.gm-cw .gm-ko__ruch:hover { background: var(--tlo); color: var(--tekst); }
+.gm-ko__strzalka { font-size: 20px; line-height: 1; font-weight: 700; }
+/* krańcowy przycisk: aria-disabled (nie `disabled` — B8), czytelny — ramka przerywana, tekst bez zmiany koloru */
+.gm-cw .gm-ko__ruch[aria-disabled="true"] { border-style: dashed; cursor: default; background: var(--tlo-karta); color: var(--tekst); }
+.gm-cw .gm-ko__krok.gm-ko__krok--ok { border: 3px solid var(--pozytyw); background: var(--tlo-ok); }
+.gm-cw .gm-ko__krok.gm-ko__krok--zle { border: 3px dashed var(--wyroznik, var(--akcent)); background: var(--tlo-zle); }
+
+.gm-ko__sprawdz { align-self: flex-start; }
+.gm-ko__po:empty { display: none; }
+.gm-ko__klucz { align-self: flex-start; }
+.gm-ko__pauzainfo { border: 1px solid var(--ramka); border-radius: 8px; padding: 14px 16px; background: var(--tlo-blok, var(--tlo-karta));
+  display: flex; align-items: center; }
+.gm-ko__podp { font-size: 14px; }
+
+/* podsumowanie: właściwa kolejność */
+.gm-ko__klucze { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.gm-cw ol.gm-ko__klucz-lista { padding-left: 1.6em; display: flex; flex-direction: column; gap: 4px; }
+.gm-cw p.gm-ko__klucz-pol { font-weight: 700; }
+
+@container (max-width: 26rem) {
+  .gm-cw .gm-ko__krok { grid-template-columns: 32px minmax(0, 1fr) auto; grid-template-areas: "nr tekst ocena" "nr ruchy ruchy"; }
+  .gm-ko__nr { grid-area: nr; align-self: start; }
+  .gm-ko__tekst { grid-area: tekst; }
+  .gm-ko__ocena { grid-area: ocena; }
+  .gm-ko__ruchy { grid-area: ruchy; }
+}
+
+@media (forced-colors: active) {
+  .gm-cw .gm-ko__krok, .gm-ko__nr { border-color: CanvasText; }
+  .gm-cw .gm-ko__krok.gm-ko__krok--ok, .gm-cw .gm-ko__krok.gm-ko__krok--zle { border-color: Highlight; }
+}
+
+</style>
+</head>
+<body class="gm-strona">
+
+<a class="gm-pomin" href="#tresc">Przejdź do treści</a>
+
+<header class="gm-pas">
+  <h1>Po infekcji: ułóż kroki we właściwej kolejności</h1>
+  <p></p>
+</header>
+
+<main id="tresc" tabindex="-1">
+<div class="gm-karta gm-karta--gra">
+  <h2>Po infekcji: ułóż kroki we właściwej kolejności</h2>
+  <div data-gra data-gra-id="holdup-po-infekcji" data-gra-przestrzen="holdup" data-gm-ukonczenie="brak" data-gm-mechanika="kolejnosc" data-gm-widok="cwiczenie" data-gm-naglowek="2" data-gm-tytul="ukryj"></div>
+  <noscript><div class="gm-reakcja gm-reakcja--uwaga"><p>Ćwiczenie wymaga JavaScriptu. Tę samą treść bez ćwiczenia znajdziesz niżej, w części „Wersja tekstowa”.</p></div></noscript>
+</div>
+
+<section class="gm-karta" id="wersja-tekstowa" data-gm-wersja-tekstowa data-gra-id="holdup-po-infekcji">
+  <h2>Wersja tekstowa</h2>
+  <p>Te same zestawy bez ćwiczenia: kroki we właściwej kolejności z uzasadnieniem i źródłem.</p>
+  <details class="gm-lista-elementow">
+    <summary>Wszystkie zestawy we właściwej kolejności (1)</summary>
+    <ol>
+      <li><strong>Podejrzewasz, że na komputerze działa złośliwy program kradnący hasła. Ułóż kroki od pierwszego do ostatniego. Przesuwaj kroki przyciskami wyżej i niżej, a potem sprawdź kolejność.</strong> — 1. Odłącz urządzenie od sieci; 2. Z innego, czystego urządzenia zmień hasła zapisane w przeglądarce i wpisane po infekcji; 3. Zmień hasła powtarzane w innych serwisach; 4. Usuń nieznane zalogowane urządzenia i sprawdź dane odzyskiwania konta; 5. Zadzwoń do banku, jeśli zagrożone są karty; 6. Zgłoś sprawę na incydent.cert.pl; 7. Zachowaj potrzebne pliki i zainstaluj system od nowa. Krok 1: Złośliwy program wysyła skradzione dane przez sieć (e-mailem, na serwer plików, komunikatorem). Odłączenie przerywa ten kanał, zanim zrobisz cokolwiek innego. Krok 2: Hasła zmienia się z urządzenia, które nie jest zainfekowane, bo na zainfekowanym nowe hasło trafiłoby prosto do przestępcy. Najpierw te, które program mógł już zdobyć: zapisane w przeglądarce i aplikacjach oraz wpisane po infekcji. Krok 3: Dopiero po najpilniejszych kontach przychodzi kolej na serwisy, w których użyto tego samego hasła. Skradzione hasło działa tam tak samo. Krok 4: Przy nowym haśle przestępca z ciasteczkiem sesji bywa nadal zalogowany. Nieznane urządzenia na liście, zmienione dane odzyskiwania i aplikacje z dostępem to sygnały włamania, które trzeba usunąć po zmianie haseł. Krok 5: Dane z aplikacji i przeglądarki mogły objąć karty płatnicze. Bank może zablokować kartę, a to zabezpiecza pieniądze, zanim zajmiesz się resztą. Krok 6: Zgłoszenie trafia do zespołu, który zbiera i analizuje takie incydenty. Robi się je po zabezpieczeniu kont, a przed czyszczeniem komputera, bo potem śladów już nie będzie. Krok 7: Skan antywirusowy nie daje gwarancji, że program zniknął, więc komputer czyści się instalacją od nowa. Potrzebne pliki zachowuje się wcześniej, bo reinstalacja kasuje dane. To krok ostatni, bo niszczy ślady. Źródło: CERT Polska, raport 2025, post „Złośliwe programy”, pole „Co robić” i akapit „Telefon, objawy i co robić po infekcji”.</li>
+    </ol>
+  </details>
+</section>
+
+<div class="gm-karta">
+  <h2>Źródła</h2>
+  <ul class="gm-zrodla">
+    <li>CERT Polska / NASK (2026). Krajobraz bezpieczeństwa polskiego internetu. Raport roczny 2025. NASK. Zalecenia po infekcji, cytowane w kursie HoldUp, post „Złośliwe programy: kradzież haseł, przejęte konta i okup”. — materiał kursu HoldUp, post zlosliwe (dostęp: 22.10.2026).</li>
+  </ul>
+</div>
+</main>
+
+
+<script data-gm-plik="rdzen.js">
+/* gry-moodle 0.2.0 — NIE EDYTUJ W KURSIE, poprawiaj w PLUGIN/gry-moodle (~/.claude/local-marketplace-maciek/plugins/gry-moodle) */
+/* rdzen.js — WARSTWA WSPÓLNA gier i ćwiczeń. Ładowana zawsze, przed gra.js / cwiczenie.js.
+ *
+ * Rdzeń nie zna gier ani mechanik. Daje przestrzeń globalną `Gm`:
+ *   Gm.bezpieczny(t), Gm.tekstZHtml(h), Gm.gotowe(fn)
+ *   Gm.losowanie(ziarno) → funkcja 0..1 (powtarzalna, gdy ziarno podane; bez ziarna Math.random)
+ *   Gm.tasuj(a, ziarnoAlboLos), Gm.losuj(a, los), Gm.ogranicz, Gm.lerp, Gm.wygladz, Gm.rgba
+ *   Gm.ogloszenia(kontener) → {powiedz(tekst), el}   region aria-live TWORZONY PRZY STARCIE (przed pierwszym
+ *                           komunikatem — region dodany w chwili mówienia czytnik często pomija)
+ *   Gm.dzwiek(ustawienia)  → {graj, muzyka, odblokuj}   Web Audio, odzywa się dopiero PO GEŚCIE gracza
+ *   Gm.klucz(przestrzen, …czesci) → "<przestrzen>-…"; Gm.magazyn.czytaj/zapisz (localStorage w try/catch)
+ *   Gm.ustawienia(przestrzen, domyslne) → {wartosci, zapisz()}   klucz "<przestrzen>-gry-ustawienia"
+ *   Gm.rekord(przestrzen, id, punkty) → {rekord, nowy}           klucz "<przestrzen>-gra-<id>-rekord"
+ *   Gm.tempo.{TEMPO, ustaw(konf), czasZeSlow(tekst) → ms, domyslneTempo(konf) → "spokojne"|"normalne"}
+ *   Gm.ukoncz({tryb:"gra"|"modul"|"brak", przestrzen, id, korzen})  — raz na wczytanie strony na grę
+ *   Gm.lms.{start(), zakoncz()}  — globalny `Scorm` (most z paczki), a gdy go brak — własne szukanie API SCORM 1.2
+ *   Gm.wersjaTekstowa.{przejdz(), uruchom(kontener, naKoniec)}  — odsyłacz i zaliczenie z wersji tekstowej
+ *   Gm.wstrzyknijCss(nazwa, css)  — element style do head raz na nazwę i wersję rdzenia (format Strona, widoki mechanik)
+ *   Gm.konfiguracja(korzen) → {id, przestrzen, ukonczenie, dane}   dane = window.GM_DANE[data-gra-id] (lekcja L12)
+ *
+ * Do Moodle idzie wyłącznie „ukończone” (decyzja 9). Wyniku punktowego rdzeń nie wysyła i nie umie wysłać.
+ */
+(function (global) {
+  "use strict";
+
+  var WERSJA = "0.2.0";
+  if (global.Gm && global.Gm.wersja === WERSJA) return;   /* dwie gry na jednej stronie — rdzeń raz */
+
+  var doc = global.document;
+
+  /* ——— drobne narzędzia ——— */
+
+  function bezpieczny(t) {
+    /* [<] zamiast samego < : ciąg „</” (np. w /</g) generator formatu Strona zamienia na „<\/” — w wyrażeniu regularnym to błąd */
+    return String(t == null ? "" : t).replace(/&/g, "&amp;").replace(/[<]/g, "&lt;")
+      .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+  function tekstZHtml(h) {
+    var d = doc.createElement("div");
+    d.innerHTML = h;
+    return (d.textContent || "").replace(/\s+/g, " ").trim();
+  }
+  function gotowe(fn) {
+    if (doc.readyState === "loading") doc.addEventListener("DOMContentLoaded", fn);
+    else fn();
+  }
+  function ogranicz(v, a, b) { return Math.max(a, Math.min(b, v)); }
+  function lerp(a, b, t) { return a + (b - a) * t; }
+  function wygladz(t) { t = ogranicz(t, 0, 1); return 1 - Math.pow(1 - t, 3); }
+  function rgba(hex, alfa) {
+    var h = String(hex).replace("#", "").trim();
+    if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+    var n = parseInt(h, 16);
+    if (isNaN(n)) return String(hex);   /* token w innym zapisie niż #hex — oddajemy bez przezroczystości */
+    return "rgba(" + ((n >> 16) & 255) + "," + ((n >> 8) & 255) + "," + (n & 255) + "," + alfa + ")";
+  }
+
+  /* ——— losowanie z ziarnem ———
+     Ziarno (tekst albo liczba) daje powtarzalną kolejność: generator i testy losują to samo przy każdym
+     uruchomieniu. Bez ziarna — Math.random (runda w grze ma być za każdym razem inna). */
+  function hasz(tekst) {
+    var h = 2166136261 >>> 0, s = String(tekst);
+    for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+    return h >>> 0;
+  }
+  function losowanie(ziarno) {
+    if (ziarno == null || ziarno === "") return Math.random;
+    var a = typeof ziarno === "number" ? (ziarno >>> 0) : hasz(ziarno);
+    return function () {   /* mulberry32 */
+      a = (a + 0x6D2B79F5) >>> 0;
+      var t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function jakoLos(z) { return typeof z === "function" ? z : losowanie(z); }
+  /* Fisher–Yates; zwraca NOWĄ tablicę. */
+  function tasuj(a, ziarnoAlboLos) {
+    var los = jakoLos(ziarnoAlboLos), b = a.slice();
+    for (var i = b.length - 1; i > 0; i--) {
+      var j = Math.floor(los() * (i + 1));
+      var t = b[i]; b[i] = b[j]; b[j] = t;
+    }
+    return b;
+  }
+  function losuj(a, ziarnoAlboLos) { return a[Math.floor(jakoLos(ziarnoAlboLos)() * a.length)]; }
+
+  /* ——— magazyn i klucze ———
+     Wszystkie paczki SCORM na jednym Moodle dzielą origin, a więc i localStorage (L15, TOP 15 #11):
+     każdy klucz ma przestrzeń kursu i identyfikator gry. */
+  function klucz(przestrzen) {
+    var czesci = [przestrzen || "gm"];
+    for (var i = 1; i < arguments.length; i++) czesci.push(arguments[i]);
+    return czesci.join("-");
+  }
+  var magazyn = {
+    czytaj: function (k) {
+      try { return global.localStorage.getItem(k); } catch (e) { return null; }   /* prywatne okno, blokada */
+    },
+    zapisz: function (k, v) {
+      try { global.localStorage.setItem(k, String(v)); return true; } catch (e) { return false; }
+    }
+  };
+
+  /* Ustawienia gracza wspólne dla wszystkich gier kursu (tempo, dźwięk, muzyka).
+     Tempo z magazynu liczy się TYLKO wtedy, gdy gracz sam je wybrał (tempoWybrane) — inaczej obowiązuje
+     domyślne tempo pluginu „bez pośpiechu” (decyzja 10). Stare zapisy gier ZZR nie mają tej flagi,
+     więc ich „normalne” (zapisane przy okazji przełączenia dźwięku) nie przykrywa nowego domyślnego. */
+  function ustawienia(przestrzen, domyslne) {
+    var k = klucz(przestrzen, "gry", "ustawienia");
+    var u = {
+      tempo: domyslne && domyslne.tempo === "normalne" ? "normalne" : "spokojne",
+      tempoWybrane: false,
+      dzwiek: !(domyslne && domyslne.dzwiek === false),
+      muzyka: !!(domyslne && domyslne.muzyka)
+    };
+    try {
+      var z = JSON.parse(magazyn.czytaj(k) || "null");
+      if (z && typeof z === "object") {
+        if (z.tempoWybrane === true && (z.tempo === "spokojne" || z.tempo === "normalne")) {
+          u.tempo = z.tempo; u.tempoWybrane = true;
+        }
+        if (typeof z.dzwiek === "boolean") u.dzwiek = z.dzwiek;
+        if (typeof z.muzyka === "boolean") u.muzyka = z.muzyka;
+      }
+    } catch (e) { /* uszkodzony zapis — domyślne */ }
+    return {
+      wartosci: u,
+      zapisz: function () { magazyn.zapisz(k, JSON.stringify(u)); }
+    };
+  }
+
+  function rekord(przestrzen, id, punkty) {
+    var k = klucz(przestrzen, "gra", id, "rekord");
+    var stary = Number(magazyn.czytaj(k)) || 0;
+    if (punkty > stary) magazyn.zapisz(k, punkty);
+    return { rekord: Math.max(stary, punkty), nowy: punkty > stary && stary > 0 };
+  }
+
+  /* ——— tempo ———
+     TOP 15 #4: domyślnie BEZ limitu; czas na przeczytanie liczony ze słów, jedna stała TEMPO
+     (większa = wolniej). Konfiguracja przychodzi z banku: tempo {domyslne, TEMPO, bazowo_s, na_slowo_s, min_s}. */
+  var tempo = {
+    TEMPO: 1.0, bazowo_s: 6, na_slowo_s: 0.45, min_s: 4.5,
+    ustaw: function (konf) {
+      konf = konf || {};
+      ["TEMPO", "bazowo_s", "na_slowo_s", "min_s"].forEach(function (p) {
+        if (typeof konf[p] === "number" && konf[p] > 0) tempo[p] = konf[p];
+      });
+      return tempo;
+    },
+    slowa: function (t) {
+      var s = String(t == null ? "" : t).replace(/<[^>]*>/g, " ").trim();
+      return s ? s.split(/\s+/).length : 0;
+    },
+    czasZeSlow: function (t) {
+      var s = Math.max(tempo.min_s, tempo.bazowo_s + tempo.na_slowo_s * tempo.slowa(t));
+      return Math.round(s * tempo.TEMPO * 1000);
+    },
+    /* "bez-limitu" (domyślne pluginu) → silnik startuje w tempie spokojnym; "normalne" tylko świadomie */
+    domyslneTempo: function (konf) {
+      return konf && konf.domyslne === "normalne" ? "normalne" : "spokojne";
+    }
+  };
+
+  /* ——— ogłoszenia dla czytnika ——— */
+  function ogloszenia(kontener) {
+    var p = doc.createElement("p");
+    p.className = "gm-sr";
+    p.setAttribute("aria-live", "polite");
+    p.setAttribute("aria-atomic", "true");
+    (kontener || doc.body).appendChild(p);
+    var zegar = 0;
+    return {
+      el: p,
+      powiedz: function (tekst) {
+        p.textContent = "";
+        global.clearTimeout(zegar);
+        /* pusty → treść: czytnik odczyta także to samo zdanie powtórzone drugi raz */
+        zegar = global.setTimeout(function () { p.textContent = tekst; }, 60);
+      }
+    };
+  }
+
+  /* ——— dźwięk: syntezowany, bez plików, dopiero po geście ———
+     AudioContext tworzony przed gestem gracza jest wstrzymany przez przeglądarkę i sypie ostrzeżeniami.
+     Dlatego graj()/muzyka() milczą, dopóki gra nie zawoła odblokuj() z obsługi kliknięcia. */
+  function dzwiek(ust) {
+    var ctx = null, glowny = null, muzykaWzmocnienie = null, poGescie = false;
+    var planista = null, nastepnaNuta = 0, krok = 0, konf = { tempo: 96, podstawa: 0 };
+
+    function gotowy() {
+      if (!poGescie) return false;
+      if (ctx) {
+        if (ctx.state === "suspended" && ctx.resume) ctx.resume();
+        return true;
+      }
+      var AC = global.AudioContext || global.webkitAudioContext;
+      if (!AC) return false;
+      try { ctx = new AC(); } catch (e) { return false; }
+      glowny = ctx.createGain();
+      glowny.gain.value = 0.22;
+      glowny.connect(ctx.destination);
+      muzykaWzmocnienie = ctx.createGain();
+      muzykaWzmocnienie.gain.value = 0;
+      muzykaWzmocnienie.connect(glowny);
+      return true;
+    }
+    function odblokuj() { poGescie = true; return gotowy(); }
+
+    function nuta(hz, start, dlugosc, typ, glosnosc, doHz, cel) {
+      var o = ctx.createOscillator(), w = ctx.createGain();
+      o.type = typ || "sine";
+      o.frequency.setValueAtTime(hz, start);
+      if (doHz) o.frequency.exponentialRampToValueAtTime(doHz, start + dlugosc);
+      w.gain.setValueAtTime(0.0001, start);
+      w.gain.exponentialRampToValueAtTime(glosnosc || 0.4, start + Math.min(0.02, dlugosc / 3));
+      w.gain.exponentialRampToValueAtTime(0.0001, start + dlugosc);
+      o.connect(w);
+      w.connect(cel || glowny);
+      o.start(start);
+      o.stop(start + dlugosc + 0.03);
+    }
+
+    /* [Hz, przesunięcie s, długość s, kształt, głośność, glissando do Hz] */
+    var EFEKTY = {
+      klik: [[880, 0, 0.05, "square", 0.1]],
+      tik: [[1250, 0, 0.03, "sine", 0.14]],
+      ok: [[660, 0, 0.09, "triangle", 0.42], [990, 0.08, 0.15, "triangle", 0.42]],
+      zbierz: [[784, 0, 0.07, "sine", 0.38], [1175, 0.06, 0.13, "sine", 0.34]],
+      blad: [[208, 0, 0.2, "sawtooth", 0.2, 139]],
+      zdarzenie: [[523, 0, 0.08, "triangle", 0.34], [659, 0.09, 0.08, "triangle", 0.34], [784, 0.18, 0.15, "triangle", 0.34]],
+      alarm: [[440, 0, 0.12, "square", 0.14], [330, 0.15, 0.18, "square", 0.14]],
+      poziom: [[523, 0, 0.1, "triangle", 0.38], [659, 0.1, 0.1, "triangle", 0.38], [784, 0.2, 0.1, "triangle", 0.38], [1047, 0.3, 0.28, "triangle", 0.42]],
+      koniec: [[392, 0, 0.16, "triangle", 0.38], [523, 0.16, 0.16, "triangle", 0.38], [659, 0.32, 0.16, "triangle", 0.38], [784, 0.48, 0.45, "triangle", 0.42]],
+      start: [[330, 0, 0.1, "triangle", 0.34], [494, 0.1, 0.1, "triangle", 0.34], [659, 0.2, 0.22, "triangle", 0.4]]
+    };
+
+    function graj(nazwa) {
+      if (!ust.dzwiek || !gotowy()) return;
+      var e = EFEKTY[nazwa];
+      if (!e) return;
+      var t = ctx.currentTime + 0.01;
+      for (var i = 0; i < e.length; i++) nuta(e[i][0], t + e[i][1], e[i][2], e[i][3], e[i][4], e[i][5]);
+    }
+
+    /* Muzyka: łagodny, generowany motyw pentatoniczny — tło, nie melodia do zapamiętania. */
+    var PENTATONIKA = [0, 2, 4, 7, 9];
+    var BASY = [0, 5, 7, 3];
+    function hz(polton) { return 220 * Math.pow(2, polton / 12); }
+    function planuj() {
+      if (!ctx) return;
+      var osemka = 60 / (konf.tempo || 96) / 2;
+      while (nastepnaNuta < ctx.currentTime + 0.3) {
+        var wTakcie = krok % 16, takt = Math.floor(krok / 16);
+        if (wTakcie % 8 === 0) {
+          nuta(hz((konf.podstawa || 0) - 12 + BASY[takt % 4]), nastepnaNuta, osemka * 7, "triangle", 0.16, null, muzykaWzmocnienie);
+        }
+        if (wTakcie % 2 === 0 && (krok * 7) % 5 !== 0) {
+          var st = PENTATONIKA[(krok * 3 + takt) % 5] + (wTakcie > 10 ? 12 : 0);
+          nuta(hz((konf.podstawa || 0) + st), nastepnaNuta, osemka * 0.9, "sine", 0.09, null, muzykaWzmocnienie);
+        }
+        nastepnaNuta += osemka;
+        krok++;
+      }
+    }
+    function muzyka(wlacz, nowaKonf) {
+      if (nowaKonf) konf = nowaKonf;
+      var gra = !!(wlacz && ust.muzyka);
+      if (!gra && !ctx) return;
+      if (!gotowy()) return;
+      var teraz = ctx.currentTime;
+      muzykaWzmocnienie.gain.cancelScheduledValues(teraz);
+      muzykaWzmocnienie.gain.setTargetAtTime(gra ? 0.5 : 0, teraz, 0.25);
+      if (gra && !planista) {
+        nastepnaNuta = ctx.currentTime + 0.1;
+        planista = global.setInterval(planuj, 100);
+      } else if (!gra && planista) {
+        global.clearInterval(planista);
+        planista = null;
+      }
+    }
+
+    return { graj: graj, muzyka: muzyka, odblokuj: odblokuj };
+  }
+
+  /* ——— LMS: tylko „ukończone” ———
+     Gdy paczka ma most `Scorm` (formaty/scorm/scorm.js) — używamy go. Gdy nie ma (np. gra wstawiona
+     do cudzej paczki, PS — RAPORT-A §2 p. 6), rdzeń sam szuka API SCORM 1.2 w oknach nadrzędnych.
+     `completed` BEZ LMSFinish — sesję zamyka beforeunload (L63: po LMSFinish nic się już nie zapisuje). */
+  var lms = (function () {
+    var api = null, szukano = false, polaczono = false;
+    function szukaj(okno) {
+      var i = 0;
+      try {
+        while (okno && okno.API == null && okno.parent && okno.parent !== okno && i < 12) { i++; okno = okno.parent; }
+        return (okno && okno.API) || null;
+      } catch (e) { return null; }   /* ramka z innego origin */
+    }
+    function znajdz() {
+      if (szukano) return api;
+      szukano = true;
+      api = szukaj(global);
+      try { if (!api && global.opener && !global.opener.closed) api = szukaj(global.opener); } catch (e) { api = null; }
+      return api;
+    }
+    function wywolaj(m, a) {
+      if (!api) return "";
+      try { return api[m].apply(api, a || []); } catch (e) { return ""; }
+    }
+    return {
+      start: function () {
+        if (global.Scorm && global.Scorm.start) { try { return global.Scorm.start(); } catch (e) { return false; } }
+        if (polaczono || !znajdz()) return polaczono;
+        polaczono = wywolaj("LMSInitialize", [""]) === "true";
+        if (polaczono) {
+          var s = wywolaj("LMSGetValue", ["cmi.core.lesson_status"]);
+          if (!s || s === "not attempted") {
+            wywolaj("LMSSetValue", ["cmi.core.lesson_status", "incomplete"]);
+            wywolaj("LMSCommit", [""]);
+          }
+          global.addEventListener("beforeunload", function () {
+            if (polaczono) { wywolaj("LMSCommit", [""]); wywolaj("LMSFinish", [""]); }
+          });
+        }
+        return polaczono;
+      },
+      zakoncz: function () {
+        if (global.Scorm && global.Scorm.zakoncz) { try { global.Scorm.zakoncz(true); } catch (e) { /* podgląd */ } return; }
+        if (!polaczono) lms.start();
+        if (!polaczono) return;
+        wywolaj("LMSSetValue", ["cmi.core.lesson_status", "completed"]);
+        wywolaj("LMSCommit", [""]);
+      }
+    };
+  })();
+
+  /* ——— ukończenie: trzy tryby (ARCHITEKTURA §4.2) ———
+     gra   — gra jest osobną paczką: LMS dostaje „completed”
+     modul — gra jest ekranem modułu: tylko zdarzenie, LMS-em rządzi moduł kursu
+     brak  — Strona / samodzielny HTML: zapis lokalny + zdarzenie
+     We wszystkich trybach zostaje znacznik lokalny "<przestrzen>-gra-<id>-ukonczona" (jak w ZZR). */
+  var ukonczone = {};
+  function ukoncz(o) {
+    o = o || {};
+    var id = o.id || "bez-id";
+    var znak = klucz(o.przestrzen, "gra", id);
+    if (ukonczone[znak]) return false;
+    ukonczone[znak] = true;
+    var tryb = o.tryb === "modul" || o.tryb === "brak" ? o.tryb : "gra";
+    if (tryb === "gra") lms.zakoncz();
+    magazyn.zapisz(znak + "-ukonczona", "1");
+    var cel = o.korzen || doc;
+    try {
+      cel.dispatchEvent(new CustomEvent("gm:ukonczone", { bubbles: true, detail: { id: id, tryb: tryb, zrodlo: o.zrodlo || "gra" } }));
+    } catch (e) { /* stara przeglądarka bez CustomEvent */ }
+    return true;
+  }
+
+  /* ——— wstrzykiwanie CSS (format Strona: filtr Moodle wycina znacznik style z treści — CSS przychodzi z JS) ——— */
+  function wstrzyknijCss(nazwa, css) {
+    var znacznik = nazwa + "@" + WERSJA;
+    var istn = doc.querySelectorAll("style[data-gm-css]");
+    for (var i = 0; i < istn.length; i++) if (istn[i].getAttribute("data-gm-css") === znacznik) return false;
+    var st = doc.createElement("style");
+    st.setAttribute("data-gm-css", znacznik);
+    st.appendChild(doc.createTextNode(css));
+    (doc.head || doc.documentElement).appendChild(st);
+    return true;
+  }
+
+  /* ——— konfiguracja gry z korzenia i banku ——— */
+  function konfiguracja(korzen) {
+    var id = korzen.getAttribute("data-gra-id") || "";
+    var dane = (global.GM_DANE && global.GM_DANE[id]) || null;
+    return {
+      id: id,
+      przestrzen: korzen.getAttribute("data-gra-przestrzen") || (dane && dane.przestrzen) || "gm",
+      ukonczenie: korzen.getAttribute("data-gm-ukonczenie") || (dane && dane.ukonczenie) || (global.Scorm ? "gra" : "brak"),
+      dane: dane
+    };
+  }
+
+  /* ——— wersja tekstowa: odsyłacz i zaliczenie ———
+     Pytanie zatwierdza przycisk „Sprawdź odpowiedź”, nie samo zaznaczenie — zatwierdzanie na „change”
+     blokowało odpowiedzi 3 i 4 z klawiatury (L64). Stan pokazany znakiem i kolorem (1.4.1);
+     fokus na reakcji (4.1.3). Odpowiedź na wszystkie pytania zalicza materiał tak samo jak gra. */
+  var wersjaTekstowa = {
+    przejdz: function (idCelu) {
+      var cel = doc.getElementById(idCelu || "wersja-tekstowa");
+      if (!cel) return false;
+      if (cel.tagName === "DETAILS") cel.open = true;
+      cel.scrollIntoView({ block: "start" });
+      var h = cel.querySelector("h2, h3, summary");
+      if (h) {
+        if (h.tagName !== "SUMMARY") h.tabIndex = -1;
+        try { h.focus({ preventScroll: true }); } catch (e) { h.focus(); }
+      }
+      return true;
+    },
+    uruchom: function (kontener, naKoniec) {
+      var pytania = kontener.querySelectorAll("[data-gm-pytanie]");
+      var stan = { odpowiedziano: 0, wszystkich: pytania.length };
+      function postep() {
+        var l = kontener.querySelector("[data-gm-postep]");
+        if (l) l.textContent = stan.odpowiedziano + " z " + stan.wszystkich;
+        if (stan.wszystkich > 0 && stan.odpowiedziano === stan.wszystkich && naKoniec) naKoniec();
+      }
+      function znak(opcja, tekst) {
+        var s = doc.createElement("span");
+        s.className = "gm-odpowiedz__znak";
+        s.textContent = tekst;
+        opcja.appendChild(s);
+      }
+      Array.prototype.forEach.call(pytania, function (pytanie) {
+        var opcje = pytanie.querySelectorAll(".gm-odpowiedz");
+        var reakcja = pytanie.querySelector(".gm-reakcja");
+        if (!reakcja || !opcje.length) return;
+        reakcja.setAttribute("tabindex", "-1");
+        var przycisk = doc.createElement("button");
+        przycisk.type = "button";
+        przycisk.className = "gm-przycisk gm-pytanie__sprawdz";
+        przycisk.textContent = "Sprawdź odpowiedź";
+        reakcja.parentNode.insertBefore(przycisk, reakcja);
+        przycisk.addEventListener("click", function () {
+          if (pytanie.getAttribute("data-gm-zamkniete") === "tak") return;
+          var wybrana = null;
+          Array.prototype.forEach.call(opcje, function (o) {
+            var w = o.querySelector("input");
+            if (w && w.checked) wybrana = o;
+          });
+          if (!wybrana) {
+            reakcja.className = "gm-reakcja gm-reakcja--uwaga";
+            reakcja.innerHTML = "<p>Zaznacz jedną odpowiedź, a potem ją sprawdź.</p>";
+            reakcja.hidden = false;
+            reakcja.focus();
+            return;
+          }
+          pytanie.setAttribute("data-gm-zamkniete", "tak");
+          var dobra = wybrana.getAttribute("data-poprawna") === "tak";
+          stan.odpowiedziano += 1;
+          Array.prototype.forEach.call(opcje, function (o) {
+            var w = o.querySelector("input");
+            if (w) w.disabled = true;
+          });
+          wybrana.classList.add(dobra ? "gm-odpowiedz--ok" : "gm-odpowiedz--zle");
+          znak(wybrana, dobra ? "✓ dobrze" : "✗ nie tym razem");
+          if (!dobra) {
+            var wlasciwa = pytanie.querySelector('.gm-odpowiedz[data-poprawna="tak"]');
+            if (wlasciwa) { wlasciwa.classList.add("gm-odpowiedz--ok"); znak(wlasciwa, "✓ właściwa"); }
+          }
+          reakcja.className = "gm-reakcja " + (dobra ? "gm-reakcja--ok" : "gm-reakcja--zle");
+          reakcja.innerHTML = '<p><span class="gm-sr">' + (dobra ? "Dobrze. " : "Nie tym razem. ") + "</span>" +
+            bezpieczny(wybrana.getAttribute("data-reakcja") || "") + "</p>";
+          reakcja.hidden = false;
+          reakcja.focus();
+          przycisk.hidden = true;
+          postep();
+        });
+      });
+      postep();
+      return stan;
+    }
+  };
+
+  /* Na starcie strony: połączenie z LMS (status „incomplete”) i uruchomienie wersji tekstowych.
+     Wersja tekstowa wskazuje swoją grę przez data-gra-id — zalicza tak samo jak gra (równoważna, TOP 15 #10). */
+  gotowe(function () {
+    if (doc.querySelector('[data-gm-ukonczenie="gra"]')) lms.start();
+    Array.prototype.forEach.call(doc.querySelectorAll("[data-gm-wersja-tekstowa]"), function (k) {
+      if (k.getAttribute("data-gm-init")) return;
+      k.setAttribute("data-gm-init", "1");
+      var id = k.getAttribute("data-gra-id") || "";
+      var korzen = id ? doc.querySelector('[data-gra][data-gra-id="' + id + '"]') : null;
+      wersjaTekstowa.uruchom(k, function () {
+        var konf = korzen ? konfiguracja(korzen) : { id: id, przestrzen: k.getAttribute("data-gra-przestrzen") || "gm",
+          ukonczenie: k.getAttribute("data-gm-ukonczenie") || "brak" };
+        ukoncz({ tryb: konf.ukonczenie, przestrzen: konf.przestrzen, id: konf.id, korzen: korzen || k, zrodlo: "wersja-tekstowa" });
+      });
+    });
+  });
+
+  global.Gm = {
+    wersja: WERSJA,
+    bezpieczny: bezpieczny, tekstZHtml: tekstZHtml, gotowe: gotowe,
+    losowanie: losowanie, hasz: hasz, tasuj: tasuj, losuj: losuj,
+    ogranicz: ogranicz, lerp: lerp, wygladz: wygladz, rgba: rgba,
+    ogloszenia: ogloszenia, dzwiek: dzwiek,
+    klucz: klucz, magazyn: magazyn, ustawienia: ustawienia, rekord: rekord,
+    tempo: tempo, lms: lms, ukoncz: ukoncz,
+    wersjaTekstowa: wersjaTekstowa, wstrzyknijCss: wstrzyknijCss, konfiguracja: konfiguracja
+  };
+})(window);
+
+</script>
+<script data-gm-plik="cwiczenie.js">
+/* gry-moodle 0.2.0 — NIE EDYTUJ W KURSIE, poprawiaj w PLUGIN/gry-moodle (~/.claude/local-marketplace-maciek/plugins/gry-moodle) */
+/* cwiczenia/cwiczenie.js — WARSTWA ĆWICZEŃ (decyzja 7): bez pętli gry, bez zegara domyślnie.
+ *
+ * Wymaga: rdzen.js (Gm). Daje przestrzeń globalną `GmCwiczenie`:
+ *   GmCwiczenie.zarejestruj(mechanika, uruchom)  — widok mechaniki zgłasza się sam; warstwa uruchamia go na każdym
+ *       korzeniu [data-gra][data-gm-widok="cwiczenie"][data-gm-mechanika="<mechanika>"] (raz — data-gm-init).
+ *   GmCwiczenie.utworz(korzen) → c   — szkielet jednego ćwiczenia (używa go uruchom()).
+ *
+ * Szkielet c:
+ *   c.bank, c.konf, c.T (teksty.widok), c.punkty (bank.punkty.wlaczone — w ćwiczeniu domyślnie WYŁĄCZONE, decyzja 9)
+ *   c.el(tag, klasa, tekst), c.wstaw(szablon, {klucz: wartość}), c.h(wzgl, tekst, klasa) — nagłówek poziomu bazowy+wzgl
+ *   c.ekran — kontener bieżącego ekranu; c.mow(tekst, opoznienieMs) — region aria-live TWORZONY PRZY STARCIE
+ *   c.ekranStartowy({...}) — opis, wybór poziomu (radio w fieldset), szczegóły zasad, przycisk startu
+ *   c.stoper — rosnący, bez limitu (tylko gdy punkty włączone; pauza go zatrzymuje)
+ *   c.pauza({naPauze, naWznow, czyMozna}) — przycisk + samoczynne wstrzymanie przy ukryciu karty przeglądarki
+ *   c.informacja(cel, {ton, naglowek, tekst, dalej, naDalej}) — informacja zwrotna; „Dalej” dostaje fokus
+ *   c.pytanie(cel, {legenda, opcje, ocen, dalej, naDalej}) — „Sprawdź” → informacja zwrotna → „Dalej” z fokusem
+ *   c.podsumowanie({...}) — nagłówek z fokusem, kafle liczb, tabela z <caption>, sekcje, wnioski, „Jeszcze raz”
+ *   c.wniosek(lista, stan) — adaptacyjny wniosek: napis albo {gdy:{pole: wartość | {min, max}}, tekst}
+ *   c.rekord(poziom, wartosc, {mniejszyLepszy}) — rekord per poziom w localStorage (<przestrzen>-gra-<id>-rekord-<poziom>)
+ *   c.klawisze(fn) — skróty TYLKO wewnątrz kontenera (WCAG 2.1.4); bez Alt/Ctrl/Meta
+ *   c.ukoncz() — Gm.ukoncz w trybie z konfiguracji (gra | modul | brak)
+ *   c.czas(ms) „m:ss”, c.czasSlowami(ms), c.odmiana(n, jeden, dwa, piec)
+ *
+ * Poziom nagłówków: data-gm-naglowek (domyślnie 3 — Strona Moodle ma własne h1/h2); tytuł ćwiczenia rysowany, gdy
+ * data-gm-tytul ≠ "ukryj" (samodzielny HTML i SCORM mają tytuł w karcie strony). Sekcje podsumowania = poziom + 1.
+ * Klasy z prefiksem gm-cw (L13). Treść wyłącznie z banku (decyzja 8): warstwa nie ma żadnego napisu merytorycznego,
+ * a napisy techniczne („Sprawdź”, „Dalej”) bierze z teksty.widok, gdy bank je podaje.
+ */
+(function (global) {
+  "use strict";
+
+  var Gm = global.Gm;
+  if (!Gm) return;
+  if (global.GmCwiczenie && global.GmCwiczenie.wersja === Gm.wersja) return;   /* dwa ćwiczenia na stronie — warstwa raz */
+
+  var doc = global.document;
+  var rejestr = {};
+
+  /* napisy techniczne warstwy — bank może je nadpisać w teksty.widok */
+  var DOMYSLNE = {
+    sprawdz: "Sprawdź", dalej: "Dalej", jeszcze: "Zagraj jeszcze raz", pauza: "Pauza", wznow: "Wznów",
+    zaznaczNajpierw: "Zaznacz jedną odpowiedź, a potem ją sprawdź.", dobrze: "Dobrze.", zle: "Nie tym razem.",
+    pauzaOgl: "Wstrzymane.", wznowOgl: "Wznowione.", wersjaTekstowa: "Wersja tekstowa"
+  };
+
+  function el(tag, klasa, tekst) {
+    var e = doc.createElement(tag);
+    if (klasa) e.className = klasa;
+    if (tekst !== undefined && tekst !== null) e.textContent = tekst;
+    return e;
+  }
+
+  /* {klucz} → wartość; brakujący klucz zostaje widoczny (bramka B3 łapie literówki w banku) */
+  function wstaw(s, m) {
+    var out = String(s == null ? "" : s);
+    for (var k in m) {
+      if (Object.prototype.hasOwnProperty.call(m, k)) out = out.split("{" + k + "}").join(String(m[k]));
+    }
+    return out;
+  }
+
+  function odmiana(n, jeden, dwa, piec) {
+    var m10 = n % 10, m100 = n % 100;
+    if (n === 1) return jeden;
+    if (m10 >= 2 && m10 <= 4 && !(m100 >= 12 && m100 <= 14)) return dwa;
+    return piec;
+  }
+  function czas(ms) {
+    var s = Math.floor(ms / 1000), m = Math.floor(s / 60);
+    s = s % 60;
+    return m + ":" + (s < 10 ? "0" : "") + s;
+  }
+  function czasSlowami(ms) {
+    var s = Math.floor(ms / 1000), m = Math.floor(s / 60), out = "";
+    s = s % 60;
+    if (m > 0) out = m + " " + odmiana(m, "minuta", "minuty", "minut");
+    if (s > 0 || m === 0) out += (out ? " i " : "") + s + " " + odmiana(s, "sekunda", "sekundy", "sekund");
+    return out;
+  }
+
+  function utworz(korzen) {
+    var konf = Gm.konfiguracja(korzen);
+    var bank = konf.dane;
+    if (!bank) return null;
+    var teksty = bank.teksty || {};
+    var T = teksty.widok || {};
+    function napis(k) { return T[k] != null ? T[k] : DOMYSLNE[k]; }
+    var poziomBazowy = Math.max(2, Math.min(5, parseInt(korzen.getAttribute("data-gm-naglowek") || "3", 10) || 3));
+    var timery = [];
+
+    korzen.innerHTML = "";   /* zdejmuje tekst zastępczy formatu Strona (zapas dla aplikacji mobilnej) */
+    korzen.classList.add("gm-cw");
+    if (!korzen.getAttribute("lang")) korzen.setAttribute("lang", (bank.jezyk && bank.jezyk.lang) || "pl");
+
+    function h(wzgl, tekst, klasa) {
+      var e = el("h" + Math.min(6, poziomBazowy + wzgl), klasa || null, tekst);
+      return e;
+    }
+
+    /* nagłówek: „nad” + tytuł (Strona) i polecenie stale nad ekranem (L21) */
+    var cialo;
+    if (korzen.getAttribute("data-gm-tytul") !== "ukryj") {
+      var glowa = el("div", "gm-cw__glowa");
+      if (T.nad) glowa.appendChild(el("p", "gm-cw__nad", T.nad));
+      glowa.appendChild(h(0, bank.tytul, "gm-cw__tytul"));
+      korzen.appendChild(glowa);
+    }
+    cialo = el("div", "gm-cw__cialo");
+    korzen.appendChild(cialo);
+    if (teksty.polecenie) cialo.appendChild(el("p", "gm-cw__polecenie", teksty.polecenie));
+    var ekran = el("div", "gm-cw__ekran");
+    cialo.appendChild(ekran);
+    var glos = Gm.ogloszenia(cialo);   /* region aria-live istnieje, zanim cokolwiek powiemy */
+    var zegarMowy = 0;
+
+    var c = {
+      korzen: korzen, konf: konf, bank: bank, teksty: teksty, T: T, ekran: ekran, cialo: cialo,
+      punkty: !!(bank.punkty && bank.punkty.wlaczone === true),
+      el: el, wstaw: wstaw, h: h, napis: napis, odmiana: odmiana, czas: czas, czasSlowami: czasSlowami,
+      poziomBazowy: poziomBazowy
+    };
+
+    c.mow = function (tekst, opoznienie) {
+      global.clearTimeout(zegarMowy);
+      if (opoznienie) zegarMowy = global.setTimeout(function () { glos.powiedz(tekst); }, opoznienie);
+      else glos.powiedz(tekst);
+    };
+
+    /* zegary ćwiczenia — c.wyczysc() zatrzymuje wszystkie (nowy ekran, „Jeszcze raz”) */
+    c.za = function (fn, ms) {
+      var t = global.setTimeout(function () { timery.splice(timery.indexOf(t), 1); fn(); }, ms);
+      timery.push(t);
+      return t;
+    };
+    c.anuluj = function (t) {
+      global.clearTimeout(t);
+      var i = timery.indexOf(t);
+      if (i >= 0) timery.splice(i, 1);
+    };
+    c.wyczysc = function () {
+      timery.forEach(function (t) { global.clearTimeout(t); });
+      timery = [];
+      c.stoper.stop();
+      ekran.innerHTML = "";
+    };
+
+    /* ——— ekran startowy ———
+       o: {opis, poziomy:[{id, nazwa, opis}], wybrany, legenda, pytanie, uwaga, zasadyTytul, zasady[], przycisk, naStart(id, wskaznik)}
+       Wybór poziomu tylko wtedy, gdy są co najmniej dwa. Pierwszy i domyślny — bez pośpiechu (decyzja 10). */
+    c.ekranStartowy = function (o) {
+      c.wyczysc();
+      var wybrany = o.wybrany || (o.poziomy && o.poziomy[0] && o.poziomy[0].id);
+      if (o.opis) ekran.appendChild(el("p", "gm-cw__lead", o.opis));
+      if (o.poziomy && o.poziomy.length > 1) {
+        var fs = el("fieldset", "gm-cw__poziomy");
+        var lg = el("legend", "gm-sr", o.legenda || "");
+        fs.appendChild(lg);
+        if (o.pytanie) {
+          var pt = el("p", "gm-cw__pyt", o.pytanie);
+          pt.setAttribute("aria-hidden", "true");
+          fs.appendChild(pt);
+        }
+        o.poziomy.forEach(function (p) {
+          var id = "gm-" + konf.id + "-poziom-" + p.id;
+          var lab = el("label", "gm-cw__opcja");
+          lab.setAttribute("for", id);
+          var inp = el("input", "gm-cw__radio");
+          inp.type = "radio";
+          inp.name = "gm-" + konf.id + "-poziom";
+          inp.id = id;
+          inp.value = p.id;
+          if (p.id === wybrany) inp.checked = true;
+          inp.addEventListener("change", function () { if (inp.checked) wybrany = p.id; });
+          var box = el("span", "gm-cw__opt");
+          box.appendChild(el("span", "gm-cw__optnazwa", p.nazwa));
+          if (p.opis) box.appendChild(el("span", "gm-cw__opttekst", p.opis));
+          lab.appendChild(inp);
+          lab.appendChild(box);
+          fs.appendChild(lab);
+        });
+        ekran.appendChild(fs);
+      }
+      if (o.uwaga) ekran.appendChild(el("p", "gm-cw__uwaga", o.uwaga));
+      if (o.zasady && o.zasady.length) {
+        var det = el("details", "gm-cw__szczegoly");
+        det.appendChild(el("summary", null, o.zasadyTytul || ""));
+        var ul = el("ul", "gm-cw__lista");
+        o.zasady.forEach(function (z) { ul.appendChild(el("li", null, z)); });
+        det.appendChild(ul);
+        ekran.appendChild(det);
+      }
+      var btn = el("button", "gm-przycisk gm-cw__duzy gm-cw__start", o.przycisk || "");
+      btn.type = "button";
+      /* wskaznik = kliknięcie myszą/dotykiem (detail > 0) — wtedy fokus przenosimy bez przewijania strony */
+      btn.addEventListener("click", function (ev) { o.naStart(wybrany, !!ev && ev.detail > 0); });
+      ekran.appendChild(btn);
+      return { przycisk: btn, wybrany: function () { return wybrany; } };
+    };
+
+    /* ——— stoper rosnący (bez limitu) ———
+       Mierzy, nie pogania: nic się od niego nie rozstrzyga. Tylko gdy punkty są włączone. */
+    c.stoper = (function () {
+      var zgromadzone = 0, od = 0, tm = 0, cel = null;
+      function ms() { return zgromadzone + (od ? Date.now() - od : 0); }
+      function pokaz() {
+        if (cel) { var t = czas(ms()); if (cel.textContent !== t) cel.textContent = t; }
+      }
+      function tyk() {
+        tm = 0;
+        if (!od) return;
+        pokaz();
+        tm = global.setTimeout(tyk, Math.max(40, 1000 - (ms() % 1000) + 10));
+      }
+      return {
+        ms: ms, pokaz: pokaz,
+        biegnie: function () { return !!od; },
+        wyswietlW: function (e) { cel = e; pokaz(); },
+        start: function () { if (od) return; od = Date.now(); global.clearTimeout(tm); tyk(); },
+        stop: function () { global.clearTimeout(tm); tm = 0; if (od) { zgromadzone += Date.now() - od; od = 0; } pokaz(); },
+        zeruj: function () { global.clearTimeout(tm); tm = 0; zgromadzone = 0; od = 0; cel = null; }
+      };
+    })();
+
+    /* ——— pauza i autopauza (WCAG 2.2.1 / 2.2.2) ———
+       o: {przycisk (element), naPauze(powod), naWznow(), czyMozna()} — powod: "reczna" | "karta" */
+    c.pauza = function (o) {
+      var wstrzymane = false;
+      function pauzuj(powod) {
+        if (wstrzymane || (o.czyMozna && !o.czyMozna())) return;
+        wstrzymane = true;
+        if (o.przycisk) o.przycisk.textContent = napis("wznow");
+        o.naPauze(powod);
+      }
+      function wznow() {
+        if (!wstrzymane) return;
+        wstrzymane = false;
+        if (o.przycisk) o.przycisk.textContent = napis("pauza");
+        o.naWznow();
+      }
+      if (o.przycisk) {
+        o.przycisk.addEventListener("click", function () {
+          if (o.przycisk.getAttribute("aria-disabled") === "true") return;
+          if (wstrzymane) wznow(); else pauzuj("reczna");
+        });
+      }
+      function widocznosc() {
+        if (!korzen.isConnected) { doc.removeEventListener("visibilitychange", widocznosc); return; }
+        if (doc.hidden || doc.visibilityState === "hidden") pauzuj("karta");
+      }
+      doc.addEventListener("visibilitychange", widocznosc);
+      return { pauzuj: pauzuj, wznow: wznow, wstrzymane: function () { return wstrzymane; },
+               odlacz: function () { doc.removeEventListener("visibilitychange", widocznosc); } };
+    };
+
+    /* ——— informacja zwrotna z „Dalej” ———
+       Nic nie znika samo (decyzja 10): informacja czeka, aż student naciśnie „Dalej”; fokus na „Dalej” (4.1.3, 2.4.3). */
+    c.informacja = function (cel, o) {
+      var blok = el("div", "gm-cw__info" + (o.ton ? " gm-cw__info--" + o.ton : ""));
+      blok.setAttribute("tabindex", "-1");
+      var p = el("p", "gm-cw__info-tekst");
+      if (o.naglowek) {
+        p.appendChild(el("strong", null, o.naglowek));
+        p.appendChild(doc.createTextNode(" " + (o.tekst || "")));
+      } else {
+        p.textContent = o.tekst || "";
+      }
+      blok.appendChild(p);
+      var dalej = null;
+      if (o.naDalej) {
+        dalej = el("button", "gm-przycisk gm-cw__dalej", o.dalej || napis("dalej"));
+        dalej.type = "button";
+        dalej.addEventListener("click", function () { o.naDalej(); });
+        blok.appendChild(dalej);
+      }
+      cel.appendChild(blok);
+      c.mow((o.naglowek ? o.naglowek + " " : "") + (o.tekst || ""));
+      if (dalej) {
+        dalej.focus();
+        if (dalej.scrollIntoView) dalej.scrollIntoView({ block: "nearest" });
+      }
+      return { blok: blok, dalej: dalej };
+    };
+
+    /* ——— pytanie: „Sprawdź” → informacja zwrotna → „Dalej” ———
+       o: {legenda, opcje:[{id, tekst}], ocen(id) → {dobrze, naglowek, tekst}, dalej, naDalej(id, wynik)}
+       Zatwierdza przycisk „Sprawdź”, nie samo zaznaczenie (L64). Przycisk nigdy nie dostaje `disabled`
+       (ślepy zaułek dla klawiatury) — bez wyboru mówi, co zrobić, i oddaje fokus pierwszej opcji. */
+    c.pytanie = function (cel, o) {
+      var fs = el("fieldset", "gm-cw__pytanie");
+      fs.appendChild(el("legend", "gm-cw__legenda", o.legenda));
+      var nazwa = "gm-" + konf.id + "-p-" + Math.floor(Math.random() * 1e9);
+      var pola = [];
+      o.opcje.forEach(function (op, i) {
+        var lab = el("label", "gm-cw__odp");
+        var inp = el("input");
+        inp.type = "radio";
+        inp.name = nazwa;
+        inp.value = op.id;
+        inp.id = nazwa + "-" + i;
+        lab.setAttribute("for", inp.id);
+        lab.appendChild(inp);
+        lab.appendChild(el("span", null, op.tekst));
+        fs.appendChild(lab);
+        pola.push({ inp: inp, lab: lab, op: op });
+      });
+      cel.appendChild(fs);
+      var sprawdz = el("button", "gm-przycisk gm-cw__sprawdz", napis("sprawdz"));
+      sprawdz.type = "button";
+      cel.appendChild(sprawdz);
+      var miejsce = el("div", "gm-cw__po");
+      cel.appendChild(miejsce);
+      var zamkniete = false;
+      sprawdz.addEventListener("click", function () {
+        if (zamkniete) return;
+        var w = null;
+        pola.forEach(function (p) { if (p.inp.checked) w = p; });
+        miejsce.innerHTML = "";
+        if (!w) {
+          var uw = el("p", "gm-cw__brak", napis("zaznaczNajpierw"));
+          miejsce.appendChild(uw);
+          c.mow(napis("zaznaczNajpierw"));
+          pola[0].inp.focus();
+          return;
+        }
+        zamkniete = true;
+        var wynik = o.ocen(w.op.id) || {};
+        pola.forEach(function (p) {
+          p.inp.setAttribute("aria-disabled", "true");
+          p.inp.addEventListener("click", function (e) { if (zamkniete && !p.inp.checked) e.preventDefault(); });
+        });
+        w.lab.classList.add(wynik.dobrze ? "gm-cw__odp--ok" : "gm-cw__odp--zle");
+        var znak = el("span", "gm-cw__znak", wynik.dobrze ? "✓" : "✗");
+        znak.setAttribute("aria-hidden", "true");
+        w.lab.appendChild(znak);
+        sprawdz.hidden = true;
+        c.informacja(miejsce, {
+          ton: wynik.dobrze ? "ok" : "zle",
+          naglowek: wynik.naglowek || (wynik.dobrze ? napis("dobrze") : napis("zle")),
+          tekst: wynik.tekst || "", dalej: o.dalej,
+          naDalej: function () { o.naDalej(w.op.id, wynik); }
+        });
+      });
+      return { sprawdz: sprawdz, pola: pola };
+    };
+
+    /* ——— adaptacyjny wniosek ———
+       Element listy: napis (zawsze) albo {gdy: {pole: wartość | {min, max}}, tekst}. Wniosek nie zakłada zachowania
+       gracza, którego nie było (MK lekcja 13) — warianty wybiera stan, nie domysł. */
+    c.wniosek = function (lista, stan) {
+      var out = [];
+      (lista || []).forEach(function (w) {
+        if (typeof w === "string") { out.push(w); return; }
+        var ok = true;
+        for (var k in (w.gdy || {})) {
+          if (!Object.prototype.hasOwnProperty.call(w.gdy, k)) continue;
+          var war = w.gdy[k], v = stan ? stan[k] : undefined;
+          if (war && typeof war === "object") {
+            if (war.min != null && !(v >= war.min)) ok = false;
+            if (war.max != null && !(v <= war.max)) ok = false;
+          } else if (v !== war) ok = false;
+        }
+        if (ok) out.push(w.tekst);
+      });
+      return out;
+    };
+
+    /* ——— rekord per poziom ——— */
+    var rekordPamiec = {};
+    c.rekord = function (poziom, wartosc, o) {
+      o = o || {};
+      var k = Gm.klucz(konf.przestrzen, "gra", konf.id, "rekord", poziom);
+      var stary = parseInt(Gm.magazyn.czytaj(k), 10);
+      if (isNaN(stary) || stary < 1) stary = 0;
+      if (rekordPamiec[poziom] && (!stary || (o.mniejszyLepszy ? rekordPamiec[poziom] < stary : rekordPamiec[poziom] > stary))) {
+        stary = rekordPamiec[poziom];
+      }
+      var nowy = !stary || (o.mniejszyLepszy ? wartosc < stary : wartosc > stary);
+      var zapisano = true;
+      if (nowy) {
+        rekordPamiec[poziom] = wartosc;
+        zapisano = Gm.magazyn.zapisz(k, wartosc);
+      }
+      return { rekord: nowy ? wartosc : stary, nowy: nowy, zapisano: zapisano };
+    };
+
+    /* ——— podsumowanie ———
+       o: {naglowek, info[], liczby:[{etyk, wart, wezel?}], tabela:{caption, kolumny[], wiersze[[…]]},
+           sekcje:[{tytul, lid, lista:[{mocne, tekst, dalej}] | akapity[]}], wnioskiTytul, wnioski[],
+           przyciski:[{tekst, fn(wskaznik), cichy}]}
+       Fokus na nagłówku (2.4.3); ukończenie zgłaszamy tutaj (decyzja 9 — tylko „ukończone”). */
+    c.podsumowanie = function (o) {
+      c.wyczysc();
+      var wyn = el("div", "gm-cw__koniec");
+      var nag = h(1, o.naglowek, "gm-cw__wynik-h");
+      nag.setAttribute("tabindex", "-1");
+      wyn.appendChild(nag);
+      (o.info || []).forEach(function (t) { wyn.appendChild(el("p", null, t)); });
+      if (o.liczby && o.liczby.length) {
+        var hud = el("div", "gm-cw__hud gm-cw__hud--" + o.liczby.length);
+        o.liczby.forEach(function (l) {
+          var k = el("div", "gm-cw__kafel");
+          k.appendChild(el("span", "gm-cw__kafel-n", l.etyk));
+          if (l.wezel) k.appendChild(l.wezel);
+          else k.appendChild(el("span", "gm-cw__kafel-w", l.wart));
+          hud.appendChild(k);
+        });
+        wyn.appendChild(hud);
+      }
+      (o.dopiski || []).forEach(function (d) { wyn.appendChild(el("p", d.klasa || null, d.tekst)); });
+      if (o.tabela) {
+        var tb = el("table", "gm-cw__tabela");
+        tb.appendChild(el("caption", null, o.tabela.caption));
+        var th = el("thead"), tr = el("tr");
+        o.tabela.kolumny.forEach(function (k) { var x = el("th", null, k); x.setAttribute("scope", "col"); tr.appendChild(x); });
+        th.appendChild(tr);
+        tb.appendChild(th);
+        var tbo = el("tbody");
+        o.tabela.wiersze.forEach(function (w) {
+          var r = el("tr");
+          w.forEach(function (v, i) {
+            var x = el(i === 0 ? "th" : "td", null, v);
+            if (i === 0) x.setAttribute("scope", "row");
+            r.appendChild(x);
+          });
+          tbo.appendChild(r);
+        });
+        tb.appendChild(tbo);
+        wyn.appendChild(tb);
+      }
+      (o.sekcje || []).forEach(function (s) {
+        wyn.appendChild(h(1, s.tytul, "gm-cw__sekcja"));
+        if (s.lid) wyn.appendChild(el("p", "gm-slaby", s.lid));
+        if (s.lista) {
+          var ul = el("ul", "gm-cw__lista gm-cw__lista--odstep");
+          s.lista.forEach(function (it) {
+            var li = el("li");
+            var p1 = el("p");
+            if (it.mocne) p1.appendChild(el("strong", null, it.mocne));
+            if (it.tekst) p1.appendChild(doc.createTextNode((it.mocne ? " — " : "") + it.tekst));
+            li.appendChild(p1);
+            if (it.dalej) li.appendChild(el("p", "gm-cw__wyj", it.dalej));
+            ul.appendChild(li);
+          });
+          wyn.appendChild(ul);
+        }
+        (s.akapity || []).forEach(function (a) { wyn.appendChild(el("p", null, a)); });
+      });
+      if (o.wnioski && o.wnioski.length) {
+        if (o.wnioskiTytul) wyn.appendChild(h(1, o.wnioskiTytul, "gm-cw__sekcja"));
+        o.wnioski.forEach(function (a) { wyn.appendChild(el("p", null, a)); });
+      }
+      var btny = el("div", "gm-cw__przyciski");
+      (o.przyciski || []).forEach(function (b) {
+        var x = el("button", "gm-przycisk" + (b.cichy ? " gm-przycisk--cichy" : ""), b.tekst);
+        x.type = "button";
+        x.addEventListener("click", function (ev) { b.fn(!!ev && ev.detail > 0); });
+        btny.appendChild(x);
+      });
+      wyn.appendChild(btny);
+      ekran.appendChild(wyn);
+      c.mow("");
+      nag.focus();
+      c.ukoncz();
+      return { naglowek: nag, blok: wyn };
+    };
+
+    /* ——— wersja tekstowa W widgecie (format Strona: data-gm-wt="widzet") ———
+       Na stronie scorm/html wersję tekstową składa generator jako statyczny HTML pod grą; w polu „Strona” wolno mieć tylko
+       div + skrypt, więc rysuje ją ćwiczenie — ta sama lista co w generatorze (pozycje_wersji_tekstowej), rozwijana,
+       poza ekranem gry (zostaje przy zmianie ekranu). pozycje: [[mocne, reszta]]. */
+    c.wersjaTekstowa = function (pozycje) {
+      if (korzen.getAttribute("data-gm-wt") !== "widzet" || !pozycje || !pozycje.length) return null;
+      var wt = bank.wersja_tekstowa || {};
+      var det = el("details", "gm-cw__wt");
+      det.id = korzen.id ? korzen.id + "-wersja-tekstowa" : "";
+      det.appendChild(el("summary", null, napis("wersjaTekstowa") + (wt.lista_tytul ? ": " + wt.lista_tytul : "") + " (" + pozycje.length + ")"));
+      if (wt.wstep) det.appendChild(el("p", null, wt.wstep));
+      var ol = el("ol", "gm-cw__wt-lista");
+      pozycje.forEach(function (pz) {
+        var li = el("li");
+        li.appendChild(el("strong", null, pz[0]));
+        li.appendChild(doc.createTextNode(" — " + pz[1]));
+        ol.appendChild(li);
+      });
+      det.appendChild(ol);
+      if (teksty.zrodla_wstep) det.appendChild(el("p", "gm-slaby", teksty.zrodla_wstep));
+      cialo.appendChild(det);
+      return det;
+    };
+
+    c.klawisze = function (fn) {
+      korzen.addEventListener("keydown", function (e) {
+        if (e.altKey || e.ctrlKey || e.metaKey) return;
+        fn(e);
+      });
+    };
+
+    c.ukoncz = function () {
+      return Gm.ukoncz({ tryb: konf.ukonczenie, przestrzen: konf.przestrzen, id: konf.id, korzen: korzen, zrodlo: "cwiczenie" });
+    };
+
+    return c;
+  }
+
+  function skan(mechanika) {
+    var sel = '[data-gra][data-gm-widok="cwiczenie"]' + (mechanika ? '[data-gm-mechanika="' + mechanika + '"]' : "");
+    Array.prototype.forEach.call(doc.querySelectorAll(sel), function (k) {
+      var m = k.getAttribute("data-gm-mechanika");
+      if (!rejestr[m] || k.getAttribute("data-gm-init")) return;
+      k.setAttribute("data-gm-init", "1");
+      try {
+        rejestr[m](k);
+      } catch (e) {
+        /* awaria widoku nie może zostawić pustego miejsca: komunikat + odesłanie do wersji tekstowej */
+        k.innerHTML = "";
+        var p = el("p", "gm-cw__awaria", "Ćwiczenie nie uruchomiło się w tej przeglądarce. Ta sama treść jest w wersji tekstowej.");
+        k.appendChild(p);
+        if (global.console && global.console.error) global.console.error("gry-moodle:", e);
+      }
+    });
+  }
+
+  global.GmCwiczenie = {
+    wersja: Gm.wersja,
+    utworz: utworz,
+    zarejestruj: function (mechanika, uruchom) {
+      rejestr[mechanika] = uruchom;
+      Gm.gotowe(function () { skan(mechanika); });
+    },
+    pomoc: { el: el, wstaw: wstaw, odmiana: odmiana, czas: czas, czasSlowami: czasSlowami }
+  };
+})(window);
+
+</script>
+<script data-gm-plik="dane.js">
+/* WYGENEROWANE z banku bank.json przez gry-moodle 0.9.0 (scripts/gm_zbuduj.py) — nie edytuj ręcznie, poprawiaj bank. */
+/* gry-moodle:dane */
+window.GM_DANE = window.GM_DANE || {};
+window.GM_DANE["holdup-po-infekcji"] = {"format":"gry-moodle/bank@1","id":"holdup-po-infekcji","przestrzen":"holdup","warstwa":"cwiczenie","mechanika":"kolejnosc","widok":"cwiczenie","tytul":"Po infekcji: ułóż kroki we właściwej kolejności","teksty":{"polecenie":"Podejrzewasz, że na komputerze działa złośliwy program kradnący hasła. Ułóż kroki od pierwszego do ostatniego. Przesuwaj kroki przyciskami wyżej i niżej, a potem sprawdź kolejność.","opis":"Procedura po podejrzeniu infekcji, według zaleceń CERT Polska i poradnika Google z kursu. Ustaw kroki w kolejności i sprawdź; po ułożeniu zobaczysz, dlaczego każdy krok stoi na swoim miejscu.","zasady":["Każdy krok ma dwa przyciski: „Przenieś wyżej” i „Przenieś niżej”.","„Sprawdź kolejność” pokazuje, które kroki stoją na swoim miejscu (✓), a które nie (✗) — właściwej kolejności nie zdradza.","Po kilku nieudanych próbach możesz poprosić o pokazanie właściwej kolejności.","Nic nie liczy czasu."],"widok":{"nad":"Ćwiczenie","zacznij":"Zacznij","zasady_tytul":"Jak to działa","hud_etyk":"Postęp ćwiczenia","zestaw_etyk":"Zestaw","zestaw_nazwa":"Zestaw {nr}","zestaw_ogl":"Zestaw {nr} z {ile}. {polecenie}","proby_etyk":"Próby","lista_etyk":"Kroki do ułożenia","wyzej":"Przenieś wyżej","nizej":"Przenieś niżej","ruch_ogl":"„{tekst}” — pozycja {nr} z {ile}.","kraniec_gora":"„{tekst}” jest już na pierwszym miejscu.","kraniec_dol":"„{tekst}” jest już na ostatnim miejscu.","sprawdz":"Sprawdź kolejność","dobrze_naglowek":"Właściwa kolejność!","proby_pierwsza":"Próby: {proby} — za pierwszym razem!","proby_tekst":"Próby: {proby}.","zle_naglowek":"Jeszcze nie.","zle_tekst":"Na swoim miejscu: {dobrze} z {ile}. Przestaw kroki oznaczone ✗ i sprawdź jeszcze raz.","na_miejscu_sr":"na swoim miejscu","nie_na_miejscu_sr":"nie na swoim miejscu","pokaz_klucz":"Pokaż właściwą kolejność","klucz_naglowek":"Właściwa kolejność:","klucz_tekst":"Kroki stoją teraz na swoich miejscach.","dalej":"Następny zestaw","zobacz_wynik":"Zobacz podsumowanie","koniec":"Ułożone samodzielnie: {ulozone} z {ile}. Próby razem: {proby}.","l_proby":"Próby","l_zestawy":"Ułożone","klucz_tytul":"Właściwa kolejność","wynik_sam":"ułożony samodzielnie, próby: {proby}","wynik_klucz":"z pokazaną kolejnością (po {proby} próbach)","jeszcze":"Jeszcze raz","wn_tytul":"Co dalej","wn":[{"gdy":{"podpowiedzi":{"min":1}},"tekst":"Wróć do zestawu z pokazaną kolejnością — uzasadnienie mówi, co wyznacza kolejne kroki."},{"gdy":{"podpowiedzi":0},"tekst":"Wszystkie zestawy ułożone samodzielnie. Zagraj jeszcze raz — kroki ustawią się inaczej."}],"czas":"Czas","pauza":"Pauza","pauza_info":"Ćwiczenie wstrzymane. Lista jest ukryta, żeby pauza nie służyła do podglądania. Naciśnij „Wznów”.","pauza_info_karta":"Ćwiczenie wstrzymało się samo, bo przełączono kartę przeglądarki. Naciśnij „Wznów”.","l_czas":"Czas","l_rekord":"Rekord","przebieg_tytul":"Twoje zestawy","koniec_z_kluczem":"Ułożone samodzielnie: {ulozone} z {ile}; właściwą kolejność pokazano na Twoją prośbę w zestawach: {podpowiedzi}. Próby razem: {proby}."}},"zrodla":[{"id":"Z1","krotko":"CERT Polska, raport 2025","opis":"CERT Polska / NASK (2026). Krajobraz bezpieczeństwa polskiego internetu. Raport roczny 2025. NASK. Zalecenia po infekcji, cytowane w kursie HoldUp, post „Złośliwe programy: kradzież haseł, przejęte konta i okup”.","adres":"materiał kursu HoldUp, post zlosliwe","dostep":"22.10.2026"}],"punkty":{"wlaczone":false},"tempo":{"domyslne":"bez-limitu","TEMPO":1.0},"wersja_tekstowa":{"tryb":"auto","wstep":"Te same zestawy bez ćwiczenia: kroki we właściwej kolejności z uzasadnieniem i źródłem.","lista_tytul":"Wszystkie zestawy we właściwej kolejności"},"ukonczenie":"brak","jezyk":{"lang":"pl","rodzaj":"bezosobowo"},"dane":{"pokaz_klucz_po":3,"zestawy":[{"id":"z1","polecenie":"Podejrzewasz, że na komputerze działa złośliwy program kradnący hasła. Ułóż kroki od pierwszego do ostatniego. Przesuwaj kroki przyciskami wyżej i niżej, a potem sprawdź kolejność.","kroki":[{"id":"k1","tekst":"Odłącz urządzenie od sieci"},{"id":"k2","tekst":"Z innego, czystego urządzenia zmień hasła zapisane w przeglądarce i wpisane po infekcji"},{"id":"k3","tekst":"Zmień hasła powtarzane w innych serwisach"},{"id":"k4","tekst":"Usuń nieznane zalogowane urządzenia i sprawdź dane odzyskiwania konta"},{"id":"k5","tekst":"Zadzwoń do banku, jeśli zagrożone są karty"},{"id":"k6","tekst":"Zgłoś sprawę na incydent.cert.pl"},{"id":"k7","tekst":"Zachowaj potrzebne pliki i zainstaluj system od nowa"}],"uzasadnienie":"Krok 1: Złośliwy program wysyła skradzione dane przez sieć (e-mailem, na serwer plików, komunikatorem). Odłączenie przerywa ten kanał, zanim zrobisz cokolwiek innego. Krok 2: Hasła zmienia się z urządzenia, które nie jest zainfekowane, bo na zainfekowanym nowe hasło trafiłoby prosto do przestępcy. Najpierw te, które program mógł już zdobyć: zapisane w przeglądarce i aplikacjach oraz wpisane po infekcji. Krok 3: Dopiero po najpilniejszych kontach przychodzi kolej na serwisy, w których użyto tego samego hasła. Skradzione hasło działa tam tak samo. Krok 4: Przy nowym haśle przestępca z ciasteczkiem sesji bywa nadal zalogowany. Nieznane urządzenia na liście, zmienione dane odzyskiwania i aplikacje z dostępem to sygnały włamania, które trzeba usunąć po zmianie haseł. Krok 5: Dane z aplikacji i przeglądarki mogły objąć karty płatnicze. Bank może zablokować kartę, a to zabezpiecza pieniądze, zanim zajmiesz się resztą. Krok 6: Zgłoszenie trafia do zespołu, który zbiera i analizuje takie incydenty. Robi się je po zabezpieczeniu kont, a przed czyszczeniem komputera, bo potem śladów już nie będzie. Krok 7: Skan antywirusowy nie daje gwarancji, że program zniknął, więc komputer czyści się instalacją od nowa. Potrzebne pliki zachowuje się wcześniej, bo reinstalacja kasuje dane. To krok ostatni, bo niszczy ślady.","zrodlo":"Z1","miejsce":"post „Złośliwe programy”, pole „Co robić” i akapit „Telefon, objawy i co robić po infekcji”"}]}};
+
+</script>
+<script data-gm-plik="kolejnosc-model.js">
+/* gry-moodle 0.5.0 — NIE EDYTUJ W KURSIE, poprawiaj w PLUGIN/gry-moodle (~/.claude/local-marketplace-maciek/plugins/gry-moodle) */
+/* mechaniki/kolejnosc/model.js — LOGIKA „ułóż we właściwej kolejności” bez DOM (testowalna w node: scripts/test/model_kolejnosc.test.js).
+ *
+ * Bank (`dane` wg schemat.json): zestawy: [{id, polecenie?, kroki:[{id, tekst}], uzasadnienie?, zrodlo?, miejsce?}]
+ * KOLEJNOŚĆ W TABLICY `kroki` JEST KLUCZEM. Układ gracza = tablica indeksów kroków (uklad[pozycja] = indeks w kluczu).
+ *
+ *   ukladStartowy(n, tasuj)   → permutacja 0..n-1 RÓŻNA od klucza (ME: `do … while` aż ≠ poprawna; tu z ogranicznikiem
+ *                               prób i deterministycznym wyjściem — przy n ≥ 2 nigdy nie zwraca gotowej odpowiedzi)
+ *   przesun(uklad, poz, ruch) → nowy układ (ruch −1 = w górę, +1 = w dół); poza krańcem — ten sam układ (kopia)
+ *   ocen(uklad)               → {naMiejscu:[bool], ileDobrze, ile, wszystko}
+ *   zestawyRundy(bank, tasuj) → zestawy do rozegrania: wszystkie w kolejności banku, a gdy runda.ile < pula — losowe ile
+ *   zrodloPelne(bank, zestaw) → „autor, tytuł, miejsce” (L28) albo ""
+ *   pokazKluczPo(bank)        → po ilu nieudanych sprawdzeniach wolno zaproponować klucz (domyślnie 3; nigdy po 1.)
+ *   wypelnij(wzor, wartosci)  → znaczniki czasu gry {nr} {ile} {proby} …
+ */
+(function (global) {
+  "use strict";
+
+  function tozsamosc(u) {
+    for (var i = 0; i < u.length; i++) if (u[i] !== i) return false;
+    return true;
+  }
+
+  var Model = {
+    ukladStartowy: function (n, tasuj) {
+      var baza = [];
+      for (var i = 0; i < n; i++) baza.push(i);
+      if (n < 2) return baza;
+      for (var proba = 0; proba < 50; proba++) {
+        var u = tasuj ? tasuj(baza) : baza.slice().reverse();
+        if (!tozsamosc(u)) return u;
+      }
+      /* tasowanie uparcie oddaje klucz (np. podmienione na tożsamość) — przesunięcie cykliczne zawsze ≠ klucz */
+      return baza.slice(1).concat([0]);
+    },
+
+    przesun: function (uklad, poz, ruch) {
+      var u = uklad.slice(), cel = poz + ruch;
+      if (poz < 0 || poz >= u.length || cel < 0 || cel >= u.length) return u;
+      var t = u[poz]; u[poz] = u[cel]; u[cel] = t;
+      return u;
+    },
+
+    ocen: function (uklad) {
+      var naMiejscu = uklad.map(function (v, i) { return v === i; });
+      var ile = naMiejscu.filter(Boolean).length;
+      return { naMiejscu: naMiejscu, ileDobrze: ile, ile: uklad.length, wszystko: ile === uklad.length };
+    },
+
+    zestawyRundy: function (bank, tasuj) {
+      var z = (bank.dane && bank.dane.zestawy) || [];
+      var ile = bank.runda && bank.runda.ile ? Math.min(bank.runda.ile, z.length) : z.length;
+      if (ile >= z.length || !tasuj) return z.slice(0, ile);
+      return tasuj(z).slice(0, ile);
+    },
+
+    zrodloPelne: function (bank, zestaw) {
+      if (!zestaw || !zestaw.zrodlo) return "";
+      var lista = (bank && bank.zrodla) || [];
+      for (var i = 0; i < lista.length; i++) {
+        if (lista[i].id === zestaw.zrodlo) return zestaw.miejsce ? lista[i].krotko + ", " + zestaw.miejsce : lista[i].krotko;
+      }
+      return "";
+    },
+
+    pokazKluczPo: function (bank) {
+      var p = bank && bank.dane && bank.dane.pokaz_klucz_po;
+      if (p === 0) return 0;
+      if (typeof p !== "number" || p < 2) return 3;   /* nigdy po pierwszej próbie (B3 to też sprawdza) */
+      return Math.floor(p);
+    },
+
+    wypelnij: function (wzor, wartosci) {
+      return String(wzor == null ? "" : wzor).replace(/\{([a-z_]+)\}/g, function (m, k) {
+        return Object.prototype.hasOwnProperty.call(wartosci, k) ? String(wartosci[k]) : m;
+      });
+    }
+  };
+
+  if (typeof module === "object" && module.exports) module.exports = Model;
+  else global.GmKolejnosc = Model;
+})(typeof window !== "undefined" ? window : this);
+
+</script>
+<script data-gm-plik="kolejnosc-cwiczenie.js">
+/* gry-moodle 0.5.0 — NIE EDYTUJ W KURSIE, poprawiaj w PLUGIN/gry-moodle (~/.claude/local-marketplace-maciek/plugins/gry-moodle) */
+/* mechaniki/kolejnosc/cwiczenie.js — WIDOK „ułóż we właściwej kolejności” na warstwie ćwiczeń (bez pętli, bez zegara).
+ * Wzory: ME „Kolejność” (`Media Education/_HTML_WSPOLNE/kurs.js` initGraSekw — 7 gier), MK `w_kolejnosc` (zestawy, wniosek
+ * po KAŻDYM zestawie), Popiel C3. Bez przeciągania (2.5.7): każdy krok ma przyciski „Przenieś wyżej / niżej”.
+ *
+ * Wymaga: rdzen.js (Gm), cwiczenia/cwiczenie.js (GmCwiczenie), mechaniki/kolejnosc/model.js (GmKolejnosc), dane (GM_DANE).
+ * Treść WYŁĄCZNIE z banku (decyzja 8): kroki, polecenia i uzasadnienia z `dane.zestawy`, napisy z `teksty.widok`.
+ *
+ * Przebieg: ekran startowy → zestaw n z N: kroki w układzie startowym ≠ klucz (model) → przestawianie przyciskami (fokus
+ * zostaje na przesuniętym kroku, komunikat dla czytnika „… — pozycja 3 z 5”) → „Sprawdź kolejność”:
+ *   • źle — przy każdym kroku znak ✓/✗ i tekst dla czytnika (na swoim miejscu / nie), informacja „Na swoim miejscu: 2 z 5”;
+ *     właściwej kolejności NIE pokazujemy; dopiero po `pokaz_klucz_po` nieudanych próbach (domyślnie 3, nigdy po 1.)
+ *     informacja proponuje „Pokaż właściwą kolejność” — wybór studenta, nie automat;
+ *   • dobrze — „Właściwa kolejność! Próby: N”, uzasadnienie ze źródłem, „Dalej” z fokusem;
+ * → podsumowanie: liczby, właściwa kolejność każdego zestawu z uzasadnieniem, wnioski, „Jeszcze raz” (nowy układ startowy).
+ * Po przesunięciu stare znaki ✓/✗ i informacja znikają (MK: wynik po zmianie jest nieaktualny). Krańcowe przyciski mają
+ * aria-disabled (nie `disabled` — B8, ślepy zaułek klawiatury). Nic nie liczy czasu (decyzja 10); punkty (stoper + pauza)
+ * tylko gdy bank je włączy (decyzja 9); po „Wznów” fokus wraca do listy (poprawka 2B z Piaskownicy).
+ */
+(function (global) {
+  "use strict";
+
+  var Gm = global.Gm, Cw = global.GmCwiczenie, Model = global.GmKolejnosc;
+  if (!Gm || !Cw || !Model) return;
+
+  function uruchom(korzen) {
+    var c = Cw.utworz(korzen);
+    if (!c) return null;
+    korzen.classList.add("gm-ko");
+    var bank = c.bank, T = c.T, el = c.el, wstaw = c.wstaw;
+    var los = bank.runda && bank.runda.ziarno != null ? Gm.losowanie(bank.runda.ziarno) : null;
+    function tasuj(a) { return Gm.tasuj(a, los || undefined); }
+    var PO = Model.pokazKluczPo(bank);
+
+    var stan = "start";      // start | gra | koniec
+    var zestawy = [], nrZ = 0, z = null, uklad = [], proby = 0, probyRazem = 0, ulozony = false, wyniki = [];
+    var ui = null, pauza = null, ostatniFokus = null;
+
+    function zrodlo(zs) { var p = Model.zrodloPelne(bank, zs); return p ? " Źródło: " + p + "." : ""; }
+    function zamkniecie(zs) { return (zs.uzasadnienie ? " " + zs.uzasadnienie : "") + zrodlo(zs); }
+
+    /* ——— ekran startowy ——— */
+    function ekranStart() {
+      if (pauza) { pauza.odlacz(); pauza = null; }
+      stan = "start"; ui = null;
+      c.stoper.zeruj();
+      return c.ekranStartowy({
+        opis: c.teksty.opis, uwaga: T.czytnik, zasadyTytul: T.zasady_tytul, zasady: c.teksty.zasady,
+        przycisk: T.zacznij, naStart: function (id, wskaznik) { zacznij(wskaznik); }
+      });
+    }
+
+    function kafel(etyk, wart) {
+      var k = el("div", "gm-cw__kafel");
+      k.appendChild(el("span", "gm-cw__kafel-n", etyk));
+      var w = el("span", "gm-cw__kafel-w", wart);
+      k.appendChild(w);
+      return { k: k, w: w };
+    }
+
+    /* ——— ekran zestawu ——— */
+    function budujEkran() {
+      c.ekran.innerHTML = "";
+      ui = {};
+      var kafle = 1 + (zestawy.length > 1 ? 1 : 0) + (c.punkty ? 1 : 0);
+      var hud = el("div", "gm-cw__hud gm-cw__hud--" + kafle);
+      hud.setAttribute("role", "group");
+      hud.setAttribute("aria-label", T.hud_etyk || "");
+      if (zestawy.length > 1) { var kz = kafel(T.zestaw_etyk, "1/" + zestawy.length); ui.nrZ = kz.w; hud.appendChild(kz.k); }
+      var kp = kafel(T.proby_etyk, "0"); ui.proby = kp.w; hud.appendChild(kp.k);
+      if (c.punkty) { var kc = kafel(T.czas, "0:00"); c.stoper.wyswietlW(kc.w); hud.appendChild(kc.k); }
+      c.ekran.appendChild(hud);
+
+      if (c.punkty) {
+        var ster = el("div", "gm-ko__ster");
+        ui.pauza = el("button", "gm-przycisk gm-przycisk--cichy gm-ko__pauza", T.pauza || c.napis("pauza"));
+        ui.pauza.type = "button";
+        ster.appendChild(ui.pauza);
+        c.ekran.appendChild(ster);
+      }
+
+      ui.plansza = el("div", "gm-ko__plansza");
+      ui.polecenie = el("p", "gm-ko__polecenie");
+      ui.plansza.appendChild(ui.polecenie);
+      ui.lista = el("ol", "gm-ko__lista");
+      ui.lista.setAttribute("aria-label", T.lista_etyk || "");
+      ui.plansza.appendChild(ui.lista);
+      ui.sprawdz = el("button", "gm-przycisk gm-ko__sprawdz", T.sprawdz || c.napis("sprawdz"));
+      ui.sprawdz.type = "button";
+      ui.sprawdz.addEventListener("click", sprawdz);
+      ui.plansza.appendChild(ui.sprawdz);
+      ui.po = el("div", "gm-ko__po");
+      ui.plansza.appendChild(ui.po);
+      ui.plansza.addEventListener("focusin", function (e) { ostatniFokus = e.target; });
+      c.ekran.appendChild(ui.plansza);
+
+      ui.pauzaInfo = el("div", "gm-ko__pauzainfo");
+      ui.pauzaInfo.hidden = true;
+      ui.pauzaTxt = el("p");
+      ui.pauzaInfo.appendChild(ui.pauzaTxt);
+      c.ekran.appendChild(ui.pauzaInfo);
+      if (T.podpowiedz) c.ekran.appendChild(el("p", "gm-slaby gm-ko__podp", T.podpowiedz));
+
+      if (ui.pauza) {
+        pauza = c.pauza({ przycisk: ui.pauza, naPauze: naPauze, naWznow: naWznow,
+                          czyMozna: function () { return stan === "gra"; } });
+      }
+    }
+
+    /* jeden wiersz listy: numer pozycji, tekst kroku, znak oceny (po sprawdzeniu), przyciski ruchu */
+    function rysuj(fokus) {
+      ui.lista.innerHTML = "";
+      var ile = uklad.length;
+      uklad.forEach(function (ki, poz) {
+        var krok = z.kroki[ki];
+        var li = el("li", "gm-ko__krok");
+        li.setAttribute("data-krok", krok.id);
+        var nr = el("span", "gm-ko__nr", String(poz + 1));
+        nr.setAttribute("aria-hidden", "true");
+        li.appendChild(nr);
+        li.appendChild(el("span", "gm-ko__tekst", krok.tekst));
+        var ocena = el("span", "gm-ko__ocena");
+        li.appendChild(ocena);
+        var ruchy = el("span", "gm-ko__ruchy");
+        [[-1, "↑", T.wyzej || "Przenieś wyżej"], [1, "↓", T.nizej || "Przenieś niżej"]].forEach(function (r) {
+          var b = el("button", "gm-przycisk gm-przycisk--cichy gm-ko__ruch");
+          b.type = "button";
+          b.setAttribute("data-ruch", String(r[0]));
+          var zn = el("span", "gm-ko__strzalka", r[1]);
+          zn.setAttribute("aria-hidden", "true");
+          b.appendChild(zn);
+          b.appendChild(el("span", "gm-sr", r[2] + ": " + krok.tekst));
+          var kraniec = (r[0] < 0 && poz === 0) || (r[0] > 0 && poz === ile - 1);
+          if (kraniec || ulozony) b.setAttribute("aria-disabled", "true");
+          b.addEventListener("click", function () { ruch(poz, r[0]); });
+          ruchy.appendChild(b);
+        });
+        li.appendChild(ruchy);
+        ui.lista.appendChild(li);
+      });
+      if (fokus) {
+        var li2 = ui.lista.children[fokus.poz];
+        var b2 = li2 && li2.querySelector('[data-ruch="' + fokus.ruch + '"]');
+        if (b2 && b2.getAttribute("aria-disabled") === "true") b2 = li2.querySelector('[data-ruch]:not([aria-disabled="true"])');
+        if (b2) b2.focus();
+      }
+    }
+
+    function znaki(ocena) {
+      Array.prototype.forEach.call(ui.lista.children, function (li, poz) {
+        var ok = ocena.naMiejscu[poz];
+        li.classList.toggle("gm-ko__krok--ok", ok);
+        li.classList.toggle("gm-ko__krok--zle", !ok);
+        var o = li.querySelector(".gm-ko__ocena");
+        o.innerHTML = "";
+        var zn = el("span", "gm-ko__znak", ok ? "✓" : "✗");
+        zn.setAttribute("aria-hidden", "true");
+        o.appendChild(zn);
+        o.appendChild(el("span", "gm-sr", ", " + (ok ? T.na_miejscu_sr : T.nie_na_miejscu_sr)));
+      });
+    }
+
+    function odswiezHud() {
+      if (ui.nrZ) ui.nrZ.textContent = (nrZ + 1) + "/" + zestawy.length;
+      ui.proby.textContent = String(proby);
+    }
+
+    function ruch(poz, kier) {
+      if (stan !== "gra" || ulozony || (pauza && pauza.wstrzymane())) return;
+      var cel = poz + kier, krok = z.kroki[uklad[poz]];
+      if (cel < 0 || cel >= uklad.length) {
+        c.mow(wstaw(kier < 0 ? T.kraniec_gora : T.kraniec_dol, { tekst: krok.tekst }));
+        return;
+      }
+      uklad = Model.przesun(uklad, poz, kier);
+      ui.po.innerHTML = "";              /* stary wynik jest nieaktualny po zmianie (MK) */
+      rysuj({ poz: cel, ruch: kier });
+      c.mow(wstaw(T.ruch_ogl, { tekst: krok.tekst, nr: cel + 1, ile: uklad.length }));
+    }
+
+    function sprawdz() {
+      if (stan !== "gra" || ulozony || (pauza && pauza.wstrzymane())) return;
+      proby++; probyRazem++;
+      odswiezHud();
+      var o = Model.ocen(uklad);
+      znaki(o);
+      ui.po.innerHTML = "";
+      if (o.wszystko) { zakonczZestaw(false); return; }
+      var info = c.informacja(ui.po, {
+        ton: "zle", naglowek: T.zle_naglowek,
+        tekst: wstaw(T.zle_tekst, { dobrze: o.ileDobrze, ile: o.ile, proby: proby })
+      });
+      /* klucz dopiero po kilku próbach i tylko na życzenie studenta (nigdy po pierwszej — B3/T) */
+      if (PO && proby >= PO) {
+        var bk = el("button", "gm-przycisk gm-przycisk--cichy gm-ko__klucz", T.pokaz_klucz);
+        bk.type = "button";
+        bk.addEventListener("click", function () { zakonczZestaw(true); });
+        info.blok.appendChild(bk);
+      }
+      /* fokus zostaje na „Sprawdź” — informacja trafia do czytnika przez aria-live; pokaż ją, gdy jest pod krawędzią */
+      if (info.blok.scrollIntoView) info.blok.scrollIntoView({ block: "nearest" });
+    }
+
+    function zakonczZestaw(zKluczem) {
+      ulozony = true;
+      if (zKluczem) uklad = z.kroki.map(function (k, i) { return i; });
+      wyniki.push({ z: z, proby: proby, klucz: zKluczem });
+      rysuj(null);
+      znaki(Model.ocen(uklad));
+      ui.sprawdz.hidden = true;
+      ui.po.innerHTML = "";
+      var ostatni = nrZ >= zestawy.length - 1;
+      c.informacja(ui.po, {
+        ton: zKluczem ? "" : "ok",
+        naglowek: zKluczem ? T.klucz_naglowek : T.dobrze_naglowek,
+        tekst: (zKluczem ? (T.klucz_tekst || "") : wstaw(proby === 1 ? T.proby_pierwsza : T.proby_tekst, { proby: proby })) + zamkniecie(z),
+        dalej: ostatni ? (T.zobacz_wynik || c.napis("dalej")) : (T.dalej || c.napis("dalej")),
+        naDalej: function () { if (ostatni) koniec(); else pokazZestaw(nrZ + 1, false); }
+      });
+    }
+
+    function pokazZestaw(n, wskaznik) {
+      nrZ = n;
+      z = zestawy[n];
+      proby = 0;
+      ulozony = false;
+      uklad = Model.ukladStartowy(z.kroki.length, tasuj);
+      ui.sprawdz.hidden = false;
+      ui.po.innerHTML = "";
+      var pol = z.polecenie || "";
+      ui.polecenie.textContent = pol;
+      ui.polecenie.hidden = !pol;
+      odswiezHud();
+      rysuj(null);
+      /* fokus na pierwszym aktywnym przycisku listy — Tab prowadzi dalej po krokach, a czytnik słyszy krok i kierunek */
+      var b = ui.lista.querySelector('[data-ruch]:not([aria-disabled="true"])');
+      if (b) { try { b.focus(wskaznik ? { preventScroll: true } : undefined); } catch (e) { b.focus(); } }
+      if (zestawy.length > 1) c.mow(wstaw(T.zestaw_ogl || "", { nr: n + 1, ile: zestawy.length, polecenie: pol }));
+    }
+
+    /* ——— pauza: tylko z punktami (coś biegnie — stoper). Lista schowana, żeby pauza nie była podglądaniem. ——— */
+    function naPauze(powod) {
+      c.stoper.stop();
+      ui.pauzaInfo.style.minHeight = ui.plansza.offsetHeight + "px";
+      ui.plansza.hidden = true;
+      ui.pauzaInfo.hidden = false;
+      ui.pauzaTxt.textContent = powod === "karta" ? (T.pauza_info_karta || T.pauza_info) : T.pauza_info;
+      c.mow(T.pauza_ogl || c.napis("pauzaOgl"));
+    }
+    function naWznow() {
+      ui.plansza.hidden = false;
+      ui.pauzaInfo.hidden = true;
+      c.mow(T.wznow_ogl || c.napis("wznowOgl"));
+      if (stan === "gra") c.stoper.start();
+      /* Po „Wznów” fokus nie zostaje na przycisku pauzy (Piaskownica 12.10, memory): wraca tam, gdzie był w liście,
+         a gdy tego elementu już nie ma — na „Dalej” albo pierwszy przycisk ruchu. */
+      if (document.activeElement === ui.pauza) {
+        var cel = ostatniFokus && ui.plansza.contains(ostatniFokus) ? ostatniFokus : null;
+        cel = cel || ui.po.querySelector(".gm-cw__dalej") || ui.lista.querySelector('[data-ruch]:not([aria-disabled="true"])') || ui.sprawdz;
+        cel.focus();
+      }
+    }
+
+    /* ——— start / koniec ——— */
+    function zacznij(wskaznik) {
+      if (pauza) { pauza.odlacz(); pauza = null; }
+      c.wyczysc();
+      c.stoper.zeruj();
+      zestawy = Model.zestawyRundy(bank, tasuj);
+      wyniki = []; probyRazem = 0;
+      stan = "gra";
+      budujEkran();
+      if (c.punkty) c.stoper.start();
+      pokazZestaw(0, wskaznik);
+    }
+
+    function koniec() {
+      stan = "koniec";
+      c.stoper.stop();
+      if (pauza) { pauza.odlacz(); pauza = null; }
+      var czasMs = Math.max(1, c.stoper.ms());
+      var ulozone = wyniki.filter(function (w) { return !w.klucz; }).length;
+      var stanW = { proby: probyRazem, ile: wyniki.length, ulozone: ulozone, podpowiedzi: wyniki.length - ulozone,
+                    pierwsza: wyniki.filter(function (w) { return !w.klucz && w.proby === 1; }).length, punkty: c.punkty };
+      var wnioski = c.wniosek(T.wn, stanW);
+      var o = {
+        naglowek: wstaw(stanW.podpowiedzi && T.koniec_z_kluczem ? T.koniec_z_kluczem : T.koniec, stanW),
+        liczby: [],
+        przyciski: [{ tekst: T.jeszcze || c.napis("jeszcze"), fn: function (w) { zacznij(w); } }]
+      };
+      if (T.l_proby) o.liczby.push({ etyk: T.l_proby, wart: String(probyRazem) });
+      if (wyniki.length > 1 && T.l_zestawy) o.liczby.push({ etyk: T.l_zestawy, wart: ulozone + "/" + wyniki.length });
+      if (c.punkty) {
+        var rek = c.rekord("cwiczenie", czasMs, { mniejszyLepszy: true });
+        o.liczby.push({ etyk: T.l_czas || T.czas, wart: c.czas(czasMs) }, { etyk: T.l_rekord || "", wart: c.czas(rek.rekord) });
+      }
+      /* przebieg zestawów jako lista, nie tabela (długie polecenia rozpychały tabelę przy 320 px — zrzut 2D) */
+      if (wyniki.length > 1 && T.przebieg_tytul) {
+        o.sekcje = [{ tytul: T.przebieg_tytul, lista: wyniki.map(function (w, i) {
+          return { mocne: w.z.polecenie || wstaw(T.zestaw_nazwa || "{nr}", { nr: i + 1 }),
+                   tekst: wstaw(w.klucz ? T.wynik_klucz : T.wynik_sam, { proby: w.proby }) };
+        }) }];
+      }
+      ui = null;
+      var p = c.podsumowanie(o);
+      /* właściwa kolejność każdego zestawu z uzasadnieniem — zamknięcie dydaktyczne zestawu (MK) i na koniec całości */
+      var miejsce = p.blok.querySelector(".gm-cw__przyciski");
+      var sek = el("div", "gm-ko__klucze");
+      sek.appendChild(c.h(1, T.klucz_tytul, "gm-cw__sekcja"));
+      wyniki.forEach(function (w, i) {
+        if (wyniki.length > 1) sek.appendChild(el("p", "gm-ko__klucz-pol", w.z.polecenie || wstaw(T.zestaw_nazwa || "{nr}", { nr: i + 1 })));
+        var ol = el("ol", "gm-ko__klucz-lista");
+        w.z.kroki.forEach(function (k) { ol.appendChild(el("li", null, k.tekst)); });
+        sek.appendChild(ol);
+        var zam = zamkniecie(w.z).trim();
+        if (zam) sek.appendChild(el("p", "gm-cw__wyj", zam));
+      });
+      /* wnioski po liście kluczy — kolejność czytania: wynik → właściwa kolejność → co dalej */
+      if (wnioski.length) {
+        if (T.wn_tytul) sek.appendChild(c.h(1, T.wn_tytul, "gm-cw__sekcja"));
+        wnioski.forEach(function (a) { sek.appendChild(el("p", null, a)); });
+      }
+      p.blok.insertBefore(sek, miejsce);
+    }
+
+    /* Uchwyt dla testów (B11 — bot zna klucz z banku). Ćwiczenie z tego nie korzysta. */
+    korzen.__widok = {
+      stan: function () {
+        return { ekran: stan, zestaw: nrZ, ileZestawow: zestawy.length, uklad: uklad.slice(), proby: proby, probyRazem: probyRazem,
+                 ulozony: ulozony, kroki: z ? z.kroki.map(function (k) { return k.id; }) : [],
+                 wyniki: wyniki.map(function (w) { return { id: w.z.id, proby: w.proby, klucz: w.klucz }; }),
+                 pauza: !!(pauza && pauza.wstrzymane()) };
+      }
+    };
+
+    /* wersja tekstowa w widgecie Strony — ta sama treść i kolejność co pozycje_wersji_tekstowej() generatora */
+    c.wersjaTekstowa((bank.dane.zestawy || []).map(function (zs, i) {
+      var kroki = zs.kroki.map(function (k, j) { return (j + 1) + ". " + k.tekst; }).join("; ");
+      if (!/[.!?…]$/.test(kroki)) kroki += ".";
+      var nazwa = zs.polecenie || (bank.dane.zestawy.length === 1 ? bank.tytul : wstaw(T.zestaw_nazwa || "{nr}", { nr: i + 1 }));
+      return [nazwa, kroki + zamkniecie(zs)];
+    }));
+
+    ekranStart();
+    return c;
+  }
+
+  Cw.zarejestruj("kolejnosc", uruchom);
+})(window);
+
+</script>
+</body>
+</html>

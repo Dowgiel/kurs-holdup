@@ -1,0 +1,2052 @@
+<!DOCTYPE html>
+<html lang="pl" data-gm-motyw="jasny">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="generator" content="gry-moodle 0.9.0">
+<title>Tydzień z podejrzanymi wiadomościami</title>
+<style>
+/* ——— rdzen.css ——— */
+/* gry-moodle 0.2.0 — NIE EDYTUJ W KURSIE, poprawiaj w PLUGIN/gry-moodle (~/.claude/local-marketplace-maciek/plugins/gry-moodle) */
+/* rdzen.css — warstwa wspólna: tokeny motywu, [hidden], klasy pomocnicze, fokus, tryby systemowe.
+   Paleta domyślna = paleta zmierzona kursu ZZR (13/13 par WCAG AA, `ZZR/_produkcja/scorm/kontrast.py`).
+   Kurs nadpisuje tokeny polem `motyw` banku (generator dopisuje własny arkusz po tym). */
+
+:root {
+  --tlo:            #F7F4EF;
+  --tlo-karta:      #FFFFFF;
+  --tlo-glebia:     #0E4F63;
+  --tekst:          #1C2B33;
+  --tekst-slaby:    #4A5C66;
+  --glowny:         #0E4F63;
+  --akcent:         #B8432A;
+  --akcent-ciemny:  #8F3320;
+  --pozytyw:        #1F6B55;
+  --uwaga:          #8A5A00;
+  --ramka:          #D8D0C4;   /* separatory dekoracyjne */
+  --ramka-kontrolka:#8A8175;   /* granice pól i przycisków — 1.4.11 */
+  --na-glebi:       #DCE9EE;   /* tekst i linie na tle sceny */
+  --na-glownym:     #FFFFFF;   /* tekst na wypełnieniu --glowny / --akcent */
+  --tlo-ok:         #F1F8F5;
+  --tlo-zle:        #FDF3F1;
+  --gm-nakladka:    rgba(14, 79, 99, .84);
+  --promien: 10px;
+}
+
+/* Motyw ciemny — tylko gdy strona go zamówi (data-gm-motyw="ciemny" albo "auto" + ustawienie systemu).
+   Paczka ZZR-owa i pilot jadą w jasnym, jak oryginał. */
+:root[data-gm-motyw="ciemny"] {
+  --tlo: #121A1F; --tlo-karta: #1B262D; --tlo-glebia: #0B2E3A; --tekst: #E8EEF1; --tekst-slaby: #B4C2CA;
+  --glowny: #8FD0E3; --akcent: #F0997F; --akcent-ciemny: #F6B6A2; --pozytyw: #7FD1B4; --uwaga: #E8C26A;
+  --ramka: #33434D; --ramka-kontrolka: #8C9DA7; --na-glebi: #DCE9EE; --na-glownym: #0B1B22;
+  --tlo-ok: #16302A; --tlo-zle: #3A2019; --gm-nakladka: rgba(6, 22, 28, .86);
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-gm-motyw="auto"] {
+    --tlo: #121A1F; --tlo-karta: #1B262D; --tlo-glebia: #0B2E3A; --tekst: #E8EEF1; --tekst-slaby: #B4C2CA;
+    --glowny: #8FD0E3; --akcent: #F0997F; --akcent-ciemny: #F6B6A2; --pozytyw: #7FD1B4; --uwaga: #E8C26A;
+    --ramka: #33434D; --ramka-kontrolka: #8C9DA7; --na-glebi: #DCE9EE; --na-glownym: #0B1B22;
+    --tlo-ok: #16302A; --tlo-zle: #3A2019; --gm-nakladka: rgba(6, 22, 28, .86);
+  }
+}
+
+/* Atrybut hidden chowa ZAWSZE. Reguła przeglądarki [hidden]{display:none} przegrywa z każdą regułą autora,
+   która ustawia display (decyduje pochodzenie reguły, nie swoistość) — TOP 15 #7, MK REGULA_HIDDEN.
+   Wariant .gm [hidden] jest dla formatu Strona, gdzie arkusz siedzi w cudzej stronie. */
+[hidden], .gm [hidden] { display: none !important; }
+
+/* tylko dla czytnika ekranu */
+.gm-sr {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+}
+
+/* ——— klasy, których używa silnik (dawniej klasy strony-gospodarza ZZR: przycisk, reakcja, slaby,
+   tylko-czytnik). Z prefiksem gm-, żeby nie zderzały się z komponentami kursu (L13). ——— */
+.gm-przycisk {
+  display: inline-flex; align-items: center; gap: .5em;
+  min-height: 44px; padding: .7em 1.3em;           /* 2.5.8 */
+  background: var(--akcent); color: var(--na-glownym);
+  border: 2px solid var(--akcent);
+  border-radius: var(--promien);
+  font: inherit; font-weight: 600; cursor: pointer;
+  text-decoration: none;
+}
+.gm-przycisk:hover { background: var(--akcent-ciemny); border-color: var(--akcent-ciemny); }
+.gm-przycisk[aria-disabled="true"], .gm-przycisk:disabled {
+  background: var(--tlo); color: var(--tekst-slaby);
+  border-color: var(--ramka-kontrolka); cursor: not-allowed;
+}
+.gm-przycisk--cichy { background: transparent; color: var(--akcent); border-color: var(--ramka-kontrolka); }
+.gm-przycisk--cichy:hover { background: var(--tlo); color: var(--akcent-ciemny); }
+
+.gm-reakcja {
+  border-left: 4px solid var(--glowny);
+  background: var(--tlo);
+  padding: .9em 1.1em; border-radius: 0 var(--promien) var(--promien) 0;
+  margin: .8em 0 0;
+}
+.gm-reakcja--ok  { border-left-color: var(--pozytyw); }
+.gm-reakcja--zle { border-left-color: var(--akcent); }
+.gm-reakcja--uwaga { border-left-color: var(--uwaga); }
+.gm-reakcja p:first-child { margin-top: 0; }
+.gm-reakcja p:last-child  { margin-bottom: 0; }
+
+.gm-slaby { color: var(--tekst-slaby); font-size: .92em; }
+
+/* ——— widoczny fokus (2.4.7, 2.4.11). Nigdy bez zamiennika. ——— */
+.gm-przycisk:focus-visible, .gra :focus-visible {
+  outline: 3px solid var(--akcent-ciemny);
+  outline-offset: 2px;
+}
+
+/* ——— tryby systemowe ——— */
+@media (prefers-reduced-motion: reduce) {
+  .gra *, .gra *::before, .gra *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+@media (forced-colors: active) {
+  .gm-przycisk, .gm-reakcja { border: 2px solid ButtonText; }
+  .gm-przycisk:focus-visible, .gra :focus-visible { outline-color: Highlight; }
+}
+
+/* ——— strona.css ——— */
+/* gry-moodle 0.2.0 — NIE EDYTUJ W KURSIE, poprawiaj w PLUGIN/gry-moodle (~/.claude/local-marketplace-maciek/plugins/gry-moodle) */
+/* formaty/wspolne/strona.css — strona wokół gry w formatach SCORM (paczka) i samodzielny HTML:
+   nagłówek, karty, wersja tekstowa z pytaniami, lista źródeł. Wzór: ZZR `szablon/zasoby/styl.css` (paleta 13/13 AA).
+   Klasy z prefiksem gm- (L13). Tokeny kolorów — z rdzen.css. W formacie Strona ten arkusz NIE jest używany. */
+
+:root {
+  --cien: 0 1px 3px rgba(28, 43, 51, .10), 0 6px 16px rgba(28, 43, 51, .06);
+  --odstep: clamp(16px, 4vw, 32px);
+  --szerokosc: 62rem;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+
+body.gm-strona {
+  margin: 0;
+  background: var(--tlo);
+  color: var(--tekst);
+  font: 400 clamp(16px, 1rem + .2vw, 18px)/1.65 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  letter-spacing: normal;   /* 1.4.12 — odstępy nie mogą być zablokowane */
+  word-spacing: normal;
+}
+
+.gm-strona :focus-visible { outline: 3px solid var(--akcent-ciemny); outline-offset: 2px; border-radius: 4px; }
+.gm-strona :focus:not(:focus-visible) { outline: none; }
+
+/* pomijanie nawigacji (2.4.1) */
+.gm-pomin {
+  position: absolute; left: -9999px;
+  background: var(--tlo-karta); color: var(--akcent-ciemny);
+  padding: 12px 20px; border-radius: var(--promien); font-weight: 600;
+  border: 2px solid var(--ramka-kontrolka);
+}
+.gm-pomin:focus { left: var(--odstep); top: 12px; z-index: 50; }
+
+/* szkielet */
+.gm-pas { background: var(--tlo-glebia); color: var(--tlo-karta); padding: var(--odstep); }
+.gm-pas h1 { margin: 0; font-size: clamp(1.35rem, 1.1rem + 1.4vw, 2rem); line-height: 1.25; }
+.gm-pas p  { margin: .4em 0 0; color: var(--na-glebi); }
+.gm-stopka { margin-top: 3rem; }
+.gm-stopka p { margin: 0; font-size: .92em; }
+
+.gm-strona main { max-width: var(--szerokosc); margin: 0 auto; padding: var(--odstep); }
+.gm-strona h2 { color: var(--glowny); font-size: clamp(1.2rem, 1rem + 1vw, 1.6rem); line-height: 1.3; margin: 2em 0 .6em; }
+.gm-strona h3 { color: var(--glowny); font-size: clamp(1.05rem, .95rem + .6vw, 1.3rem); margin: 1.6em 0 .5em; }
+.gm-strona h2:first-child, .gm-strona h3:first-child { margin-top: 0; }
+.gm-strona p, .gm-strona li { max-width: 68ch; }
+.gm-strona a { color: var(--akcent); text-underline-offset: 3px; overflow-wrap: anywhere; }
+.gm-strona a:hover { color: var(--akcent-ciemny); }
+
+.gm-karta {
+  background: var(--tlo-karta);
+  border: 1px solid var(--ramka);
+  border-radius: var(--promien);
+  box-shadow: var(--cien);
+  padding: var(--odstep);
+  margin: 1.5em 0;
+}
+/* „scena pierwsza” (ARCH §4.2, L43): karta z grą bez górnego marginesu — w ramce SCORM 500 px liczy się każdy piksel */
+.gm-karta--gra { margin-top: 0; }
+.gm-karta--gra > h2 { margin-bottom: .3em; }
+
+/* pytania wersji tekstowej */
+.gm-pytanie-blok { margin: 1.8em 0 0; padding-top: 1.2em; border-top: 1px solid var(--ramka); }
+fieldset.gm-pytanie { border: 0; margin: 0; padding: 0; min-width: 0; }   /* min-width:0 — 320 px bez przewijania */
+.gm-pytanie legend { font-weight: 600; color: var(--glowny); padding: 0; }
+.gm-pytanie__sprawdz { margin-top: .6em; }
+.gm-odpowiedz {
+  display: flex; align-items: flex-start; flex-wrap: wrap; gap: .7em;
+  min-height: 44px; padding: .7em .9em;
+  border: 2px solid var(--ramka-kontrolka);
+  border-radius: var(--promien);
+  margin: .5em 0; cursor: pointer; background: var(--tlo-karta);
+}
+.gm-odpowiedz > span:not(.gm-odpowiedz__znak) { flex: 1 1 12ch; min-width: 0; }
+.gm-odpowiedz:hover { background: var(--tlo); }
+.gm-odpowiedz input { margin: .25em 0 0; width: 1.15em; height: 1.15em; accent-color: var(--akcent); flex: none; }
+.gm-odpowiedz--ok  { border-color: var(--pozytyw); background: var(--tlo-ok); }
+.gm-odpowiedz--zle { border-color: var(--akcent);  background: var(--tlo-zle); }
+.gm-odpowiedz:has(input:checked:not(:disabled)) { border-color: var(--glowny); }
+@supports selector(:has(*)) {
+  .gm-odpowiedz:has(input:focus-visible) { outline: 3px solid var(--akcent-ciemny); outline-offset: 2px; }
+  .gm-odpowiedz input:focus-visible { outline: none; }
+}
+/* stan odpowiedzi nie samym kolorem (1.4.1) — znacznik tekstowy */
+.gm-odpowiedz__znak { font-weight: 700; margin-left: auto; flex: none; }
+.gm-odpowiedz--ok  .gm-odpowiedz__znak { color: var(--pozytyw); }
+.gm-odpowiedz--zle .gm-odpowiedz__znak { color: var(--akcent); }
+.gm-postep { margin-bottom: 0; }
+
+/* pełna lista elementów gry w wersji tekstowej */
+.gm-lista-elementow { margin-top: 1.8em; }
+.gm-lista-elementow > summary { cursor: pointer; font-weight: 600; color: var(--glowny); min-height: 44px; padding: .5em 0; }
+.gm-lista-elementow ol { padding-left: 1.4em; }
+.gm-lista-elementow li { margin: .6em 0; }
+
+/* źródła */
+.gm-zrodla { margin: 0; padding: 0; list-style: none; }
+.gm-zrodla li { padding: .6em 0; border-top: 1px solid var(--ramka); max-width: 68ch; }
+.gm-zrodla li:first-child { border-top: 0; }
+
+/* 1.4.10 Reflow: 320 px bez poziomego przewijania */
+@media (max-width: 26rem) {
+  :root { --odstep: 16px; }
+  .gm-strona .gm-przycisk { width: 100%; justify-content: center; }
+  .gm-odpowiedz__znak { width: 100%; margin-left: 0; text-align: right; }
+}
+
+/* ——— cwiczenie.css ——— */
+/* gry-moodle 0.2.0 — NIE EDYTUJ W KURSIE, poprawiaj w PLUGIN/gry-moodle (~/.claude/local-marketplace-maciek/plugins/gry-moodle) */
+/* cwiczenia/cwiczenie.css — warstwa ćwiczeń: nagłówek, polecenie, ekran startowy z poziomami, informacja zwrotna,
+   kafle liczb, podsumowanie z tabelą. Kolory WYŁĄCZNIE z tokenów rdzen.css (kurs nadpisuje je polem `motyw` banku).
+   Tokeny opcjonalne: --fokus (obrys fokusu; domyślnie --akcent-ciemny), --wyroznik (akcent ostrzegawczy;
+   domyślnie --akcent), --tlo-blok (tło bloków i kafli; domyślnie --tlo-karta), --nad (napis nad tytułem; domyślnie --na-glebi). Bez `opacity` (B8 — znosi wyjątek kontrastu); stany nie samym kolorem (1.4.1). */
+
+.gm-cw { display: block; min-width: 0; }
+.gm-cw *, .gm-cw *::before, .gm-cw *::after { box-sizing: border-box; }
+.gm-cw p, .gm-cw ul, .gm-cw ol, .gm-cw li, .gm-cw figure,
+.gm-cw h2, .gm-cw h3, .gm-cw h4, .gm-cw h5, .gm-cw h6 { margin: 0; padding: 0; }
+.gm-cw fieldset { margin: 0; }   /* bez padding: 0 — reset (0,1,1) przebijałby klasy pól (0,1,0) */
+
+/* nagłówek (format Strona: pas z „nad” i tytułem) */
+.gm-cw__glowa { background: var(--tlo-glebia); color: var(--na-glebi); padding: 14px 20px;
+  display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; }
+.gm-cw__nad { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; font-weight: 700; color: var(--nad, var(--na-glebi)); }
+.gm-cw__tytul { width: 100%; font-size: 20px; font-weight: 700; line-height: 1.25; color: var(--na-glownym); }
+.gm-cw__cialo { padding: 20px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.gm-cw__cialo > * { min-width: 0; }
+/* scorm/html: ćwiczenie siedzi w karcie strony, która ma własny odstęp — bez drugiego wcięcia */
+.gm-cw[data-gm-tytul="ukryj"] > .gm-cw__cialo { padding: 0; }
+.gm-cw__polecenie { font-weight: 600; color: var(--tekst); max-width: 62ch; }
+
+/* ekran — kolumna z auto-marginesami (skill widgety-moodle-strona: max-width zawsze z marginesami auto) */
+.gm-cw__ekran { display: flex; flex-direction: column; gap: 14px; min-width: 0; width: 100%; max-width: 46rem;
+  margin-left: auto; margin-right: auto; container-type: inline-size; }
+.gm-cw__ekran > * { min-width: 0; }
+.gm-cw__lead { font-size: 17px; max-width: 62ch; }
+.gm-cw p.gm-cw__uwaga { font-size: 14px; color: var(--tekst-slaby); border-left: 3px solid var(--ramka-kontrolka);
+  padding: 8px 12px; background: var(--tlo-blok, var(--tlo-karta)); }
+
+/* wybór poziomu */
+.gm-cw__poziomy { border: 1px solid var(--ramka); border-radius: 6px; padding: 12px 14px; background: var(--tlo-blok, var(--tlo-karta));
+  margin: 0; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.gm-cw__pyt { font-weight: 700; }
+.gm-cw__opcja { display: flex; align-items: flex-start; gap: 10px; border: 2px solid var(--ramka-kontrolka); border-radius: 6px;
+  padding: 9px 12px; cursor: pointer; background: var(--tlo-karta); min-height: 44px; margin: 0; }
+.gm-cw__opcja:hover { background: var(--tlo); }
+.gm-cw__opcja:has(.gm-cw__radio:checked) { border-color: var(--tekst); background: var(--tlo); }
+.gm-cw__opcja:focus-within { outline: 3px solid var(--fokus, var(--akcent-ciemny)); outline-offset: 2px; }
+.gm-cw__radio { width: 20px; height: 20px; accent-color: var(--wyroznik, var(--akcent)); margin: 2px 0 0; flex: none; }
+.gm-cw__opt { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.gm-cw__optnazwa { font-weight: 700; }
+.gm-cw__opttekst { color: var(--tekst-slaby); font-size: 14px; }
+
+/* szczegóły zasad */
+.gm-cw__szczegoly { border: 1px solid var(--ramka); border-radius: 6px; background: var(--tlo-blok, var(--tlo-karta)); padding: 0 14px; }
+.gm-cw__szczegoly summary { cursor: pointer; font-weight: 700; min-height: 44px; display: flex; align-items: center;
+  justify-content: space-between; gap: 10px; padding: 6px 0; list-style: none; }
+.gm-cw__szczegoly summary::-webkit-details-marker { display: none; }
+.gm-cw__szczegoly summary::after { content: ""; flex: none; width: 9px; height: 9px; border-right: 2px solid var(--tekst);
+  border-bottom: 2px solid var(--tekst); transform: rotate(45deg); margin: -4px 4px 0 10px; }
+.gm-cw__szczegoly[open] summary::after { transform: rotate(-135deg); margin-top: 4px; }
+.gm-cw__szczegoly ul { padding-bottom: 12px; }
+
+/* listy z kwadratowym znacznikiem */
+.gm-cw ul.gm-cw__lista { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.gm-cw ul.gm-cw__lista > li { padding-left: 18px; position: relative; }
+.gm-cw ul.gm-cw__lista > li::before { content: ""; position: absolute; left: 0; top: .62em; width: 7px; height: 7px;
+  background: var(--wyroznik, var(--akcent)); border-radius: 1px; }
+.gm-cw ul.gm-cw__lista--odstep { gap: 14px; }
+.gm-cw__lista--odstep li > * + * { margin-top: 4px; }
+.gm-cw__wyj { color: var(--tekst-slaby); }
+
+/* przyciski warstwy */
+.gm-cw .gm-przycisk { justify-content: center; text-align: center; }
+.gm-cw .gm-przycisk:focus-visible, .gm-cw :focus-visible { outline: 3px solid var(--fokus, var(--akcent-ciemny)); outline-offset: 2px; }
+.gm-cw__duzy { font-size: 18px; min-height: 52px; width: 100%; }
+.gm-cw__przyciski { display: flex; flex-wrap: wrap; gap: 10px; }
+
+/* kafle liczb (HUD i podsumowanie) */
+.gm-cw__hud { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.gm-cw__hud--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.gm-cw__hud--1 { grid-template-columns: minmax(0, 1fr); }
+@container (min-width: 28rem) { .gm-cw__hud--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.gm-cw__kafel { border: 1px solid var(--ramka); background: var(--tlo-blok, var(--tlo-karta)); border-radius: 6px; padding: 8px 10px; min-width: 0;
+  display: flex; flex-direction: column; gap: 2px; justify-content: flex-start; }
+.gm-cw__kafel-n { font-size: 13px; font-weight: 700; color: var(--tekst-slaby); line-height: 20px; }
+.gm-cw__kafel-w { font-size: 22px; font-weight: 700; line-height: 1.15; color: var(--tekst); font-variant-numeric: tabular-nums; }
+
+/* informacja zwrotna (czeka na „Dalej”) */
+.gm-cw__info { border: 2px solid var(--ramka-kontrolka); border-left-width: 6px; background: var(--tlo-karta); border-radius: 8px;
+  padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+.gm-cw__info--ok { border-color: var(--pozytyw); background: var(--tlo-ok); }
+.gm-cw__info--zle { border-color: var(--wyroznik, var(--akcent)); background: var(--tlo-zle); }
+.gm-cw__info:focus { outline: none; }
+
+/* pytanie z „Sprawdź” */
+.gm-cw__pytanie { border: 0; padding: 0; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.gm-cw__legenda { font-weight: 700; padding: 0; font-size: 1em; }
+.gm-cw__odp { display: flex; align-items: flex-start; gap: 10px; min-height: 44px; padding: 9px 12px; margin: 0;
+  border: 2px solid var(--ramka-kontrolka); border-radius: 8px; background: var(--tlo-karta); cursor: pointer; }
+.gm-cw__odp input { width: 20px; height: 20px; margin: 2px 0 0; flex: none; accent-color: var(--wyroznik, var(--akcent)); }
+.gm-cw__odp > span { flex: 1 1 auto; min-width: 0; }
+.gm-cw__odp--ok { border-color: var(--pozytyw); background: var(--tlo-ok); }
+.gm-cw__odp--zle { border-color: var(--wyroznik, var(--akcent)); background: var(--tlo-zle); }
+.gm-cw__odp > .gm-cw__znak { flex: none; font-weight: 700; }
+.gm-cw__brak { font-weight: 700; color: var(--tekst); border-left: 4px solid var(--uwaga); padding-left: 10px; }
+
+/* podsumowanie */
+.gm-cw__koniec { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.gm-cw__koniec > * { min-width: 0; }
+.gm-cw__wynik-h { font-size: 22px; font-weight: 700; line-height: 1.25; }
+.gm-cw__wynik-h:focus { outline: none; }
+.gm-cw__wynik-h:focus-visible { outline: 2px solid var(--tekst); outline-offset: 3px; }
+.gm-cw .gm-cw__sekcja { font-size: 17px; font-weight: 700; padding-top: 6px; }
+.gm-cw__tabela { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+.gm-cw__tabela caption { text-align: left; font-weight: 700; padding-bottom: 6px; }
+.gm-cw__tabela th, .gm-cw__tabela td { border: 1px solid var(--ramka); padding: 6px 8px; text-align: left; vertical-align: top; }
+/* wersja tekstowa w widgecie (format Strona) */
+.gm-cw__wt { border-top: 1px solid var(--ramka); padding-top: 10px; }
+.gm-cw__wt > summary { cursor: pointer; font-weight: 700; min-height: 44px; padding: 10px 0; }
+.gm-cw__wt > * + * { margin-top: 10px; }
+.gm-cw ol.gm-cw__wt-lista { padding-left: 1.6em; display: flex; flex-direction: column; gap: 8px; }
+.gm-cw__awaria { border-left: 4px solid var(--uwaga); padding: 10px 12px; background: var(--tlo-karta); }
+
+@media (max-width: 420px) {
+  .gm-cw__cialo { padding: 15px; gap: 10px; }
+  .gm-cw__glowa { padding: 12px 15px; }
+  .gm-cw__ekran { gap: 10px; }
+  .gm-cw__kafel { padding: 6px 8px; }
+  .gm-cw__kafel-w { font-size: 20px; }
+}
+@media (forced-colors: active) {
+  .gm-cw__opcja, .gm-cw__odp, .gm-cw__info { border-color: CanvasText; }
+}
+
+/* ——— scenariusz.css ——— */
+/* gry-moodle 0.5.0 — NIE EDYTUJ W KURSIE, poprawiaj w PLUGIN/gry-moodle (~/.claude/local-marketplace-maciek/plugins/gry-moodle) */
+/* mechaniki/scenariusz/scenariusz.css — scenariusz decyzyjny: wskaźniki (tekst + pasek), karta sytuacji, opcje, finał.
+   Kolory tylko z tokenów rdzenia i warstwy; bez #hex i bez `opacity` (B8). Wskaźnik niesie liczba TEKSTEM, pasek jest
+   dekoracją (aria-hidden) — kolor nigdy nie jest jedynym nośnikiem (1.4.1). Wybrana opcja: grubsza ramka + napis
+   „twój wybór” (nie sam kolor). Cele ≥ 44 px (2.5.8). */
+
+.gm-sc__plansza { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.gm-sc__ster { display: flex; justify-content: flex-end; }
+
+.gm-cw ul.gm-sc__wskazniki { list-style: none; display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px;
+  border: 1px solid var(--ramka); border-radius: 8px; background: var(--tlo-blok, var(--tlo-karta)); padding: 10px 12px; }
+@container (min-width: 28rem) { .gm-cw ul.gm-sc__wskazniki { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 18px; } }
+.gm-sc__wsk { display: grid; grid-template-columns: minmax(0, auto) auto minmax(60px, 1fr); align-items: center; gap: 8px; min-width: 0; }
+.gm-sc__wsk-n { font-weight: 700; min-width: 0; overflow-wrap: anywhere; }
+.gm-sc__wsk-v { font-weight: 700; font-size: 18px; font-variant-numeric: tabular-nums; min-width: 2.2em; text-align: right; color: var(--tekst); }
+.gm-sc__pasek { display: block; height: 12px; border: 1px solid var(--ramka-kontrolka); border-radius: 6px; background: var(--tlo-karta);
+  overflow: hidden; min-width: 0; }
+.gm-sc__pasek-w { display: block; height: 100%; width: 0; background: var(--akcent); transition: width .3s ease; }
+.gm-sc__wsk--pozytyw .gm-sc__pasek-w { background: var(--pozytyw); }
+.gm-sc__wsk--negatyw .gm-sc__pasek-w { background: var(--wyroznik, var(--akcent)); }
+@media (prefers-reduced-motion: reduce) { .gm-sc__pasek-w { transition: none; } }
+
+.gm-sc__karta { border: 2px solid var(--ramka-kontrolka); border-left-width: 6px; border-radius: 8px;
+  background: var(--tlo-blok, var(--tlo-karta)); padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; }
+.gm-sc__karta:focus { outline: none; }
+.gm-sc__karta:focus-visible { outline: 3px solid var(--fokus, var(--akcent-ciemny)); outline-offset: 2px; }
+.gm-cw p.gm-sc__meta { font-size: 13px; font-weight: 700; color: var(--tekst-slaby); letter-spacing: .02em; }
+.gm-cw p.gm-sc__sytuacja { font-size: 18px; line-height: 1.4; font-weight: 700; color: var(--tekst); overflow-wrap: anywhere; }
+
+.gm-sc__opcje { display: flex; flex-direction: column; gap: 8px; }
+.gm-cw .gm-sc__opcja { justify-content: flex-start; text-align: left; min-height: 48px; width: 100%; color: var(--tekst);
+  background: var(--tlo-karta); padding: 8px 12px; gap: 10px; flex-wrap: wrap; }
+.gm-cw .gm-sc__opcja:hover { background: var(--tlo); color: var(--tekst); }
+.gm-sc__nr { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px;
+  border: 2px solid var(--ramka-kontrolka); border-radius: 50%; font-weight: 700; font-variant-numeric: tabular-nums; }
+.gm-sc__opcja-t { flex: 1 1 0; min-width: 0; overflow-wrap: anywhere; font-weight: 400; }
+.gm-cw .gm-sc__opcja[aria-disabled="true"] { background: var(--tlo-karta); color: var(--tekst); border-style: dashed; cursor: default; }
+.gm-cw .gm-sc__opcja.gm-sc__opcja--wybrana { border: 3px solid var(--tekst); border-style: solid; background: var(--tlo); }
+.gm-sc__wybor { flex: none; font-size: 13px; font-weight: 700; }
+
+.gm-sc__po:empty { display: none; }
+.gm-sc__pauzainfo { border: 1px solid var(--ramka); border-radius: 8px; padding: 14px 16px; background: var(--tlo-blok, var(--tlo-karta));
+  display: flex; align-items: center; }
+.gm-sc__podp { font-size: 14px; }
+.gm-cw p.gm-sc__final { font-size: 17px; border-left: 4px solid var(--wyroznik, var(--akcent)); padding: 6px 0 6px 12px; }
+
+@media (forced-colors: active) {
+  .gm-sc__karta, .gm-sc__nr, .gm-sc__pasek { border-color: CanvasText; }
+  .gm-sc__pasek-w { background: CanvasText; }
+  .gm-cw .gm-sc__opcja.gm-sc__opcja--wybrana { border-color: Highlight; }
+}
+
+</style>
+</head>
+<body class="gm-strona">
+
+<a class="gm-pomin" href="#tresc">Przejdź do treści</a>
+
+<header class="gm-pas">
+  <h1>Tydzień z podejrzanymi wiadomościami</h1>
+  <p></p>
+</header>
+
+<main id="tresc" tabindex="-1">
+<div class="gm-karta gm-karta--gra">
+  <h2>Tydzień z podejrzanymi wiadomościami</h2>
+  <div data-gra data-gra-id="scenariusz" data-gra-przestrzen="gm" data-gm-ukonczenie="brak" data-gm-mechanika="scenariusz" data-gm-widok="cwiczenie" data-gm-naglowek="2" data-gm-tytul="ukryj"></div>
+  <noscript><div class="gm-reakcja gm-reakcja--uwaga"><p>Ćwiczenie wymaga JavaScriptu. Tę samą treść bez ćwiczenia znajdziesz niżej, w części „Wersja tekstowa”.</p></div></noscript>
+</div>
+
+<section class="gm-karta" id="wersja-tekstowa" data-gm-wersja-tekstowa data-gra-id="scenariusz">
+  <h2>Wersja tekstowa</h2>
+  <p>Te same sytuacje bez gry: każde wyjście ze skutkami i wyjaśnieniem, potem wszystkie zakończenia z warunkami.</p>
+  <details class="gm-lista-elementow">
+    <summary>Wszystkie sytuacje i zakończenia (12)</summary>
+    <ol>
+      <li><strong>Piętnastoletni syn mówi przy kolacji, że „tylko sprawdził”, czy da się wejść do systemu dziennika w jego szkole. Nic nie zepsuł ani nie ukradł. Czekając na Twoją reakcję, wyraźnie jest z siebie dumny.</strong> — 1) Powiedzieć, że skoro nic nie zniszczył, to nie ma sprawy [Ochrona kont i pieniędzy −10, Zaufanie w domu i w pracy +5]: Kodeks karny karze już samo uzyskanie dostępu do systemu bez uprawnienia, nawet gdy nic nie zniszczono. Ściganie następuje na wniosek pokrzywdzonego, np. szkoły albo firmy prowadzącej dziennik. Osoby w wieku od trzynastu do siedemnastu lat zajmuje się zwykle sąd rodzinny. Źródło: HoldUp: Hakerzy. 2) Zapytać, skąd zna te sztuczki, i ustalić zasadę: ćwiczy tylko na swoim sprzęcie i na platformach do nauki, a to, co znajdzie u kogoś innego, zgłasza [Ochrona kont i pieniędzy +10, Zaufanie w domu i w pracy +15]: To droga opisana w komentarzu rodzica z kursu: zamiast zakazu rozmowa i zasada. Legalne ścieżki to zgłoszenie luki (także anonimowo przez CSIRT NASK), programy nagród za błędy oraz zawody CTF. Źródło: HoldUp: Hakerzy. 3) Zabronić dalszych prób i odebrać komputer, bez rozmowy [Zaufanie w domu i w pracy −15]: Zakaz zamyka temat, ale nie pokazuje legalnej drogi dla ciekawości. Materiał opisuje alternatywę: zawody CTF, na których włamywanie jest legalne i ma regulamin, oraz programy nagród za błędy. Źródło: HoldUp: Hakerzy. 4) Wejść razem z nim do dziennika i sprawdzić, ile da się zobaczyć [Ochrona kont i pieniędzy −15]: Wyjątek dla działających w dobrej wierze jest wąski: wyłącznie dla zabezpieczenia systemu, z niezwłocznym powiadomieniem właściciela i bez szkody. „Sprawdzanie, ile da się zobaczyć” może już być naruszeniem, a warunki ocenia po fakcie prokurator lub sąd. Źródło: HoldUp: Hakerzy.</li>
+      <li><strong>Na telefonie wiadomość SMS: „Paczka wstrzymana, dopłać 1,50 zł”, z linkiem. Nadawca wygląda jak firma kurierska, a Ty rzeczywiście czekasz na paczkę.</strong> — 1) Kliknąć i zobaczyć, co będzie; przecież bez podania danych nic się nie stanie [Ochrona kont i pieniędzy −15]: Samo kliknięcie może doprowadzić do pobrania złośliwego pliku lub aplikacji (zwłaszcza na Androidzie), a strona za linkiem potrafi wyłudzić dane karty albo logowania. Źródło: HoldUp: Phishing i BLIK. 2) Zaufać, bo nazwa nadawcy się zgadza [Ochrona kont i pieniędzy −20]: Nazwę nadawcy i numer nadal da się podrobić, mimo filtrów operatorów. SMS-y oszustów potrafią trafić do tego samego wątku co prawdziwe wiadomości. Źródło: HoldUp: Phishing i BLIK. 3) Nie klikać; sprawdzić paczkę w aplikacji przewoźnika, a SMS przesłać na numer 8080 [Ochrona kont i pieniędzy +10, Zaufanie w domu i w pracy +5]: Zasada z kursu: nie klikać w link z SMS-a, wejść do aplikacji, wpisać adres ręcznie albo zadzwonić. Podejrzany SMS można przesłać na numer 8080 (CERT Polska). Źródło: HoldUp: Phishing i BLIK. 4) Usunąć wiadomość i zapomnieć [Ochrona kont i pieniędzy +5]: Nie klikasz, więc nic nie tracisz. Zalecenie z kursu idzie jednak dalej: weryfikacja w aplikacji i zgłoszenie podejrzanego SMS-a na numer 8080. Źródło: HoldUp: Phishing i BLIK.</li>
+      <li><strong>Na Messengerze pisze do Ciebie bratowa: „Pożycz kod BLIK, oddam jutro, pilne”. Konwersacja wygląda zwyczajnie, a ton jest jej.</strong> — 1) Podać kod, skoro to rodzina [Ochrona kont i pieniędzy −25, Zaufanie w domu i w pracy −5]: W opisanym przypadku z Wałbrzycha kobieta przekazała kody BLIK osobie, którą brała za bratową; korespondencję prowadził przestępca, a strata wyniosła dwa i pół tysiąca złotych. Źródło: HoldUp: Phishing i BLIK. 2) Zadzwonić do bratowej na numer, który znasz [Ochrona kont i pieniędzy +10, Zaufanie w domu i w pracy +10]: Prośbę o pieniądze weryfikuje się telefonem na znany numer. Kod BLIK, hasło i kod SMS są tylko dla Ciebie. Źródło: HoldUp: Phishing i BLIK. 3) Dopytać na tym samym czacie o szczegóły i poczekać na odpowiedź [Ochrona kont i pieniędzy −10]: W opisanym przypadku to przestępca prowadził rozmowę na komunikatorze, więc odpowiedź z tego samego czatu niczego nie potwierdza. Kurs radzi sprawdzić telefonem. Źródło: HoldUp: Phishing i BLIK. 4) Nie odpisywać i nie podawać nic [Ochrona kont i pieniędzy +5, Zaufanie w domu i w pracy −5]: Kod zostaje u Ciebie, ale nie wiesz, czy to bratowa. Zalecenie z kursu to weryfikacja telefonem na znany numer. Źródło: HoldUp: Phishing i BLIK.</li>
+      <li><strong>Dzwoni „szef” i mówi znajomym głosem, że potrzebuje pilnego, poufnego przelewu, a szczegóły wyślesz mu dziś bez informowania innych. Głos brzmi tak, jak go znasz od lat.</strong> — 1) Wykonać przelew, bo głos jest rozpoznawalny [Ochrona kont i pieniędzy −30, Zaufanie w domu i w pracy −5]: Znajomość głosu nie jest uwierzytelnieniem. Według doniesień mediów do sklonowania głosu wystarcza krótkie nagranie, a w stresie i pośpiechu rozpoznajemy to, czego się spodziewamy. Źródło: HoldUp: Deepfake. 2) Poprosić o wideorozmowę i na tej podstawie zrobić przelew [Ochrona kont i pieniędzy −15]: Kurs opisuje oszustwo zaprojektowane tak, by wątpliwość rozwiać: kilka znanych twarzy na jednym połączeniu. Wideorozmowa nie liczy się jako potwierdzenie. Źródło: HoldUp: Deepfake. 3) Rozłączyć się i oddzwonić na numer, który sam znajdziesz [Ochrona kont i pieniędzy +15, Zaufanie w domu i w pracy +5]: To zalecenie z ramki „Co robić”: przy każdej nietypowej prośbie o pieniądze rozłącz się i oddzwoń na numer, który sam znajdziesz. W firmie dobrze działa też potwierdzenie innym kanałem i przez drugą osobę. Źródło: HoldUp: Deepfake. 4) Zadać pytanie kontrolne, na które odpowiedź zna tylko prawdziwy szef [Ochrona kont i pieniędzy +10, Zaufanie w domu i w pracy +10]: Według doniesień Bloomberga menedżer Ferrari uniknął oszustwa dzięki pytaniu, na które odpowiedź znał wyłącznie prawdziwy prezes. Takie pytanie warto uzgodnić z zespołem z góry. Źródło: HoldUp: Deepfake.</li>
+      <li><strong>Telefon co chwilę pokazuje prośbę o zatwierdzenie logowania do Twojej poczty służbowej. Sam się nie logowałeś. Prośby przychodzą jedna po drugiej.</strong> — 1) Zatwierdzić jedną, żeby przestały przychodzić [Ochrona kont i pieniędzy −25]: W opisanym włamaniu do Uber napastnik zalewał wykonawcę prośbami o zatwierdzenie logowania, aż jedna została przyjęta. Źródło: HoldUp: Hakerzy. 2) Odrzucić wszystkie i zmienić hasło do poczty [Ochrona kont i pieniędzy +15]: Zatwierdzaj tylko takie logowanie, które zaczęło się od Ciebie; seria nieproszonych próśb to sygnał alarmowy. Hasło zmienia się przy podejrzeniu wycieku. Źródło: HoldUp: Hakerzy. 3) Nie zatwierdzać niczego i wrócić do sprawy rano [Ochrona kont i pieniędzy +5]: Nie zatwierdzasz, więc napastnik nie wchodzi, ale seria próśb sygnalizuje, że ktoś ma Twoje hasło. Kurs radzi zmienić hasło przy podejrzeniu wycieku. Źródło: HoldUp: Hakerzy.</li>
+      <li><strong>Po takim tygodniu postanawiasz coś zmienić w zabezpieczeniach swoich i rodziny. Masz czas na jedną rzecz.</strong> — 1) Zmieniać hasło co trzydzieści dni, dopisując kolejny numer do starego [Ochrona kont i pieniędzy −10]: Wymuszone, częste zmiany prowadzą do przewidywalnych wzorów (hasło1, hasło2), a NIST od roku 2017 odradza taką praktykę. Źródło: HoldUp: Hasła i 2FA. 2) Włączyć drugi składnik z aplikacji lub klucza oraz menedżer haseł z unikalnymi hasłami [Ochrona kont i pieniędzy +20]: Zalecenie z kursu: menedżer haseł, unikalne hasła do poczty, banku i konta służbowego, 2FA tam, gdzie się da, najlepiej aplikacja lub klucz, nie SMS. Źródło: HoldUp: Hasła i 2FA. 3) Uznać, że antywirus i VPN dla całej firmy wystarczą [Ochrona kont i pieniędzy −10]: Antywirus i VPN nie zatrzymają osoby z ważnym hasłem, gdy ktoś kliknie „zatwierdź”. Pomagają metody logowania odporne na wyłudzenie i nawyk sprawdzania nietypowych próśb. Źródło: HoldUp: Hakerzy. 4) Ustalić z bliskimi i w pracy tajne słowo lub pytanie kontrolne, którego nigdy nie piszecie w sieci [Ochrona kont i pieniędzy +10, Zaufanie w domu i w pracy +15]: Rodzinne hasło zalecane przez FBI i pytanie kontrolne w zespole to proste zabezpieczenia przed klonem głosu. Jeden rodzic opisał, że na początku wydawało mu się to przesadą. Źródło: HoldUp: Deepfake.</li>
+      <li><strong>Zakończenie: Konta i pieniądze poza kontrolą (Ochrona kont i pieniędzy najwyżej 0)</strong> — Ochrona spadła do [Ochrona kont i pieniędzy], a poważnych wpadek było [Poważne wpadki]. Zgodnie z kursem po stracie pieniędzy najpierw dzwoni się do banku, po kliknięciu w link zmienia się hasło i zgłasza incydent do CERT Polska, a podejrzany SMS przesyła na numer 8080.</li>
+      <li><strong>Zakończenie: Zasady, które działają (Ochrona kont i pieniędzy co najmniej 70 i Zaufanie w domu i w pracy co najmniej 70)</strong> — Ochrona [Ochrona kont i pieniędzy], zaufanie [Zaufanie w domu i w pracy]. Weryfikacja innym kanałem, drugi składnik i rozmowa zamiast zakazów zadziałały razem, a wpadek było [Poważne wpadki].</li>
+      <li><strong>Zakończenie: Bezpiecznie, ale chłodno (Ochrona kont i pieniędzy co najmniej 70 i Zaufanie w domu i w pracy najwyżej 49)</strong> — Ochrona [Ochrona kont i pieniędzy], zaufanie [Zaufanie w domu i w pracy]. Konta są dobrze zabezpieczone, ale w domu i w pracy decyzje zapadały bez rozmowy.</li>
+      <li><strong>Zakończenie: Dużo rozmów, luki w zabezpieczeniach (Ochrona kont i pieniędzy najwyżej 49 i Zaufanie w domu i w pracy co najmniej 70)</strong> — Zaufanie [Zaufanie w domu i w pracy], ochrona [Ochrona kont i pieniędzy]. Rozmowy w domu i w pracy się udały, ale w zabezpieczeniach kont zostały luki, a wpadek było [Poważne wpadki].</li>
+      <li><strong>Zakończenie: Seria wpadek (Poważne wpadki co najmniej 3)</strong> — Poważnych wpadek było [Poważne wpadki], ochrona [Ochrona kont i pieniędzy], zaufanie [Zaufanie w domu i w pracy]. Opisane w kursie włamania i oszustwa zaczynały się właśnie od takich prostych kroków.</li>
+      <li><strong>Zakończenie: Tydzień przetrwany (w pozostałych przypadkach)</strong> — Ochrona [Ochrona kont i pieniędzy], zaufanie [Zaufanie w domu i w pracy], poważnych wpadek [Poważne wpadki]. Część decyzji chroniła, część kosztowała.</li>
+    </ol>
+  </details>
+</section>
+
+<div class="gm-karta">
+  <h2>Źródła</h2>
+  <ul class="gm-zrodla">
+    <li>Materiał kursu HoldUp, post „Hakerzy: nastolatki, gangi, służby i ci „etyczni””, komentarze, przypadki (Uber 2022, CBZC 2025–2026) i sekcja Prawo — materiał kursu HoldUp (dostęp: 22.10.2026).</li>
+    <li>Materiał kursu HoldUp, post „Phishing, BLIK „na kolegę” i fałszywy kurier”, komentarze i przypadek kodów BLIK dla „bratowej” — materiał kursu HoldUp (dostęp: 22.10.2026).</li>
+    <li>Materiał kursu HoldUp, post „Głos szefa, twarz znanej osoby: oszustwa z deepfake i klonem głosu” oraz komentarze — materiał kursu HoldUp (dostęp: 22.10.2026).</li>
+    <li>Materiał kursu HoldUp, post „Hasła, 2FA, passkeys i mit zmiany co 30 dni” oraz post o hakerach (komentarze Zofii_N i Marka_R) — materiał kursu HoldUp (dostęp: 22.10.2026).</li>
+  </ul>
+</div>
+</main>
+
+
+<script data-gm-plik="rdzen.js">
+/* gry-moodle 0.2.0 — NIE EDYTUJ W KURSIE, poprawiaj w PLUGIN/gry-moodle (~/.claude/local-marketplace-maciek/plugins/gry-moodle) */
+/* rdzen.js — WARSTWA WSPÓLNA gier i ćwiczeń. Ładowana zawsze, przed gra.js / cwiczenie.js.
+ *
+ * Rdzeń nie zna gier ani mechanik. Daje przestrzeń globalną `Gm`:
+ *   Gm.bezpieczny(t), Gm.tekstZHtml(h), Gm.gotowe(fn)
+ *   Gm.losowanie(ziarno) → funkcja 0..1 (powtarzalna, gdy ziarno podane; bez ziarna Math.random)
+ *   Gm.tasuj(a, ziarnoAlboLos), Gm.losuj(a, los), Gm.ogranicz, Gm.lerp, Gm.wygladz, Gm.rgba
+ *   Gm.ogloszenia(kontener) → {powiedz(tekst), el}   region aria-live TWORZONY PRZY STARCIE (przed pierwszym
+ *                           komunikatem — region dodany w chwili mówienia czytnik często pomija)
+ *   Gm.dzwiek(ustawienia)  → {graj, muzyka, odblokuj}   Web Audio, odzywa się dopiero PO GEŚCIE gracza
+ *   Gm.klucz(przestrzen, …czesci) → "<przestrzen>-…"; Gm.magazyn.czytaj/zapisz (localStorage w try/catch)
+ *   Gm.ustawienia(przestrzen, domyslne) → {wartosci, zapisz()}   klucz "<przestrzen>-gry-ustawienia"
+ *   Gm.rekord(przestrzen, id, punkty) → {rekord, nowy}           klucz "<przestrzen>-gra-<id>-rekord"
+ *   Gm.tempo.{TEMPO, ustaw(konf), czasZeSlow(tekst) → ms, domyslneTempo(konf) → "spokojne"|"normalne"}
+ *   Gm.ukoncz({tryb:"gra"|"modul"|"brak", przestrzen, id, korzen})  — raz na wczytanie strony na grę
+ *   Gm.lms.{start(), zakoncz()}  — globalny `Scorm` (most z paczki), a gdy go brak — własne szukanie API SCORM 1.2
+ *   Gm.wersjaTekstowa.{przejdz(), uruchom(kontener, naKoniec)}  — odsyłacz i zaliczenie z wersji tekstowej
+ *   Gm.wstrzyknijCss(nazwa, css)  — element style do head raz na nazwę i wersję rdzenia (format Strona, widoki mechanik)
+ *   Gm.konfiguracja(korzen) → {id, przestrzen, ukonczenie, dane}   dane = window.GM_DANE[data-gra-id] (lekcja L12)
+ *
+ * Do Moodle idzie wyłącznie „ukończone” (decyzja 9). Wyniku punktowego rdzeń nie wysyła i nie umie wysłać.
+ */
+(function (global) {
+  "use strict";
+
+  var WERSJA = "0.2.0";
+  if (global.Gm && global.Gm.wersja === WERSJA) return;   /* dwie gry na jednej stronie — rdzeń raz */
+
+  var doc = global.document;
+
+  /* ——— drobne narzędzia ——— */
+
+  function bezpieczny(t) {
+    /* [<] zamiast samego < : ciąg „</” (np. w /</g) generator formatu Strona zamienia na „<\/” — w wyrażeniu regularnym to błąd */
+    return String(t == null ? "" : t).replace(/&/g, "&amp;").replace(/[<]/g, "&lt;")
+      .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+  function tekstZHtml(h) {
+    var d = doc.createElement("div");
+    d.innerHTML = h;
+    return (d.textContent || "").replace(/\s+/g, " ").trim();
+  }
+  function gotowe(fn) {
+    if (doc.readyState === "loading") doc.addEventListener("DOMContentLoaded", fn);
+    else fn();
+  }
+  function ogranicz(v, a, b) { return Math.max(a, Math.min(b, v)); }
+  function lerp(a, b, t) { return a + (b - a) * t; }
+  function wygladz(t) { t = ogranicz(t, 0, 1); return 1 - Math.pow(1 - t, 3); }
+  function rgba(hex, alfa) {
+    var h = String(hex).replace("#", "").trim();
+    if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+    var n = parseInt(h, 16);
+    if (isNaN(n)) return String(hex);   /* token w innym zapisie niż #hex — oddajemy bez przezroczystości */
+    return "rgba(" + ((n >> 16) & 255) + "," + ((n >> 8) & 255) + "," + (n & 255) + "," + alfa + ")";
+  }
+
+  /* ——— losowanie z ziarnem ———
+     Ziarno (tekst albo liczba) daje powtarzalną kolejność: generator i testy losują to samo przy każdym
+     uruchomieniu. Bez ziarna — Math.random (runda w grze ma być za każdym razem inna). */
+  function hasz(tekst) {
+    var h = 2166136261 >>> 0, s = String(tekst);
+    for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+    return h >>> 0;
+  }
+  function losowanie(ziarno) {
+    if (ziarno == null || ziarno === "") return Math.random;
+    var a = typeof ziarno === "number" ? (ziarno >>> 0) : hasz(ziarno);
+    return function () {   /* mulberry32 */
+      a = (a + 0x6D2B79F5) >>> 0;
+      var t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function jakoLos(z) { return typeof z === "function" ? z : losowanie(z); }
+  /* Fisher–Yates; zwraca NOWĄ tablicę. */
+  function tasuj(a, ziarnoAlboLos) {
+    var los = jakoLos(ziarnoAlboLos), b = a.slice();
+    for (var i = b.length - 1; i > 0; i--) {
+      var j = Math.floor(los() * (i + 1));
+      var t = b[i]; b[i] = b[j]; b[j] = t;
+    }
+    return b;
+  }
+  function losuj(a, ziarnoAlboLos) { return a[Math.floor(jakoLos(ziarnoAlboLos)() * a.length)]; }
+
+  /* ——— magazyn i klucze ———
+     Wszystkie paczki SCORM na jednym Moodle dzielą origin, a więc i localStorage (L15, TOP 15 #11):
+     każdy klucz ma przestrzeń kursu i identyfikator gry. */
+  function klucz(przestrzen) {
+    var czesci = [przestrzen || "gm"];
+    for (var i = 1; i < arguments.length; i++) czesci.push(arguments[i]);
+    return czesci.join("-");
+  }
+  var magazyn = {
+    czytaj: function (k) {
+      try { return global.localStorage.getItem(k); } catch (e) { return null; }   /* prywatne okno, blokada */
+    },
+    zapisz: function (k, v) {
+      try { global.localStorage.setItem(k, String(v)); return true; } catch (e) { return false; }
+    }
+  };
+
+  /* Ustawienia gracza wspólne dla wszystkich gier kursu (tempo, dźwięk, muzyka).
+     Tempo z magazynu liczy się TYLKO wtedy, gdy gracz sam je wybrał (tempoWybrane) — inaczej obowiązuje
+     domyślne tempo pluginu „bez pośpiechu” (decyzja 10). Stare zapisy gier ZZR nie mają tej flagi,
+     więc ich „normalne” (zapisane przy okazji przełączenia dźwięku) nie przykrywa nowego domyślnego. */
+  function ustawienia(przestrzen, domyslne) {
+    var k = klucz(przestrzen, "gry", "ustawienia");
+    var u = {
+      tempo: domyslne && domyslne.tempo === "normalne" ? "normalne" : "spokojne",
+      tempoWybrane: false,
+      dzwiek: !(domyslne && domyslne.dzwiek === false),
+      muzyka: !!(domyslne && domyslne.muzyka)
+    };
+    try {
+      var z = JSON.parse(magazyn.czytaj(k) || "null");
+      if (z && typeof z === "object") {
+        if (z.tempoWybrane === true && (z.tempo === "spokojne" || z.tempo === "normalne")) {
+          u.tempo = z.tempo; u.tempoWybrane = true;
+        }
+        if (typeof z.dzwiek === "boolean") u.dzwiek = z.dzwiek;
+        if (typeof z.muzyka === "boolean") u.muzyka = z.muzyka;
+      }
+    } catch (e) { /* uszkodzony zapis — domyślne */ }
+    return {
+      wartosci: u,
+      zapisz: function () { magazyn.zapisz(k, JSON.stringify(u)); }
+    };
+  }
+
+  function rekord(przestrzen, id, punkty) {
+    var k = klucz(przestrzen, "gra", id, "rekord");
+    var stary = Number(magazyn.czytaj(k)) || 0;
+    if (punkty > stary) magazyn.zapisz(k, punkty);
+    return { rekord: Math.max(stary, punkty), nowy: punkty > stary && stary > 0 };
+  }
+
+  /* ——— tempo ———
+     TOP 15 #4: domyślnie BEZ limitu; czas na przeczytanie liczony ze słów, jedna stała TEMPO
+     (większa = wolniej). Konfiguracja przychodzi z banku: tempo {domyslne, TEMPO, bazowo_s, na_slowo_s, min_s}. */
+  var tempo = {
+    TEMPO: 1.0, bazowo_s: 6, na_slowo_s: 0.45, min_s: 4.5,
+    ustaw: function (konf) {
+      konf = konf || {};
+      ["TEMPO", "bazowo_s", "na_slowo_s", "min_s"].forEach(function (p) {
+        if (typeof konf[p] === "number" && konf[p] > 0) tempo[p] = konf[p];
+      });
+      return tempo;
+    },
+    slowa: function (t) {
+      var s = String(t == null ? "" : t).replace(/<[^>]*>/g, " ").trim();
+      return s ? s.split(/\s+/).length : 0;
+    },
+    czasZeSlow: function (t) {
+      var s = Math.max(tempo.min_s, tempo.bazowo_s + tempo.na_slowo_s * tempo.slowa(t));
+      return Math.round(s * tempo.TEMPO * 1000);
+    },
+    /* "bez-limitu" (domyślne pluginu) → silnik startuje w tempie spokojnym; "normalne" tylko świadomie */
+    domyslneTempo: function (konf) {
+      return konf && konf.domyslne === "normalne" ? "normalne" : "spokojne";
+    }
+  };
+
+  /* ——— ogłoszenia dla czytnika ——— */
+  function ogloszenia(kontener) {
+    var p = doc.createElement("p");
+    p.className = "gm-sr";
+    p.setAttribute("aria-live", "polite");
+    p.setAttribute("aria-atomic", "true");
+    (kontener || doc.body).appendChild(p);
+    var zegar = 0;
+    return {
+      el: p,
+      powiedz: function (tekst) {
+        p.textContent = "";
+        global.clearTimeout(zegar);
+        /* pusty → treść: czytnik odczyta także to samo zdanie powtórzone drugi raz */
+        zegar = global.setTimeout(function () { p.textContent = tekst; }, 60);
+      }
+    };
+  }
+
+  /* ——— dźwięk: syntezowany, bez plików, dopiero po geście ———
+     AudioContext tworzony przed gestem gracza jest wstrzymany przez przeglądarkę i sypie ostrzeżeniami.
+     Dlatego graj()/muzyka() milczą, dopóki gra nie zawoła odblokuj() z obsługi kliknięcia. */
+  function dzwiek(ust) {
+    var ctx = null, glowny = null, muzykaWzmocnienie = null, poGescie = false;
+    var planista = null, nastepnaNuta = 0, krok = 0, konf = { tempo: 96, podstawa: 0 };
+
+    function gotowy() {
+      if (!poGescie) return false;
+      if (ctx) {
+        if (ctx.state === "suspended" && ctx.resume) ctx.resume();
+        return true;
+      }
+      var AC = global.AudioContext || global.webkitAudioContext;
+      if (!AC) return false;
+      try { ctx = new AC(); } catch (e) { return false; }
+      glowny = ctx.createGain();
+      glowny.gain.value = 0.22;
+      glowny.connect(ctx.destination);
+      muzykaWzmocnienie = ctx.createGain();
+      muzykaWzmocnienie.gain.value = 0;
+      muzykaWzmocnienie.connect(glowny);
+      return true;
+    }
+    function odblokuj() { poGescie = true; return gotowy(); }
+
+    function nuta(hz, start, dlugosc, typ, glosnosc, doHz, cel) {
+      var o = ctx.createOscillator(), w = ctx.createGain();
+      o.type = typ || "sine";
+      o.frequency.setValueAtTime(hz, start);
+      if (doHz) o.frequency.exponentialRampToValueAtTime(doHz, start + dlugosc);
+      w.gain.setValueAtTime(0.0001, start);
+      w.gain.exponentialRampToValueAtTime(glosnosc || 0.4, start + Math.min(0.02, dlugosc / 3));
+      w.gain.exponentialRampToValueAtTime(0.0001, start + dlugosc);
+      o.connect(w);
+      w.connect(cel || glowny);
+      o.start(start);
+      o.stop(start + dlugosc + 0.03);
+    }
+
+    /* [Hz, przesunięcie s, długość s, kształt, głośność, glissando do Hz] */
+    var EFEKTY = {
+      klik: [[880, 0, 0.05, "square", 0.1]],
+      tik: [[1250, 0, 0.03, "sine", 0.14]],
+      ok: [[660, 0, 0.09, "triangle", 0.42], [990, 0.08, 0.15, "triangle", 0.42]],
+      zbierz: [[784, 0, 0.07, "sine", 0.38], [1175, 0.06, 0.13, "sine", 0.34]],
+      blad: [[208, 0, 0.2, "sawtooth", 0.2, 139]],
+      zdarzenie: [[523, 0, 0.08, "triangle", 0.34], [659, 0.09, 0.08, "triangle", 0.34], [784, 0.18, 0.15, "triangle", 0.34]],
+      alarm: [[440, 0, 0.12, "square", 0.14], [330, 0.15, 0.18, "square", 0.14]],
+      poziom: [[523, 0, 0.1, "triangle", 0.38], [659, 0.1, 0.1, "triangle", 0.38], [784, 0.2, 0.1, "triangle", 0.38], [1047, 0.3, 0.28, "triangle", 0.42]],
+      koniec: [[392, 0, 0.16, "triangle", 0.38], [523, 0.16, 0.16, "triangle", 0.38], [659, 0.32, 0.16, "triangle", 0.38], [784, 0.48, 0.45, "triangle", 0.42]],
+      start: [[330, 0, 0.1, "triangle", 0.34], [494, 0.1, 0.1, "triangle", 0.34], [659, 0.2, 0.22, "triangle", 0.4]]
+    };
+
+    function graj(nazwa) {
+      if (!ust.dzwiek || !gotowy()) return;
+      var e = EFEKTY[nazwa];
+      if (!e) return;
+      var t = ctx.currentTime + 0.01;
+      for (var i = 0; i < e.length; i++) nuta(e[i][0], t + e[i][1], e[i][2], e[i][3], e[i][4], e[i][5]);
+    }
+
+    /* Muzyka: łagodny, generowany motyw pentatoniczny — tło, nie melodia do zapamiętania. */
+    var PENTATONIKA = [0, 2, 4, 7, 9];
+    var BASY = [0, 5, 7, 3];
+    function hz(polton) { return 220 * Math.pow(2, polton / 12); }
+    function planuj() {
+      if (!ctx) return;
+      var osemka = 60 / (konf.tempo || 96) / 2;
+      while (nastepnaNuta < ctx.currentTime + 0.3) {
+        var wTakcie = krok % 16, takt = Math.floor(krok / 16);
+        if (wTakcie % 8 === 0) {
+          nuta(hz((konf.podstawa || 0) - 12 + BASY[takt % 4]), nastepnaNuta, osemka * 7, "triangle", 0.16, null, muzykaWzmocnienie);
+        }
+        if (wTakcie % 2 === 0 && (krok * 7) % 5 !== 0) {
+          var st = PENTATONIKA[(krok * 3 + takt) % 5] + (wTakcie > 10 ? 12 : 0);
+          nuta(hz((konf.podstawa || 0) + st), nastepnaNuta, osemka * 0.9, "sine", 0.09, null, muzykaWzmocnienie);
+        }
+        nastepnaNuta += osemka;
+        krok++;
+      }
+    }
+    function muzyka(wlacz, nowaKonf) {
+      if (nowaKonf) konf = nowaKonf;
+      var gra = !!(wlacz && ust.muzyka);
+      if (!gra && !ctx) return;
+      if (!gotowy()) return;
+      var teraz = ctx.currentTime;
+      muzykaWzmocnienie.gain.cancelScheduledValues(teraz);
+      muzykaWzmocnienie.gain.setTargetAtTime(gra ? 0.5 : 0, teraz, 0.25);
+      if (gra && !planista) {
+        nastepnaNuta = ctx.currentTime + 0.1;
+        planista = global.setInterval(planuj, 100);
+      } else if (!gra && planista) {
+        global.clearInterval(planista);
+        planista = null;
+      }
+    }
+
+    return { graj: graj, muzyka: muzyka, odblokuj: odblokuj };
+  }
+
+  /* ——— LMS: tylko „ukończone” ———
+     Gdy paczka ma most `Scorm` (formaty/scorm/scorm.js) — używamy go. Gdy nie ma (np. gra wstawiona
+     do cudzej paczki, PS — RAPORT-A §2 p. 6), rdzeń sam szuka API SCORM 1.2 w oknach nadrzędnych.
+     `completed` BEZ LMSFinish — sesję zamyka beforeunload (L63: po LMSFinish nic się już nie zapisuje). */
+  var lms = (function () {
+    var api = null, szukano = false, polaczono = false;
+    function szukaj(okno) {
+      var i = 0;
+      try {
+        while (okno && okno.API == null && okno.parent && okno.parent !== okno && i < 12) { i++; okno = okno.parent; }
+        return (okno && okno.API) || null;
+      } catch (e) { return null; }   /* ramka z innego origin */
+    }
+    function znajdz() {
+      if (szukano) return api;
+      szukano = true;
+      api = szukaj(global);
+      try { if (!api && global.opener && !global.opener.closed) api = szukaj(global.opener); } catch (e) { api = null; }
+      return api;
+    }
+    function wywolaj(m, a) {
+      if (!api) return "";
+      try { return api[m].apply(api, a || []); } catch (e) { return ""; }
+    }
+    return {
+      start: function () {
+        if (global.Scorm && global.Scorm.start) { try { return global.Scorm.start(); } catch (e) { return false; } }
+        if (polaczono || !znajdz()) return polaczono;
+        polaczono = wywolaj("LMSInitialize", [""]) === "true";
+        if (polaczono) {
+          var s = wywolaj("LMSGetValue", ["cmi.core.lesson_status"]);
+          if (!s || s === "not attempted") {
+            wywolaj("LMSSetValue", ["cmi.core.lesson_status", "incomplete"]);
+            wywolaj("LMSCommit", [""]);
+          }
+          global.addEventListener("beforeunload", function () {
+            if (polaczono) { wywolaj("LMSCommit", [""]); wywolaj("LMSFinish", [""]); }
+          });
+        }
+        return polaczono;
+      },
+      zakoncz: function () {
+        if (global.Scorm && global.Scorm.zakoncz) { try { global.Scorm.zakoncz(true); } catch (e) { /* podgląd */ } return; }
+        if (!polaczono) lms.start();
+        if (!polaczono) return;
+        wywolaj("LMSSetValue", ["cmi.core.lesson_status", "completed"]);
+        wywolaj("LMSCommit", [""]);
+      }
+    };
+  })();
+
+  /* ——— ukończenie: trzy tryby (ARCHITEKTURA §4.2) ———
+     gra   — gra jest osobną paczką: LMS dostaje „completed”
+     modul — gra jest ekranem modułu: tylko zdarzenie, LMS-em rządzi moduł kursu
+     brak  — Strona / samodzielny HTML: zapis lokalny + zdarzenie
+     We wszystkich trybach zostaje znacznik lokalny "<przestrzen>-gra-<id>-ukonczona" (jak w ZZR). */
+  var ukonczone = {};
+  function ukoncz(o) {
+    o = o || {};
+    var id = o.id || "bez-id";
+    var znak = klucz(o.przestrzen, "gra", id);
+    if (ukonczone[znak]) return false;
+    ukonczone[znak] = true;
+    var tryb = o.tryb === "modul" || o.tryb === "brak" ? o.tryb : "gra";
+    if (tryb === "gra") lms.zakoncz();
+    magazyn.zapisz(znak + "-ukonczona", "1");
+    var cel = o.korzen || doc;
+    try {
+      cel.dispatchEvent(new CustomEvent("gm:ukonczone", { bubbles: true, detail: { id: id, tryb: tryb, zrodlo: o.zrodlo || "gra" } }));
+    } catch (e) { /* stara przeglądarka bez CustomEvent */ }
+    return true;
+  }
+
+  /* ——— wstrzykiwanie CSS (format Strona: filtr Moodle wycina znacznik style z treści — CSS przychodzi z JS) ——— */
+  function wstrzyknijCss(nazwa, css) {
+    var znacznik = nazwa + "@" + WERSJA;
+    var istn = doc.querySelectorAll("style[data-gm-css]");
+    for (var i = 0; i < istn.length; i++) if (istn[i].getAttribute("data-gm-css") === znacznik) return false;
+    var st = doc.createElement("style");
+    st.setAttribute("data-gm-css", znacznik);
+    st.appendChild(doc.createTextNode(css));
+    (doc.head || doc.documentElement).appendChild(st);
+    return true;
+  }
+
+  /* ——— konfiguracja gry z korzenia i banku ——— */
+  function konfiguracja(korzen) {
+    var id = korzen.getAttribute("data-gra-id") || "";
+    var dane = (global.GM_DANE && global.GM_DANE[id]) || null;
+    return {
+      id: id,
+      przestrzen: korzen.getAttribute("data-gra-przestrzen") || (dane && dane.przestrzen) || "gm",
+      ukonczenie: korzen.getAttribute("data-gm-ukonczenie") || (dane && dane.ukonczenie) || (global.Scorm ? "gra" : "brak"),
+      dane: dane
+    };
+  }
+
+  /* ——— wersja tekstowa: odsyłacz i zaliczenie ———
+     Pytanie zatwierdza przycisk „Sprawdź odpowiedź”, nie samo zaznaczenie — zatwierdzanie na „change”
+     blokowało odpowiedzi 3 i 4 z klawiatury (L64). Stan pokazany znakiem i kolorem (1.4.1);
+     fokus na reakcji (4.1.3). Odpowiedź na wszystkie pytania zalicza materiał tak samo jak gra. */
+  var wersjaTekstowa = {
+    przejdz: function (idCelu) {
+      var cel = doc.getElementById(idCelu || "wersja-tekstowa");
+      if (!cel) return false;
+      if (cel.tagName === "DETAILS") cel.open = true;
+      cel.scrollIntoView({ block: "start" });
+      var h = cel.querySelector("h2, h3, summary");
+      if (h) {
+        if (h.tagName !== "SUMMARY") h.tabIndex = -1;
+        try { h.focus({ preventScroll: true }); } catch (e) { h.focus(); }
+      }
+      return true;
+    },
+    uruchom: function (kontener, naKoniec) {
+      var pytania = kontener.querySelectorAll("[data-gm-pytanie]");
+      var stan = { odpowiedziano: 0, wszystkich: pytania.length };
+      function postep() {
+        var l = kontener.querySelector("[data-gm-postep]");
+        if (l) l.textContent = stan.odpowiedziano + " z " + stan.wszystkich;
+        if (stan.wszystkich > 0 && stan.odpowiedziano === stan.wszystkich && naKoniec) naKoniec();
+      }
+      function znak(opcja, tekst) {
+        var s = doc.createElement("span");
+        s.className = "gm-odpowiedz__znak";
+        s.textContent = tekst;
+        opcja.appendChild(s);
+      }
+      Array.prototype.forEach.call(pytania, function (pytanie) {
+        var opcje = pytanie.querySelectorAll(".gm-odpowiedz");
+        var reakcja = pytanie.querySelector(".gm-reakcja");
+        if (!reakcja || !opcje.length) return;
+        reakcja.setAttribute("tabindex", "-1");
+        var przycisk = doc.createElement("button");
+        przycisk.type = "button";
+        przycisk.className = "gm-przycisk gm-pytanie__sprawdz";
+        przycisk.textContent = "Sprawdź odpowiedź";
+        reakcja.parentNode.insertBefore(przycisk, reakcja);
+        przycisk.addEventListener("click", function () {
+          if (pytanie.getAttribute("data-gm-zamkniete") === "tak") return;
+          var wybrana = null;
+          Array.prototype.forEach.call(opcje, function (o) {
+            var w = o.querySelector("input");
+            if (w && w.checked) wybrana = o;
+          });
+          if (!wybrana) {
+            reakcja.className = "gm-reakcja gm-reakcja--uwaga";
+            reakcja.innerHTML = "<p>Zaznacz jedną odpowiedź, a potem ją sprawdź.</p>";
+            reakcja.hidden = false;
+            reakcja.focus();
+            return;
+          }
+          pytanie.setAttribute("data-gm-zamkniete", "tak");
+          var dobra = wybrana.getAttribute("data-poprawna") === "tak";
+          stan.odpowiedziano += 1;
+          Array.prototype.forEach.call(opcje, function (o) {
+            var w = o.querySelector("input");
+            if (w) w.disabled = true;
+          });
+          wybrana.classList.add(dobra ? "gm-odpowiedz--ok" : "gm-odpowiedz--zle");
+          znak(wybrana, dobra ? "✓ dobrze" : "✗ nie tym razem");
+          if (!dobra) {
+            var wlasciwa = pytanie.querySelector('.gm-odpowiedz[data-poprawna="tak"]');
+            if (wlasciwa) { wlasciwa.classList.add("gm-odpowiedz--ok"); znak(wlasciwa, "✓ właściwa"); }
+          }
+          reakcja.className = "gm-reakcja " + (dobra ? "gm-reakcja--ok" : "gm-reakcja--zle");
+          reakcja.innerHTML = '<p><span class="gm-sr">' + (dobra ? "Dobrze. " : "Nie tym razem. ") + "</span>" +
+            bezpieczny(wybrana.getAttribute("data-reakcja") || "") + "</p>";
+          reakcja.hidden = false;
+          reakcja.focus();
+          przycisk.hidden = true;
+          postep();
+        });
+      });
+      postep();
+      return stan;
+    }
+  };
+
+  /* Na starcie strony: połączenie z LMS (status „incomplete”) i uruchomienie wersji tekstowych.
+     Wersja tekstowa wskazuje swoją grę przez data-gra-id — zalicza tak samo jak gra (równoważna, TOP 15 #10). */
+  gotowe(function () {
+    if (doc.querySelector('[data-gm-ukonczenie="gra"]')) lms.start();
+    Array.prototype.forEach.call(doc.querySelectorAll("[data-gm-wersja-tekstowa]"), function (k) {
+      if (k.getAttribute("data-gm-init")) return;
+      k.setAttribute("data-gm-init", "1");
+      var id = k.getAttribute("data-gra-id") || "";
+      var korzen = id ? doc.querySelector('[data-gra][data-gra-id="' + id + '"]') : null;
+      wersjaTekstowa.uruchom(k, function () {
+        var konf = korzen ? konfiguracja(korzen) : { id: id, przestrzen: k.getAttribute("data-gra-przestrzen") || "gm",
+          ukonczenie: k.getAttribute("data-gm-ukonczenie") || "brak" };
+        ukoncz({ tryb: konf.ukonczenie, przestrzen: konf.przestrzen, id: konf.id, korzen: korzen || k, zrodlo: "wersja-tekstowa" });
+      });
+    });
+  });
+
+  global.Gm = {
+    wersja: WERSJA,
+    bezpieczny: bezpieczny, tekstZHtml: tekstZHtml, gotowe: gotowe,
+    losowanie: losowanie, hasz: hasz, tasuj: tasuj, losuj: losuj,
+    ogranicz: ogranicz, lerp: lerp, wygladz: wygladz, rgba: rgba,
+    ogloszenia: ogloszenia, dzwiek: dzwiek,
+    klucz: klucz, magazyn: magazyn, ustawienia: ustawienia, rekord: rekord,
+    tempo: tempo, lms: lms, ukoncz: ukoncz,
+    wersjaTekstowa: wersjaTekstowa, wstrzyknijCss: wstrzyknijCss, konfiguracja: konfiguracja
+  };
+})(window);
+
+</script>
+<script data-gm-plik="cwiczenie.js">
+/* gry-moodle 0.2.0 — NIE EDYTUJ W KURSIE, poprawiaj w PLUGIN/gry-moodle (~/.claude/local-marketplace-maciek/plugins/gry-moodle) */
+/* cwiczenia/cwiczenie.js — WARSTWA ĆWICZEŃ (decyzja 7): bez pętli gry, bez zegara domyślnie.
+ *
+ * Wymaga: rdzen.js (Gm). Daje przestrzeń globalną `GmCwiczenie`:
+ *   GmCwiczenie.zarejestruj(mechanika, uruchom)  — widok mechaniki zgłasza się sam; warstwa uruchamia go na każdym
+ *       korzeniu [data-gra][data-gm-widok="cwiczenie"][data-gm-mechanika="<mechanika>"] (raz — data-gm-init).
+ *   GmCwiczenie.utworz(korzen) → c   — szkielet jednego ćwiczenia (używa go uruchom()).
+ *
+ * Szkielet c:
+ *   c.bank, c.konf, c.T (teksty.widok), c.punkty (bank.punkty.wlaczone — w ćwiczeniu domyślnie WYŁĄCZONE, decyzja 9)
+ *   c.el(tag, klasa, tekst), c.wstaw(szablon, {klucz: wartość}), c.h(wzgl, tekst, klasa) — nagłówek poziomu bazowy+wzgl
+ *   c.ekran — kontener bieżącego ekranu; c.mow(tekst, opoznienieMs) — region aria-live TWORZONY PRZY STARCIE
+ *   c.ekranStartowy({...}) — opis, wybór poziomu (radio w fieldset), szczegóły zasad, przycisk startu
+ *   c.stoper — rosnący, bez limitu (tylko gdy punkty włączone; pauza go zatrzymuje)
+ *   c.pauza({naPauze, naWznow, czyMozna}) — przycisk + samoczynne wstrzymanie przy ukryciu karty przeglądarki
+ *   c.informacja(cel, {ton, naglowek, tekst, dalej, naDalej}) — informacja zwrotna; „Dalej” dostaje fokus
+ *   c.pytanie(cel, {legenda, opcje, ocen, dalej, naDalej}) — „Sprawdź” → informacja zwrotna → „Dalej” z fokusem
+ *   c.podsumowanie({...}) — nagłówek z fokusem, kafle liczb, tabela z <caption>, sekcje, wnioski, „Jeszcze raz”
+ *   c.wniosek(lista, stan) — adaptacyjny wniosek: napis albo {gdy:{pole: wartość | {min, max}}, tekst}
+ *   c.rekord(poziom, wartosc, {mniejszyLepszy}) — rekord per poziom w localStorage (<przestrzen>-gra-<id>-rekord-<poziom>)
+ *   c.klawisze(fn) — skróty TYLKO wewnątrz kontenera (WCAG 2.1.4); bez Alt/Ctrl/Meta
+ *   c.ukoncz() — Gm.ukoncz w trybie z konfiguracji (gra | modul | brak)
+ *   c.czas(ms) „m:ss”, c.czasSlowami(ms), c.odmiana(n, jeden, dwa, piec)
+ *
+ * Poziom nagłówków: data-gm-naglowek (domyślnie 3 — Strona Moodle ma własne h1/h2); tytuł ćwiczenia rysowany, gdy
+ * data-gm-tytul ≠ "ukryj" (samodzielny HTML i SCORM mają tytuł w karcie strony). Sekcje podsumowania = poziom + 1.
+ * Klasy z prefiksem gm-cw (L13). Treść wyłącznie z banku (decyzja 8): warstwa nie ma żadnego napisu merytorycznego,
+ * a napisy techniczne („Sprawdź”, „Dalej”) bierze z teksty.widok, gdy bank je podaje.
+ */
+(function (global) {
+  "use strict";
+
+  var Gm = global.Gm;
+  if (!Gm) return;
+  if (global.GmCwiczenie && global.GmCwiczenie.wersja === Gm.wersja) return;   /* dwa ćwiczenia na stronie — warstwa raz */
+
+  var doc = global.document;
+  var rejestr = {};
+
+  /* napisy techniczne warstwy — bank może je nadpisać w teksty.widok */
+  var DOMYSLNE = {
+    sprawdz: "Sprawdź", dalej: "Dalej", jeszcze: "Zagraj jeszcze raz", pauza: "Pauza", wznow: "Wznów",
+    zaznaczNajpierw: "Zaznacz jedną odpowiedź, a potem ją sprawdź.", dobrze: "Dobrze.", zle: "Nie tym razem.",
+    pauzaOgl: "Wstrzymane.", wznowOgl: "Wznowione.", wersjaTekstowa: "Wersja tekstowa"
+  };
+
+  function el(tag, klasa, tekst) {
+    var e = doc.createElement(tag);
+    if (klasa) e.className = klasa;
+    if (tekst !== undefined && tekst !== null) e.textContent = tekst;
+    return e;
+  }
+
+  /* {klucz} → wartość; brakujący klucz zostaje widoczny (bramka B3 łapie literówki w banku) */
+  function wstaw(s, m) {
+    var out = String(s == null ? "" : s);
+    for (var k in m) {
+      if (Object.prototype.hasOwnProperty.call(m, k)) out = out.split("{" + k + "}").join(String(m[k]));
+    }
+    return out;
+  }
+
+  function odmiana(n, jeden, dwa, piec) {
+    var m10 = n % 10, m100 = n % 100;
+    if (n === 1) return jeden;
+    if (m10 >= 2 && m10 <= 4 && !(m100 >= 12 && m100 <= 14)) return dwa;
+    return piec;
+  }
+  function czas(ms) {
+    var s = Math.floor(ms / 1000), m = Math.floor(s / 60);
+    s = s % 60;
+    return m + ":" + (s < 10 ? "0" : "") + s;
+  }
+  function czasSlowami(ms) {
+    var s = Math.floor(ms / 1000), m = Math.floor(s / 60), out = "";
+    s = s % 60;
+    if (m > 0) out = m + " " + odmiana(m, "minuta", "minuty", "minut");
+    if (s > 0 || m === 0) out += (out ? " i " : "") + s + " " + odmiana(s, "sekunda", "sekundy", "sekund");
+    return out;
+  }
+
+  function utworz(korzen) {
+    var konf = Gm.konfiguracja(korzen);
+    var bank = konf.dane;
+    if (!bank) return null;
+    var teksty = bank.teksty || {};
+    var T = teksty.widok || {};
+    function napis(k) { return T[k] != null ? T[k] : DOMYSLNE[k]; }
+    var poziomBazowy = Math.max(2, Math.min(5, parseInt(korzen.getAttribute("data-gm-naglowek") || "3", 10) || 3));
+    var timery = [];
+
+    korzen.innerHTML = "";   /* zdejmuje tekst zastępczy formatu Strona (zapas dla aplikacji mobilnej) */
+    korzen.classList.add("gm-cw");
+    if (!korzen.getAttribute("lang")) korzen.setAttribute("lang", (bank.jezyk && bank.jezyk.lang) || "pl");
+
+    function h(wzgl, tekst, klasa) {
+      var e = el("h" + Math.min(6, poziomBazowy + wzgl), klasa || null, tekst);
+      return e;
+    }
+
+    /* nagłówek: „nad” + tytuł (Strona) i polecenie stale nad ekranem (L21) */
+    var cialo;
+    if (korzen.getAttribute("data-gm-tytul") !== "ukryj") {
+      var glowa = el("div", "gm-cw__glowa");
+      if (T.nad) glowa.appendChild(el("p", "gm-cw__nad", T.nad));
+      glowa.appendChild(h(0, bank.tytul, "gm-cw__tytul"));
+      korzen.appendChild(glowa);
+    }
+    cialo = el("div", "gm-cw__cialo");
+    korzen.appendChild(cialo);
+    if (teksty.polecenie) cialo.appendChild(el("p", "gm-cw__polecenie", teksty.polecenie));
+    var ekran = el("div", "gm-cw__ekran");
+    cialo.appendChild(ekran);
+    var glos = Gm.ogloszenia(cialo);   /* region aria-live istnieje, zanim cokolwiek powiemy */
+    var zegarMowy = 0;
+
+    var c = {
+      korzen: korzen, konf: konf, bank: bank, teksty: teksty, T: T, ekran: ekran, cialo: cialo,
+      punkty: !!(bank.punkty && bank.punkty.wlaczone === true),
+      el: el, wstaw: wstaw, h: h, napis: napis, odmiana: odmiana, czas: czas, czasSlowami: czasSlowami,
+      poziomBazowy: poziomBazowy
+    };
+
+    c.mow = function (tekst, opoznienie) {
+      global.clearTimeout(zegarMowy);
+      if (opoznienie) zegarMowy = global.setTimeout(function () { glos.powiedz(tekst); }, opoznienie);
+      else glos.powiedz(tekst);
+    };
+
+    /* zegary ćwiczenia — c.wyczysc() zatrzymuje wszystkie (nowy ekran, „Jeszcze raz”) */
+    c.za = function (fn, ms) {
+      var t = global.setTimeout(function () { timery.splice(timery.indexOf(t), 1); fn(); }, ms);
+      timery.push(t);
+      return t;
+    };
+    c.anuluj = function (t) {
+      global.clearTimeout(t);
+      var i = timery.indexOf(t);
+      if (i >= 0) timery.splice(i, 1);
+    };
+    c.wyczysc = function () {
+      timery.forEach(function (t) { global.clearTimeout(t); });
+      timery = [];
+      c.stoper.stop();
+      ekran.innerHTML = "";
+    };
+
+    /* ——— ekran startowy ———
+       o: {opis, poziomy:[{id, nazwa, opis}], wybrany, legenda, pytanie, uwaga, zasadyTytul, zasady[], przycisk, naStart(id, wskaznik)}
+       Wybór poziomu tylko wtedy, gdy są co najmniej dwa. Pierwszy i domyślny — bez pośpiechu (decyzja 10). */
+    c.ekranStartowy = function (o) {
+      c.wyczysc();
+      var wybrany = o.wybrany || (o.poziomy && o.poziomy[0] && o.poziomy[0].id);
+      if (o.opis) ekran.appendChild(el("p", "gm-cw__lead", o.opis));
+      if (o.poziomy && o.poziomy.length > 1) {
+        var fs = el("fieldset", "gm-cw__poziomy");
+        var lg = el("legend", "gm-sr", o.legenda || "");
+        fs.appendChild(lg);
+        if (o.pytanie) {
+          var pt = el("p", "gm-cw__pyt", o.pytanie);
+          pt.setAttribute("aria-hidden", "true");
+          fs.appendChild(pt);
+        }
+        o.poziomy.forEach(function (p) {
+          var id = "gm-" + konf.id + "-poziom-" + p.id;
+          var lab = el("label", "gm-cw__opcja");
+          lab.setAttribute("for", id);
+          var inp = el("input", "gm-cw__radio");
+          inp.type = "radio";
+          inp.name = "gm-" + konf.id + "-poziom";
+          inp.id = id;
+          inp.value = p.id;
+          if (p.id === wybrany) inp.checked = true;
+          inp.addEventListener("change", function () { if (inp.checked) wybrany = p.id; });
+          var box = el("span", "gm-cw__opt");
+          box.appendChild(el("span", "gm-cw__optnazwa", p.nazwa));
+          if (p.opis) box.appendChild(el("span", "gm-cw__opttekst", p.opis));
+          lab.appendChild(inp);
+          lab.appendChild(box);
+          fs.appendChild(lab);
+        });
+        ekran.appendChild(fs);
+      }
+      if (o.uwaga) ekran.appendChild(el("p", "gm-cw__uwaga", o.uwaga));
+      if (o.zasady && o.zasady.length) {
+        var det = el("details", "gm-cw__szczegoly");
+        det.appendChild(el("summary", null, o.zasadyTytul || ""));
+        var ul = el("ul", "gm-cw__lista");
+        o.zasady.forEach(function (z) { ul.appendChild(el("li", null, z)); });
+        det.appendChild(ul);
+        ekran.appendChild(det);
+      }
+      var btn = el("button", "gm-przycisk gm-cw__duzy gm-cw__start", o.przycisk || "");
+      btn.type = "button";
+      /* wskaznik = kliknięcie myszą/dotykiem (detail > 0) — wtedy fokus przenosimy bez przewijania strony */
+      btn.addEventListener("click", function (ev) { o.naStart(wybrany, !!ev && ev.detail > 0); });
+      ekran.appendChild(btn);
+      return { przycisk: btn, wybrany: function () { return wybrany; } };
+    };
+
+    /* ——— stoper rosnący (bez limitu) ———
+       Mierzy, nie pogania: nic się od niego nie rozstrzyga. Tylko gdy punkty są włączone. */
+    c.stoper = (function () {
+      var zgromadzone = 0, od = 0, tm = 0, cel = null;
+      function ms() { return zgromadzone + (od ? Date.now() - od : 0); }
+      function pokaz() {
+        if (cel) { var t = czas(ms()); if (cel.textContent !== t) cel.textContent = t; }
+      }
+      function tyk() {
+        tm = 0;
+        if (!od) return;
+        pokaz();
+        tm = global.setTimeout(tyk, Math.max(40, 1000 - (ms() % 1000) + 10));
+      }
+      return {
+        ms: ms, pokaz: pokaz,
+        biegnie: function () { return !!od; },
+        wyswietlW: function (e) { cel = e; pokaz(); },
+        start: function () { if (od) return; od = Date.now(); global.clearTimeout(tm); tyk(); },
+        stop: function () { global.clearTimeout(tm); tm = 0; if (od) { zgromadzone += Date.now() - od; od = 0; } pokaz(); },
+        zeruj: function () { global.clearTimeout(tm); tm = 0; zgromadzone = 0; od = 0; cel = null; }
+      };
+    })();
+
+    /* ——— pauza i autopauza (WCAG 2.2.1 / 2.2.2) ———
+       o: {przycisk (element), naPauze(powod), naWznow(), czyMozna()} — powod: "reczna" | "karta" */
+    c.pauza = function (o) {
+      var wstrzymane = false;
+      function pauzuj(powod) {
+        if (wstrzymane || (o.czyMozna && !o.czyMozna())) return;
+        wstrzymane = true;
+        if (o.przycisk) o.przycisk.textContent = napis("wznow");
+        o.naPauze(powod);
+      }
+      function wznow() {
+        if (!wstrzymane) return;
+        wstrzymane = false;
+        if (o.przycisk) o.przycisk.textContent = napis("pauza");
+        o.naWznow();
+      }
+      if (o.przycisk) {
+        o.przycisk.addEventListener("click", function () {
+          if (o.przycisk.getAttribute("aria-disabled") === "true") return;
+          if (wstrzymane) wznow(); else pauzuj("reczna");
+        });
+      }
+      function widocznosc() {
+        if (!korzen.isConnected) { doc.removeEventListener("visibilitychange", widocznosc); return; }
+        if (doc.hidden || doc.visibilityState === "hidden") pauzuj("karta");
+      }
+      doc.addEventListener("visibilitychange", widocznosc);
+      return { pauzuj: pauzuj, wznow: wznow, wstrzymane: function () { return wstrzymane; },
+               odlacz: function () { doc.removeEventListener("visibilitychange", widocznosc); } };
+    };
+
+    /* ——— informacja zwrotna z „Dalej” ———
+       Nic nie znika samo (decyzja 10): informacja czeka, aż student naciśnie „Dalej”; fokus na „Dalej” (4.1.3, 2.4.3). */
+    c.informacja = function (cel, o) {
+      var blok = el("div", "gm-cw__info" + (o.ton ? " gm-cw__info--" + o.ton : ""));
+      blok.setAttribute("tabindex", "-1");
+      var p = el("p", "gm-cw__info-tekst");
+      if (o.naglowek) {
+        p.appendChild(el("strong", null, o.naglowek));
+        p.appendChild(doc.createTextNode(" " + (o.tekst || "")));
+      } else {
+        p.textContent = o.tekst || "";
+      }
+      blok.appendChild(p);
+      var dalej = null;
+      if (o.naDalej) {
+        dalej = el("button", "gm-przycisk gm-cw__dalej", o.dalej || napis("dalej"));
+        dalej.type = "button";
+        dalej.addEventListener("click", function () { o.naDalej(); });
+        blok.appendChild(dalej);
+      }
+      cel.appendChild(blok);
+      c.mow((o.naglowek ? o.naglowek + " " : "") + (o.tekst || ""));
+      if (dalej) {
+        dalej.focus();
+        if (dalej.scrollIntoView) dalej.scrollIntoView({ block: "nearest" });
+      }
+      return { blok: blok, dalej: dalej };
+    };
+
+    /* ——— pytanie: „Sprawdź” → informacja zwrotna → „Dalej” ———
+       o: {legenda, opcje:[{id, tekst}], ocen(id) → {dobrze, naglowek, tekst}, dalej, naDalej(id, wynik)}
+       Zatwierdza przycisk „Sprawdź”, nie samo zaznaczenie (L64). Przycisk nigdy nie dostaje `disabled`
+       (ślepy zaułek dla klawiatury) — bez wyboru mówi, co zrobić, i oddaje fokus pierwszej opcji. */
+    c.pytanie = function (cel, o) {
+      var fs = el("fieldset", "gm-cw__pytanie");
+      fs.appendChild(el("legend", "gm-cw__legenda", o.legenda));
+      var nazwa = "gm-" + konf.id + "-p-" + Math.floor(Math.random() * 1e9);
+      var pola = [];
+      o.opcje.forEach(function (op, i) {
+        var lab = el("label", "gm-cw__odp");
+        var inp = el("input");
+        inp.type = "radio";
+        inp.name = nazwa;
+        inp.value = op.id;
+        inp.id = nazwa + "-" + i;
+        lab.setAttribute("for", inp.id);
+        lab.appendChild(inp);
+        lab.appendChild(el("span", null, op.tekst));
+        fs.appendChild(lab);
+        pola.push({ inp: inp, lab: lab, op: op });
+      });
+      cel.appendChild(fs);
+      var sprawdz = el("button", "gm-przycisk gm-cw__sprawdz", napis("sprawdz"));
+      sprawdz.type = "button";
+      cel.appendChild(sprawdz);
+      var miejsce = el("div", "gm-cw__po");
+      cel.appendChild(miejsce);
+      var zamkniete = false;
+      sprawdz.addEventListener("click", function () {
+        if (zamkniete) return;
+        var w = null;
+        pola.forEach(function (p) { if (p.inp.checked) w = p; });
+        miejsce.innerHTML = "";
+        if (!w) {
+          var uw = el("p", "gm-cw__brak", napis("zaznaczNajpierw"));
+          miejsce.appendChild(uw);
+          c.mow(napis("zaznaczNajpierw"));
+          pola[0].inp.focus();
+          return;
+        }
+        zamkniete = true;
+        var wynik = o.ocen(w.op.id) || {};
+        pola.forEach(function (p) {
+          p.inp.setAttribute("aria-disabled", "true");
+          p.inp.addEventListener("click", function (e) { if (zamkniete && !p.inp.checked) e.preventDefault(); });
+        });
+        w.lab.classList.add(wynik.dobrze ? "gm-cw__odp--ok" : "gm-cw__odp--zle");
+        var znak = el("span", "gm-cw__znak", wynik.dobrze ? "✓" : "✗");
+        znak.setAttribute("aria-hidden", "true");
+        w.lab.appendChild(znak);
+        sprawdz.hidden = true;
+        c.informacja(miejsce, {
+          ton: wynik.dobrze ? "ok" : "zle",
+          naglowek: wynik.naglowek || (wynik.dobrze ? napis("dobrze") : napis("zle")),
+          tekst: wynik.tekst || "", dalej: o.dalej,
+          naDalej: function () { o.naDalej(w.op.id, wynik); }
+        });
+      });
+      return { sprawdz: sprawdz, pola: pola };
+    };
+
+    /* ——— adaptacyjny wniosek ———
+       Element listy: napis (zawsze) albo {gdy: {pole: wartość | {min, max}}, tekst}. Wniosek nie zakłada zachowania
+       gracza, którego nie było (MK lekcja 13) — warianty wybiera stan, nie domysł. */
+    c.wniosek = function (lista, stan) {
+      var out = [];
+      (lista || []).forEach(function (w) {
+        if (typeof w === "string") { out.push(w); return; }
+        var ok = true;
+        for (var k in (w.gdy || {})) {
+          if (!Object.prototype.hasOwnProperty.call(w.gdy, k)) continue;
+          var war = w.gdy[k], v = stan ? stan[k] : undefined;
+          if (war && typeof war === "object") {
+            if (war.min != null && !(v >= war.min)) ok = false;
+            if (war.max != null && !(v <= war.max)) ok = false;
+          } else if (v !== war) ok = false;
+        }
+        if (ok) out.push(w.tekst);
+      });
+      return out;
+    };
+
+    /* ——— rekord per poziom ——— */
+    var rekordPamiec = {};
+    c.rekord = function (poziom, wartosc, o) {
+      o = o || {};
+      var k = Gm.klucz(konf.przestrzen, "gra", konf.id, "rekord", poziom);
+      var stary = parseInt(Gm.magazyn.czytaj(k), 10);
+      if (isNaN(stary) || stary < 1) stary = 0;
+      if (rekordPamiec[poziom] && (!stary || (o.mniejszyLepszy ? rekordPamiec[poziom] < stary : rekordPamiec[poziom] > stary))) {
+        stary = rekordPamiec[poziom];
+      }
+      var nowy = !stary || (o.mniejszyLepszy ? wartosc < stary : wartosc > stary);
+      var zapisano = true;
+      if (nowy) {
+        rekordPamiec[poziom] = wartosc;
+        zapisano = Gm.magazyn.zapisz(k, wartosc);
+      }
+      return { rekord: nowy ? wartosc : stary, nowy: nowy, zapisano: zapisano };
+    };
+
+    /* ——— podsumowanie ———
+       o: {naglowek, info[], liczby:[{etyk, wart, wezel?}], tabela:{caption, kolumny[], wiersze[[…]]},
+           sekcje:[{tytul, lid, lista:[{mocne, tekst, dalej}] | akapity[]}], wnioskiTytul, wnioski[],
+           przyciski:[{tekst, fn(wskaznik), cichy}]}
+       Fokus na nagłówku (2.4.3); ukończenie zgłaszamy tutaj (decyzja 9 — tylko „ukończone”). */
+    c.podsumowanie = function (o) {
+      c.wyczysc();
+      var wyn = el("div", "gm-cw__koniec");
+      var nag = h(1, o.naglowek, "gm-cw__wynik-h");
+      nag.setAttribute("tabindex", "-1");
+      wyn.appendChild(nag);
+      (o.info || []).forEach(function (t) { wyn.appendChild(el("p", null, t)); });
+      if (o.liczby && o.liczby.length) {
+        var hud = el("div", "gm-cw__hud gm-cw__hud--" + o.liczby.length);
+        o.liczby.forEach(function (l) {
+          var k = el("div", "gm-cw__kafel");
+          k.appendChild(el("span", "gm-cw__kafel-n", l.etyk));
+          if (l.wezel) k.appendChild(l.wezel);
+          else k.appendChild(el("span", "gm-cw__kafel-w", l.wart));
+          hud.appendChild(k);
+        });
+        wyn.appendChild(hud);
+      }
+      (o.dopiski || []).forEach(function (d) { wyn.appendChild(el("p", d.klasa || null, d.tekst)); });
+      if (o.tabela) {
+        var tb = el("table", "gm-cw__tabela");
+        tb.appendChild(el("caption", null, o.tabela.caption));
+        var th = el("thead"), tr = el("tr");
+        o.tabela.kolumny.forEach(function (k) { var x = el("th", null, k); x.setAttribute("scope", "col"); tr.appendChild(x); });
+        th.appendChild(tr);
+        tb.appendChild(th);
+        var tbo = el("tbody");
+        o.tabela.wiersze.forEach(function (w) {
+          var r = el("tr");
+          w.forEach(function (v, i) {
+            var x = el(i === 0 ? "th" : "td", null, v);
+            if (i === 0) x.setAttribute("scope", "row");
+            r.appendChild(x);
+          });
+          tbo.appendChild(r);
+        });
+        tb.appendChild(tbo);
+        wyn.appendChild(tb);
+      }
+      (o.sekcje || []).forEach(function (s) {
+        wyn.appendChild(h(1, s.tytul, "gm-cw__sekcja"));
+        if (s.lid) wyn.appendChild(el("p", "gm-slaby", s.lid));
+        if (s.lista) {
+          var ul = el("ul", "gm-cw__lista gm-cw__lista--odstep");
+          s.lista.forEach(function (it) {
+            var li = el("li");
+            var p1 = el("p");
+            if (it.mocne) p1.appendChild(el("strong", null, it.mocne));
+            if (it.tekst) p1.appendChild(doc.createTextNode((it.mocne ? " — " : "") + it.tekst));
+            li.appendChild(p1);
+            if (it.dalej) li.appendChild(el("p", "gm-cw__wyj", it.dalej));
+            ul.appendChild(li);
+          });
+          wyn.appendChild(ul);
+        }
+        (s.akapity || []).forEach(function (a) { wyn.appendChild(el("p", null, a)); });
+      });
+      if (o.wnioski && o.wnioski.length) {
+        if (o.wnioskiTytul) wyn.appendChild(h(1, o.wnioskiTytul, "gm-cw__sekcja"));
+        o.wnioski.forEach(function (a) { wyn.appendChild(el("p", null, a)); });
+      }
+      var btny = el("div", "gm-cw__przyciski");
+      (o.przyciski || []).forEach(function (b) {
+        var x = el("button", "gm-przycisk" + (b.cichy ? " gm-przycisk--cichy" : ""), b.tekst);
+        x.type = "button";
+        x.addEventListener("click", function (ev) { b.fn(!!ev && ev.detail > 0); });
+        btny.appendChild(x);
+      });
+      wyn.appendChild(btny);
+      ekran.appendChild(wyn);
+      c.mow("");
+      nag.focus();
+      c.ukoncz();
+      return { naglowek: nag, blok: wyn };
+    };
+
+    /* ——— wersja tekstowa W widgecie (format Strona: data-gm-wt="widzet") ———
+       Na stronie scorm/html wersję tekstową składa generator jako statyczny HTML pod grą; w polu „Strona” wolno mieć tylko
+       div + skrypt, więc rysuje ją ćwiczenie — ta sama lista co w generatorze (pozycje_wersji_tekstowej), rozwijana,
+       poza ekranem gry (zostaje przy zmianie ekranu). pozycje: [[mocne, reszta]]. */
+    c.wersjaTekstowa = function (pozycje) {
+      if (korzen.getAttribute("data-gm-wt") !== "widzet" || !pozycje || !pozycje.length) return null;
+      var wt = bank.wersja_tekstowa || {};
+      var det = el("details", "gm-cw__wt");
+      det.id = korzen.id ? korzen.id + "-wersja-tekstowa" : "";
+      det.appendChild(el("summary", null, napis("wersjaTekstowa") + (wt.lista_tytul ? ": " + wt.lista_tytul : "") + " (" + pozycje.length + ")"));
+      if (wt.wstep) det.appendChild(el("p", null, wt.wstep));
+      var ol = el("ol", "gm-cw__wt-lista");
+      pozycje.forEach(function (pz) {
+        var li = el("li");
+        li.appendChild(el("strong", null, pz[0]));
+        li.appendChild(doc.createTextNode(" — " + pz[1]));
+        ol.appendChild(li);
+      });
+      det.appendChild(ol);
+      if (teksty.zrodla_wstep) det.appendChild(el("p", "gm-slaby", teksty.zrodla_wstep));
+      cialo.appendChild(det);
+      return det;
+    };
+
+    c.klawisze = function (fn) {
+      korzen.addEventListener("keydown", function (e) {
+        if (e.altKey || e.ctrlKey || e.metaKey) return;
+        fn(e);
+      });
+    };
+
+    c.ukoncz = function () {
+      return Gm.ukoncz({ tryb: konf.ukonczenie, przestrzen: konf.przestrzen, id: konf.id, korzen: korzen, zrodlo: "cwiczenie" });
+    };
+
+    return c;
+  }
+
+  function skan(mechanika) {
+    var sel = '[data-gra][data-gm-widok="cwiczenie"]' + (mechanika ? '[data-gm-mechanika="' + mechanika + '"]' : "");
+    Array.prototype.forEach.call(doc.querySelectorAll(sel), function (k) {
+      var m = k.getAttribute("data-gm-mechanika");
+      if (!rejestr[m] || k.getAttribute("data-gm-init")) return;
+      k.setAttribute("data-gm-init", "1");
+      try {
+        rejestr[m](k);
+      } catch (e) {
+        /* awaria widoku nie może zostawić pustego miejsca: komunikat + odesłanie do wersji tekstowej */
+        k.innerHTML = "";
+        var p = el("p", "gm-cw__awaria", "Ćwiczenie nie uruchomiło się w tej przeglądarce. Ta sama treść jest w wersji tekstowej.");
+        k.appendChild(p);
+        if (global.console && global.console.error) global.console.error("gry-moodle:", e);
+      }
+    });
+  }
+
+  global.GmCwiczenie = {
+    wersja: Gm.wersja,
+    utworz: utworz,
+    zarejestruj: function (mechanika, uruchom) {
+      rejestr[mechanika] = uruchom;
+      Gm.gotowe(function () { skan(mechanika); });
+    },
+    pomoc: { el: el, wstaw: wstaw, odmiana: odmiana, czas: czas, czasSlowami: czasSlowami }
+  };
+})(window);
+
+</script>
+<script data-gm-plik="dane.js">
+/* WYGENEROWANE z banku bank.json przez gry-moodle 0.9.0 (scripts/gm_zbuduj.py) — nie edytuj ręcznie, poprawiaj bank. */
+/* gry-moodle:dane */
+window.GM_DANE = window.GM_DANE || {};
+window.GM_DANE["scenariusz"] = {"format":"gry-moodle/bank@1","id":"scenariusz","przestrzen":"gm","warstwa":"cwiczenie","mechanika":"scenariusz","widok":"cwiczenie","tytul":"Tydzień z podejrzanymi wiadomościami","teksty":{"polecenie":"Przejdź przez sześć sytuacji z jednego tygodnia dorosłego: rodzica i pracownika. W każdej wybierz jedno wyjście i zobacz skutki.","opis":"Każda sytuacja ma 3–4 wyjścia. Wybór zmienia wskaźniki „Ochrona kont i pieniędzy” oraz „Zaufanie w domu i w pracy”; od nich i od liczby poważnych wpadek zależy zakończenie.","zasady":["Wyjście wybierasz przyciskiem albo klawiszem 1, 2, 3 lub 4.","Po wyborze widzisz wyjaśnienie, skutki i źródło w materiale kursu; dalej przechodzisz przyciskiem „Dalej”.","Wskaźniki są zawsze podane liczbą — pasek tylko ją ilustruje.","Nic nie liczy czasu. Żadne wyjście nie jest dobre za darmo: sprawdź, co kosztuje, a co chroni."],"widok":{"nad":"Scenariusz","zacznij":"Zacznij","zasady_tytul":"Jak to działa","etap_meta":"Sytuacja {nr} z {ile}","etykieta_meta":"Miejsce: {etykieta}","wsk_etyk":"Wskaźniki","opcje_etyk":"Wybierz wyjście","twoj_wybor":"twój wybór","skutki":"Skutki: {lista}.","bez_skutkow":"Wskaźniki bez zmian.","dalej":"Dalej","zobacz_wynik":"Zobacz zakończenie","koniec":"Koniec scenariusza","koniec_info":"Scenariusz dobiegł końca.","jeszcze":"Zagraj jeszcze raz","final_etyk":"Zakończenie","warunek_min":"{nazwa} co najmniej {wartosc}","warunek_max":"{nazwa} najwyżej {wartosc}","warunek_i":" i ","warunek_zawsze":"w pozostałych przypadkach","wn_tytul":"Co dalej","wn":[{"gdy":{"final":"utrata"},"tekst":"Sprawdź w tabeli decyzji, która z nich najbardziej obniżyła ochronę, i porównaj ją z zaleceniem „Co robić” z odpowiedniego postu kursu."},"To jedna rozgrywka, nie ocena. Zagraj jeszcze raz i wybierz inaczej, żeby zobaczyć inne zakończenie."],"decyzje_tytul":"Twoje decyzje"}},"zrodla":[{"id":"Z1","krotko":"HoldUp: Hakerzy","opis":"Materiał kursu HoldUp, post „Hakerzy: nastolatki, gangi, służby i ci „etyczni””, komentarze, przypadki (Uber 2022, CBZC 2025–2026) i sekcja Prawo","adres":"materiał kursu HoldUp","dostep":"22.10.2026"},{"id":"Z2","krotko":"HoldUp: Phishing i BLIK","opis":"Materiał kursu HoldUp, post „Phishing, BLIK „na kolegę” i fałszywy kurier”, komentarze i przypadek kodów BLIK dla „bratowej”","adres":"materiał kursu HoldUp","dostep":"22.10.2026"},{"id":"Z3","krotko":"HoldUp: Deepfake","opis":"Materiał kursu HoldUp, post „Głos szefa, twarz znanej osoby: oszustwa z deepfake i klonem głosu” oraz komentarze","adres":"materiał kursu HoldUp","dostep":"22.10.2026"},{"id":"Z4","krotko":"HoldUp: Hasła i 2FA","opis":"Materiał kursu HoldUp, post „Hasła, 2FA, passkeys i mit zmiany co 30 dni” oraz post o hakerach (komentarze Zofii_N i Marka_R)","adres":"materiał kursu HoldUp","dostep":"22.10.2026"}],"punkty":{"wlaczone":false},"tempo":{"domyslne":"bez-limitu","TEMPO":1.0},"kolejnosc_opcji":"losowa","wersja_tekstowa":{"tryb":"auto","wstep":"Te same sytuacje bez gry: każde wyjście ze skutkami i wyjaśnieniem, potem wszystkie zakończenia z warunkami.","lista_tytul":"Wszystkie sytuacje i zakończenia"},"ukonczenie":"brak","jezyk":{"lang":"pl","rodzaj":"bezosobowo"},"dane":{"wskazniki":[{"id":"ochrona","nazwa":"Ochrona kont i pieniędzy","start":50,"min":0,"max":100,"ton":"pozytyw","kierunek":"wyzej-lepiej"},{"id":"zaufanie","nazwa":"Zaufanie w domu i w pracy","start":50,"min":0,"max":100,"ton":"pozytyw","kierunek":"wyzej-lepiej"},{"id":"wpadki","nazwa":"Poważne wpadki","start":0,"min":0,"max":6,"widoczny":false,"kierunek":"nizej-lepiej"}],"etapy":[{"id":"s1","etykieta":"kuchnia, wieczór","sytuacja":"Piętnastoletni syn mówi przy kolacji, że „tylko sprawdził”, czy da się wejść do systemu dziennika w jego szkole. Nic nie zepsuł ani nie ukradł. Czekając na Twoją reakcję, wyraźnie jest z siebie dumny.","opcje":[{"id":"a","tekst":"Powiedzieć, że skoro nic nie zniszczył, to nie ma sprawy","skutki":{"ochrona":-10,"zaufanie":5,"wpadki":1},"wyjasnienie":"Kodeks karny karze już samo uzyskanie dostępu do systemu bez uprawnienia, nawet gdy nic nie zniszczono. Ściganie następuje na wniosek pokrzywdzonego, np. szkoły albo firmy prowadzącej dziennik. Osoby w wieku od trzynastu do siedemnastu lat zajmuje się zwykle sąd rodzinny.","zrodlo":"Z1"},{"id":"b","tekst":"Zapytać, skąd zna te sztuczki, i ustalić zasadę: ćwiczy tylko na swoim sprzęcie i na platformach do nauki, a to, co znajdzie u kogoś innego, zgłasza","skutki":{"ochrona":10,"zaufanie":15},"wyjasnienie":"To droga opisana w komentarzu rodzica z kursu: zamiast zakazu rozmowa i zasada. Legalne ścieżki to zgłoszenie luki (także anonimowo przez CSIRT NASK), programy nagród za błędy oraz zawody CTF.","zrodlo":"Z1"},{"id":"c","tekst":"Zabronić dalszych prób i odebrać komputer, bez rozmowy","skutki":{"zaufanie":-15},"wyjasnienie":"Zakaz zamyka temat, ale nie pokazuje legalnej drogi dla ciekawości. Materiał opisuje alternatywę: zawody CTF, na których włamywanie jest legalne i ma regulamin, oraz programy nagród za błędy.","zrodlo":"Z1"},{"id":"d","tekst":"Wejść razem z nim do dziennika i sprawdzić, ile da się zobaczyć","skutki":{"ochrona":-15,"wpadki":1},"wyjasnienie":"Wyjątek dla działających w dobrej wierze jest wąski: wyłącznie dla zabezpieczenia systemu, z niezwłocznym powiadomieniem właściciela i bez szkody. „Sprawdzanie, ile da się zobaczyć” może już być naruszeniem, a warunki ocenia po fakcie prokurator lub sąd.","zrodlo":"Z1"}]},{"id":"s2","etykieta":"poniedziałek rano","sytuacja":"Na telefonie wiadomość SMS: „Paczka wstrzymana, dopłać 1,50 zł”, z linkiem. Nadawca wygląda jak firma kurierska, a Ty rzeczywiście czekasz na paczkę.","opcje":[{"id":"a","tekst":"Kliknąć i zobaczyć, co będzie; przecież bez podania danych nic się nie stanie","skutki":{"ochrona":-15,"wpadki":1},"wyjasnienie":"Samo kliknięcie może doprowadzić do pobrania złośliwego pliku lub aplikacji (zwłaszcza na Androidzie), a strona za linkiem potrafi wyłudzić dane karty albo logowania.","zrodlo":"Z2"},{"id":"b","tekst":"Zaufać, bo nazwa nadawcy się zgadza","skutki":{"ochrona":-20,"wpadki":1},"wyjasnienie":"Nazwę nadawcy i numer nadal da się podrobić, mimo filtrów operatorów. SMS-y oszustów potrafią trafić do tego samego wątku co prawdziwe wiadomości.","zrodlo":"Z2"},{"id":"c","tekst":"Nie klikać; sprawdzić paczkę w aplikacji przewoźnika, a SMS przesłać na numer 8080","skutki":{"ochrona":10,"zaufanie":5},"wyjasnienie":"Zasada z kursu: nie klikać w link z SMS-a, wejść do aplikacji, wpisać adres ręcznie albo zadzwonić. Podejrzany SMS można przesłać na numer 8080 (CERT Polska).","zrodlo":"Z2"},{"id":"d","tekst":"Usunąć wiadomość i zapomnieć","skutki":{"ochrona":5},"wyjasnienie":"Nie klikasz, więc nic nie tracisz. Zalecenie z kursu idzie jednak dalej: weryfikacja w aplikacji i zgłoszenie podejrzanego SMS-a na numer 8080.","zrodlo":"Z2"}]},{"id":"s3","etykieta":"komunikator, wieczór","sytuacja":"Na Messengerze pisze do Ciebie bratowa: „Pożycz kod BLIK, oddam jutro, pilne”. Konwersacja wygląda zwyczajnie, a ton jest jej.","opcje":[{"id":"a","tekst":"Podać kod, skoro to rodzina","skutki":{"ochrona":-25,"zaufanie":-5,"wpadki":1},"wyjasnienie":"W opisanym przypadku z Wałbrzycha kobieta przekazała kody BLIK osobie, którą brała za bratową; korespondencję prowadził przestępca, a strata wyniosła dwa i pół tysiąca złotych.","zrodlo":"Z2"},{"id":"b","tekst":"Zadzwonić do bratowej na numer, który znasz","skutki":{"ochrona":10,"zaufanie":10},"wyjasnienie":"Prośbę o pieniądze weryfikuje się telefonem na znany numer. Kod BLIK, hasło i kod SMS są tylko dla Ciebie.","zrodlo":"Z2"},{"id":"c","tekst":"Dopytać na tym samym czacie o szczegóły i poczekać na odpowiedź","skutki":{"ochrona":-10},"wyjasnienie":"W opisanym przypadku to przestępca prowadził rozmowę na komunikatorze, więc odpowiedź z tego samego czatu niczego nie potwierdza. Kurs radzi sprawdzić telefonem.","zrodlo":"Z2"},{"id":"d","tekst":"Nie odpisywać i nie podawać nic","skutki":{"ochrona":5,"zaufanie":-5},"wyjasnienie":"Kod zostaje u Ciebie, ale nie wiesz, czy to bratowa. Zalecenie z kursu to weryfikacja telefonem na znany numer.","zrodlo":"Z2"}]},{"id":"s4","etykieta":"praca, popołudnie","sytuacja":"Dzwoni „szef” i mówi znajomym głosem, że potrzebuje pilnego, poufnego przelewu, a szczegóły wyślesz mu dziś bez informowania innych. Głos brzmi tak, jak go znasz od lat.","opcje":[{"id":"a","tekst":"Wykonać przelew, bo głos jest rozpoznawalny","skutki":{"ochrona":-30,"zaufanie":-5,"wpadki":1},"wyjasnienie":"Znajomość głosu nie jest uwierzytelnieniem. Według doniesień mediów do sklonowania głosu wystarcza krótkie nagranie, a w stresie i pośpiechu rozpoznajemy to, czego się spodziewamy.","zrodlo":"Z3"},{"id":"b","tekst":"Poprosić o wideorozmowę i na tej podstawie zrobić przelew","skutki":{"ochrona":-15,"wpadki":1},"wyjasnienie":"Kurs opisuje oszustwo zaprojektowane tak, by wątpliwość rozwiać: kilka znanych twarzy na jednym połączeniu. Wideorozmowa nie liczy się jako potwierdzenie.","zrodlo":"Z3"},{"id":"c","tekst":"Rozłączyć się i oddzwonić na numer, który sam znajdziesz","skutki":{"ochrona":15,"zaufanie":5},"wyjasnienie":"To zalecenie z ramki „Co robić”: przy każdej nietypowej prośbie o pieniądze rozłącz się i oddzwoń na numer, który sam znajdziesz. W firmie dobrze działa też potwierdzenie innym kanałem i przez drugą osobę.","zrodlo":"Z3"},{"id":"d","tekst":"Zadać pytanie kontrolne, na które odpowiedź zna tylko prawdziwy szef","skutki":{"ochrona":10,"zaufanie":10},"wyjasnienie":"Według doniesień Bloomberga menedżer Ferrari uniknął oszustwa dzięki pytaniu, na które odpowiedź znał wyłącznie prawdziwy prezes. Takie pytanie warto uzgodnić z zespołem z góry.","zrodlo":"Z3"}]},{"id":"s5","etykieta":"wieczór","sytuacja":"Telefon co chwilę pokazuje prośbę o zatwierdzenie logowania do Twojej poczty służbowej. Sam się nie logowałeś. Prośby przychodzą jedna po drugiej.","opcje":[{"id":"a","tekst":"Zatwierdzić jedną, żeby przestały przychodzić","skutki":{"ochrona":-25,"wpadki":1},"wyjasnienie":"W opisanym włamaniu do Uber napastnik zalewał wykonawcę prośbami o zatwierdzenie logowania, aż jedna została przyjęta.","zrodlo":"Z1"},{"id":"b","tekst":"Odrzucić wszystkie i zmienić hasło do poczty","skutki":{"ochrona":15},"wyjasnienie":"Zatwierdzaj tylko takie logowanie, które zaczęło się od Ciebie; seria nieproszonych próśb to sygnał alarmowy. Hasło zmienia się przy podejrzeniu wycieku.","zrodlo":"Z1"},{"id":"c","tekst":"Nie zatwierdzać niczego i wrócić do sprawy rano","skutki":{"ochrona":5},"wyjasnienie":"Nie zatwierdzasz, więc napastnik nie wchodzi, ale seria próśb sygnalizuje, że ktoś ma Twoje hasło. Kurs radzi zmienić hasło przy podejrzeniu wycieku.","zrodlo":"Z1"}]},{"id":"s6","etykieta":"koniec tygodnia","sytuacja":"Po takim tygodniu postanawiasz coś zmienić w zabezpieczeniach swoich i rodziny. Masz czas na jedną rzecz.","opcje":[{"id":"a","tekst":"Zmieniać hasło co trzydzieści dni, dopisując kolejny numer do starego","skutki":{"ochrona":-10},"wyjasnienie":"Wymuszone, częste zmiany prowadzą do przewidywalnych wzorów (hasło1, hasło2), a NIST od roku 2017 odradza taką praktykę.","zrodlo":"Z4"},{"id":"b","tekst":"Włączyć drugi składnik z aplikacji lub klucza oraz menedżer haseł z unikalnymi hasłami","skutki":{"ochrona":20},"wyjasnienie":"Zalecenie z kursu: menedżer haseł, unikalne hasła do poczty, banku i konta służbowego, 2FA tam, gdzie się da, najlepiej aplikacja lub klucz, nie SMS.","zrodlo":"Z4"},{"id":"c","tekst":"Uznać, że antywirus i VPN dla całej firmy wystarczą","skutki":{"ochrona":-10,"wpadki":1},"wyjasnienie":"Antywirus i VPN nie zatrzymają osoby z ważnym hasłem, gdy ktoś kliknie „zatwierdź”. Pomagają metody logowania odporne na wyłudzenie i nawyk sprawdzania nietypowych próśb.","zrodlo":"Z1"},{"id":"d","tekst":"Ustalić z bliskimi i w pracy tajne słowo lub pytanie kontrolne, którego nigdy nie piszecie w sieci","skutki":{"ochrona":10,"zaufanie":15},"wyjasnienie":"Rodzinne hasło zalecane przez FBI i pytanie kontrolne w zespole to proste zabezpieczenia przed klonem głosu. Jeden rodzic opisał, że na początku wydawało mu się to przesadą.","zrodlo":"Z3"}]}],"finaly":[{"id":"utrata","warunek":{"ochrona":{"max":0}},"przerywa":true,"tytul":"Konta i pieniądze poza kontrolą","tekst":"Ochrona spadła do {ochrona}, a poważnych wpadek było {wpadki}. Zgodnie z kursem po stracie pieniędzy najpierw dzwoni się do banku, po kliknięciu w link zmienia się hasło i zgłasza incydent do CERT Polska, a podejrzany SMS przesyła na numer 8080."},{"id":"zasady","warunek":{"ochrona":{"min":70},"zaufanie":{"min":70}},"tytul":"Zasady, które działają","tekst":"Ochrona {ochrona}, zaufanie {zaufanie}. Weryfikacja innym kanałem, drugi składnik i rozmowa zamiast zakazów zadziałały razem, a wpadek było {wpadki}."},{"id":"chlodno","warunek":{"ochrona":{"min":70},"zaufanie":{"max":49}},"tytul":"Bezpiecznie, ale chłodno","tekst":"Ochrona {ochrona}, zaufanie {zaufanie}. Konta są dobrze zabezpieczone, ale w domu i w pracy decyzje zapadały bez rozmowy."},{"id":"dziury","warunek":{"zaufanie":{"min":70},"ochrona":{"max":49}},"tytul":"Dużo rozmów, luki w zabezpieczeniach","tekst":"Zaufanie {zaufanie}, ochrona {ochrona}. Rozmowy w domu i w pracy się udały, ale w zabezpieczeniach kont zostały luki, a wpadek było {wpadki}."},{"id":"wpadki","warunek":{"wpadki":{"min":3}},"tytul":"Seria wpadek","tekst":"Poważnych wpadek było {wpadki}, ochrona {ochrona}, zaufanie {zaufanie}. Opisane w kursie włamania i oszustwa zaczynały się właśnie od takich prostych kroków."},{"id":"mieszany","warunek":{},"tytul":"Tydzień przetrwany","tekst":"Ochrona {ochrona}, zaufanie {zaufanie}, poważnych wpadek {wpadki}. Część decyzji chroniła, część kosztowała."}]}};
+
+</script>
+<script data-gm-plik="scenariusz-model.js">
+/* gry-moodle 0.5.0 — NIE EDYTUJ W KURSIE, poprawiaj w PLUGIN/gry-moodle (~/.claude/local-marketplace-maciek/plugins/gry-moodle) */
+/* mechaniki/scenariusz/model.js — LOGIKA scenariusza decyzyjnego bez DOM (testowalna w node: scripts/test/model_scenariusz.test.js).
+ *
+ * Bank (`dane` wg schemat.json): wskazniki[{id, nazwa, start, min, max, widoczny?, …}], etapy[{id, sytuacja, etykieta?,
+ * opcje[{id, tekst, skutki{wsk: zmiana}, wyjasnienie, zrodlo?, dalej?}]}], po_etapie?{skutki}, finaly[{id, warunek, przerywa?,
+ * tytul?, tekst}], presja?{wskaznik, na_sekunde}.
+ *
+ * SEMANTYKA (ta sama w scripts/gm_bank.py — bramka osiągalności B3; test modelu porównuje oba wyniki):
+ *   wybór opcji → skutki opcji (obcięte do [min, max]) → po_etapie.skutki (obcięte) → finał PRZERYWAJĄCY? (pierwszy spełniony
+ *   w kolejności tablicy) → następny etap (opcja.dalej | następny w tablicy | „koniec”) → gdy etapów brak: PIERWSZY spełniony
+ *   finał z całej listy. Presja (tryb wybrany świadomie): wskaźnik rośnie w czasie oczekiwania na wybór; po każdym przyroście
+ *   sprawdzamy finały przerywające. Wzór: MC „Cyfrowy detoks 24 h” (M17_detoks.html: wybór → FOMO −12 → koniec, gdy
+ *   FOMO ≥ 100 albo energia ≤ 0 albo koniec dnia; presja 1,6/s).
+ *
+ *   start(bank) → stan {w:{id: wartość}, etap: indeks, historia: [], koniec: id finału | "brak" | null}
+ *   wybierz(bank, stan, idOpcji) → nowy stan;  presja(bank, stan, sekundy) → nowy stan
+ *   spelnia(warunek, w), finalPierwszy(bank, w, tylkoPrzerywajace), final(bank, id)
+ *   tekstFinalu(bank, final, w) — {id wskaźnika} → wartość zaokrąglona (MC: Math.round)
+ *   skutkiWidoczne(bank, skutki) → [{id, nazwa, zmiana}] (bez ukrytych i zer)
+ *   osiagalnosc(bank) → {finaly: {id: [ [etap, opcja], … ] | null}, sciezek, bezFinalu, cykl}
+ *   ocenaOpcji(bank, opcja) → liczba (wyżej = lepiej) | null (bez kryterium) — bramka pozycji
+ */
+(function (global) {
+  "use strict";
+
+  function wsk(bank, id) {
+    var l = bank.dane.wskazniki;
+    for (var i = 0; i < l.length; i++) if (l[i].id === id) return l[i];
+    return null;
+  }
+
+  function dodaj(bank, w, skutki) {
+    var n = {};
+    for (var k in w) if (Object.prototype.hasOwnProperty.call(w, k)) n[k] = w[k];
+    for (var id in (skutki || {})) {
+      if (!Object.prototype.hasOwnProperty.call(skutki, id)) continue;
+      var d = wsk(bank, id);
+      if (!d) continue;
+      n[id] = Math.min(d.max, Math.max(d.min, n[id] + skutki[id]));
+    }
+    return n;
+  }
+
+  function spelnia(warunek, w) {
+    for (var id in (warunek || {})) {
+      if (!Object.prototype.hasOwnProperty.call(warunek, id)) continue;
+      var g = warunek[id], v = w[id];
+      if (g.min != null && !(v >= g.min)) return false;
+      if (g.max != null && !(v <= g.max)) return false;
+    }
+    return true;
+  }
+
+  function finalPierwszy(bank, w, tylkoPrzerywajace) {
+    var f = bank.dane.finaly;
+    for (var i = 0; i < f.length; i++) {
+      if (tylkoPrzerywajace && !f[i].przerywa) continue;
+      if (spelnia(f[i].warunek, w)) return f[i];
+    }
+    return null;
+  }
+
+  function indeksEtapu(bank, id) {
+    var e = bank.dane.etapy;
+    for (var i = 0; i < e.length; i++) if (e[i].id === id) return i;
+    return -1;
+  }
+
+  function nastepny(bank, idx, opcja) {
+    if (opcja.dalej === "koniec") return -1;
+    if (opcja.dalej) return indeksEtapu(bank, opcja.dalej);
+    return idx + 1 < bank.dane.etapy.length ? idx + 1 : -1;
+  }
+
+  /* jeden krok semantyki — wspólny dla gry i przeszukania: → {w, nast, koniec} */
+  function krok(bank, idx, w, opcja) {
+    var w1 = dodaj(bank, w, opcja.skutki), w2 = w1;
+    if (bank.dane.po_etapie) w2 = dodaj(bank, w1, bank.dane.po_etapie.skutki);
+    var fp = finalPierwszy(bank, w2, true);
+    if (fp) return { w: w2, w1: w1, nast: -1, koniec: fp.id };
+    var n = nastepny(bank, idx, opcja);
+    if (n < 0) {
+      var f = finalPierwszy(bank, w2, false);
+      return { w: w2, w1: w1, nast: -1, koniec: f ? f.id : "brak" };
+    }
+    return { w: w2, w1: w1, nast: n, koniec: null };
+  }
+
+  var Model = {
+    wskaznik: wsk, dodaj: dodaj, spelnia: spelnia, finalPierwszy: finalPierwszy, krok: krok,
+
+    start: function (bank) {
+      var w = {};
+      bank.dane.wskazniki.forEach(function (d) { w[d.id] = d.start; });
+      return { w: w, etap: 0, historia: [], koniec: null };
+    },
+
+    wybierz: function (bank, stan, idOpcji) {
+      if (stan.koniec) return stan;
+      var e = bank.dane.etapy[stan.etap], o = null;
+      e.opcje.forEach(function (x) { if (x.id === idOpcji) o = x; });
+      if (!o) return stan;
+      var k = krok(bank, stan.etap, stan.w, o);
+      /* posrednie = po skutkach opcji, PRZED po_etapie — to pokazuje informacja zwrotna (MC: FOMO spada dopiero
+         przy następnej sytuacji); w = stan po całym kroku (od niego zależy finał) */
+      return { w: k.w, posrednie: k.w1, etap: k.nast < 0 ? stan.etap : k.nast, koniec: k.koniec,
+               historia: stan.historia.concat([{ etap: e.id, opcja: o.id, przed: stan.w, po: k.w }]) };
+    },
+
+    presja: function (bank, stan, sekundy) {
+      var p = bank.dane.presja;
+      if (!p || stan.koniec) return stan;
+      var s = {}; s[p.wskaznik] = p.na_sekunde * sekundy;
+      var w2 = dodaj(bank, stan.w, s);
+      var fp = finalPierwszy(bank, w2, true);
+      return { w: w2, etap: stan.etap, historia: stan.historia, koniec: fp ? fp.id : null, przezPresje: !!fp };
+    },
+
+    final: function (bank, id) {
+      var f = bank.dane.finaly;
+      for (var i = 0; i < f.length; i++) if (f[i].id === id) return f[i];
+      return null;
+    },
+
+    tekstFinalu: function (bank, f, w) {
+      return String(f.tekst).replace(/\{([a-z][a-z0-9_]*)\}/g, function (m, id) {
+        return Object.prototype.hasOwnProperty.call(w, id) ? String(Math.round(w[id])) : m;
+      });
+    },
+
+    skutkiWidoczne: function (bank, skutki) {
+      var out = [];
+      bank.dane.wskazniki.forEach(function (d) {
+        var z = (skutki || {})[d.id];
+        if (d.widoczny === false || !z) return;
+        out.push({ id: d.id, nazwa: d.nazwa, zmiana: z });
+      });
+      return out;
+    },
+
+    /* przeszukanie wszystkich ścieżek wyborów (bez zegara!) — memo po (etap, stan wskaźników) */
+    osiagalnosc: function (bank) {
+      var finaly = {}, bezFinalu = 0, cykl = false;
+      bank.dane.finaly.forEach(function (f) { finaly[f.id] = null; });
+      var memo = {}, naStosie = {};
+      function klucz(idx, w) { return idx + "|" + bank.dane.wskazniki.map(function (d) { return w[d.id]; }).join(","); }
+      function idz(idx, w, sciezka) {
+        var k = klucz(idx, w);
+        if (naStosie[k]) { cykl = true; return 0; }
+        if (Object.prototype.hasOwnProperty.call(memo, k)) return memo[k];
+        naStosie[k] = true;
+        var ile = 0, e = bank.dane.etapy[idx];
+        e.opcje.forEach(function (o) {
+          var r = krok(bank, idx, w, o), s = sciezka.concat([[e.id, o.id]]);
+          if (r.koniec) {
+            ile += 1;
+            if (r.koniec === "brak") bezFinalu += 1;
+            else if (!finaly[r.koniec]) finaly[r.koniec] = s;
+          } else {
+            ile += idz(r.nast, r.w, s);
+          }
+        });
+        naStosie[k] = false;
+        memo[k] = ile;
+        return ile;
+      }
+      var s0 = Model.start(bank);
+      var sciezek = idz(0, s0.w, []);
+      return { finaly: finaly, sciezek: sciezek, bezFinalu: bezFinalu, cykl: cykl };
+    },
+
+    ocenaOpcji: function (bank, o) {
+      if (o.ocena) return { dobra: 1, neutralna: 0, zla: -1 }[o.ocena];
+      var s = 0, jest = false;
+      bank.dane.wskazniki.forEach(function (d) {
+        if (!d.kierunek) return;
+        jest = true;
+        var z = (o.skutki || {})[d.id] || 0, rozp = (d.max - d.min) || 1;
+        s += (d.kierunek === "wyzej-lepiej" ? 1 : -1) * z / rozp;
+      });
+      return jest ? s : null;
+    },
+
+    wypelnij: function (wzor, wartosci) {
+      return String(wzor == null ? "" : wzor).replace(/\{([a-z_]+)\}/g, function (m, k) {
+        return Object.prototype.hasOwnProperty.call(wartosci, k) ? String(wartosci[k]) : m;
+      });
+    }
+  };
+
+  if (typeof module === "object" && module.exports) module.exports = Model;
+  else global.GmScenariusz = Model;
+})(typeof window !== "undefined" ? window : this);
+
+</script>
+<script data-gm-plik="scenariusz-cwiczenie.js">
+/* gry-moodle 0.5.0 — NIE EDYTUJ W KURSIE, poprawiaj w PLUGIN/gry-moodle (~/.claude/local-marketplace-maciek/plugins/gry-moodle) */
+/* mechaniki/scenariusz/cwiczenie.js — WIDOK scenariusza decyzyjnego na warstwie ćwiczeń (panele, bez pętli gry).
+ * Wzory: MC „Cyfrowy detoks 24 h” (M17_detoks.html — paski FOMO/energia, 4 finały, tryb z presją), Prek M7 „Dwanaście godzin”
+ * (zestawienie wyborów w tabeli, fokus na „Dalej”), Popiel C4, PS „Sprint studencki”.
+ *
+ * Wymaga: rdzen.js (Gm), cwiczenia/cwiczenie.js (GmCwiczenie), mechaniki/scenariusz/model.js (GmScenariusz), dane (GM_DANE).
+ * Treść WYŁĄCZNIE z banku (decyzja 8): sytuacje, opcje, skutki, wyjaśnienia, finały z `dane`, napisy z `teksty.widok`.
+ *
+ * Przebieg: ekran startowy (gdy bank ma `presja` — wybór „bez presji” [domyślny] / „z presją czasu”, decyzja 10) →
+ * sytuacja n z N: wskaźniki ZAWSZE tekstem („FOMO 20”), pasek tylko dodatkowo (aria-hidden) → opcja przyciskiem albo
+ * klawiszem 1–9 (tylko w kontenerze — 2.1.4; opcje tasowane, gdy kolejnosc_opcji ≠ „stala”) → informacja: wyjaśnienie,
+ * skutki tekstem, źródło — czeka na „Dalej” z fokusem (nic nie przechodzi samo; oryginał MC przechodził po 2,9 s) →
+ * … → finał (pierwszy spełniony; finał „przerywający” kończy grę wcześniej) → podsumowanie: tekst finału z wartościami,
+ * kafle wskaźników, tabela decyzji z <caption>, wnioski, „Jeszcze raz”.
+ * Presja: wskaźnik rośnie TYLKO w czasie oczekiwania na wybór (nie przy informacji), zegar na Date.now (nie na rAF),
+ * pauza i autopauza (ukryta karta) go zatrzymują; po „Wznów” fokus wraca na opcję/„Dalej” (Piaskownica 12.10).
+ * Bez presji nic nie biegnie — nie ma też pauzy (nie ma czego wstrzymywać).
+ */
+(function (global) {
+  "use strict";
+
+  var Gm = global.Gm, Cw = global.GmCwiczenie, Model = global.GmScenariusz;
+  if (!Gm || !Cw || !Model) return;
+
+  /* liczba do tekstu: całkowita bez zmian, ułamek z przecinkiem; znak minus typograficzny (czytnik czyta „minus”) */
+  function liczba(v) {
+    var r = Math.round(v * 10) / 10;
+    var s = (Math.round(r) === r ? String(Math.abs(r)) : String(Math.abs(r)).replace(".", ","));
+    return (r < 0 ? "−" : "") + s;
+  }
+  function zmiana(v) { return (v > 0 ? "+" : "") + liczba(v); }
+
+  function uruchom(korzen) {
+    var c = Cw.utworz(korzen);
+    if (!c) return null;
+    korzen.classList.add("gm-sc");
+    var bank = c.bank, D = bank.dane, T = c.T, el = c.el, wstaw = c.wstaw;
+    var los = bank.runda && bank.runda.ziarno != null ? Gm.losowanie(bank.runda.ziarno) : null;
+    var STALA = bank.kolejnosc_opcji === "stala";
+
+    var ekranStan = "start";   // start | gra | koniec
+    var faza = null;           // wybor | info
+    var stan = null, poziom = "bez-presji", opcjeWidoczne = [], ui = null, pauza = null, ostatniFokus = null;
+    var zegar = 0, ostatniTik = 0, wynikPresji = false;
+
+    function zrodlo(o) {
+      if (!o.zrodlo) return "";
+      var l = bank.zrodla || [];
+      for (var i = 0; i < l.length; i++) if (l[i].id === o.zrodlo) return " Źródło: " + l[i].krotko + (o.miejsce ? ", " + o.miejsce : "") + ".";
+      return "";
+    }
+    function listaSkutkow(skutki) {
+      var z = Model.skutkiWidoczne(bank, skutki);
+      if (!z.length) return T.bez_skutkow || "";
+      return wstaw(T.skutki, { lista: z.map(function (x) { return x.nazwa + " " + zmiana(x.zmiana); }).join(", ") });
+    }
+
+    /* ——— ekran startowy ——— */
+    function ekranStart() {
+      zatrzymajZegar();
+      if (pauza) { pauza.odlacz(); pauza = null; }
+      ekranStan = "start"; ui = null;
+      var poziomy = null;
+      if (D.presja) {
+        var P = T.poziomy || {};
+        poziomy = ["bez-presji", "presja"].map(function (id) { return { id: id, nazwa: (P[id] || {}).nazwa || id, opis: (P[id] || {}).opis }; });
+      }
+      return c.ekranStartowy({
+        opis: c.teksty.opis, poziomy: poziomy, wybrany: "bez-presji", legenda: T.legenda, pytanie: T.pytanie,
+        uwaga: T.czytnik, zasadyTytul: T.zasady_tytul, zasady: c.teksty.zasady,
+        przycisk: T.zacznij, naStart: function (id, wskaznik) { zacznij(id || "bez-presji", wskaznik); }
+      });
+    }
+
+    /* ——— ekran gry ——— */
+    function budujEkran() {
+      c.ekran.innerHTML = "";
+      ui = { wsk: {} };
+      /* bez kafla „Sytuacja n/N” — numer jest w karcie sytuacji; w ramce SCORM 500 px liczy się każdy wiersz (L43) */
+
+      if (poziom === "presja") {
+        var ster = el("div", "gm-sc__ster");
+        ui.pauza = el("button", "gm-przycisk gm-przycisk--cichy gm-sc__pauza", T.pauza || c.napis("pauza"));
+        ui.pauza.type = "button";
+        ster.appendChild(ui.pauza);
+        c.ekran.appendChild(ster);
+      }
+
+      ui.plansza = el("div", "gm-sc__plansza");
+      /* wskaźniki: nazwa + liczba TEKSTEM (1.4.1), pasek tylko dodatkowo; bez aria-live (zmiany mówi informacja zwrotna) */
+      var wl = el("ul", "gm-sc__wskazniki");
+      wl.setAttribute("aria-label", T.wsk_etyk || "");
+      D.wskazniki.forEach(function (d) {
+        if (d.widoczny === false) return;
+        var li = el("li", "gm-sc__wsk" + (d.ton ? " gm-sc__wsk--" + d.ton : ""));
+        var n = el("span", "gm-sc__wsk-n", d.nazwa);
+        var v = el("span", "gm-sc__wsk-v", "");
+        li.appendChild(n);
+        li.appendChild(v);
+        var pasek = null;
+        if (d.pasek !== false) {
+          pasek = el("span", "gm-sc__pasek");
+          pasek.setAttribute("aria-hidden", "true");
+          var wyp = el("span", "gm-sc__pasek-w");
+          pasek.appendChild(wyp);
+          li.appendChild(pasek);
+          pasek = wyp;
+        }
+        ui.wsk[d.id] = { v: v, p: pasek, d: d };
+        wl.appendChild(li);
+      });
+      ui.plansza.appendChild(wl);
+
+      ui.karta = el("div", "gm-sc__karta");
+      ui.karta.setAttribute("tabindex", "-1");
+      ui.meta = el("p", "gm-sc__meta");
+      ui.sytuacja = el("p", "gm-sc__sytuacja");
+      ui.karta.appendChild(ui.meta);
+      ui.karta.appendChild(ui.sytuacja);
+      ui.plansza.appendChild(ui.karta);
+      ui.opcje = el("div", "gm-sc__opcje");
+      ui.opcje.setAttribute("role", "group");
+      ui.opcje.setAttribute("aria-label", T.opcje_etyk || "");
+      ui.plansza.appendChild(ui.opcje);
+      ui.po = el("div", "gm-sc__po");
+      ui.plansza.appendChild(ui.po);
+      ui.plansza.addEventListener("focusin", function (e) { ostatniFokus = e.target; });
+      c.ekran.appendChild(ui.plansza);
+
+      ui.pauzaInfo = el("div", "gm-sc__pauzainfo");
+      ui.pauzaInfo.hidden = true;
+      ui.pauzaTxt = el("p");
+      ui.pauzaInfo.appendChild(ui.pauzaTxt);
+      c.ekran.appendChild(ui.pauzaInfo);
+      if (T.podpowiedz) c.ekran.appendChild(el("p", "gm-slaby gm-sc__podp", T.podpowiedz));
+
+      if (ui.pauza) {
+        pauza = c.pauza({ przycisk: ui.pauza, naPauze: naPauze, naWznow: naWznow,
+                          czyMozna: function () { return ekranStan === "gra"; } });
+      }
+    }
+
+    function pokazWskazniki(wartosci) {
+      var W = wartosci || stan.w;
+      for (var id in ui.wsk) {
+        if (!Object.prototype.hasOwnProperty.call(ui.wsk, id)) continue;
+        var x = ui.wsk[id], v = W[id];
+        var t = liczba(Math.round(v)) + (x.d.jednostka || "");   /* jak oryginał MC: Math.round — presja daje ułamki */
+        if (x.v.textContent !== t) x.v.textContent = t;
+        if (x.p) {
+          var max = x.d.pasek_max != null ? x.d.pasek_max : x.d.max;
+          var proc = Math.max(0, Math.min(100, (v - x.d.min) / ((max - x.d.min) || 1) * 100));
+          x.p.style.width = proc.toFixed(1) + "%";
+        }
+      }
+    }
+
+    function pokazEtap(wskaznik) {
+      var e = D.etapy[stan.etap];
+      faza = "wybor";
+      ui.po.innerHTML = "";
+      var meta = wstaw(T.etap_meta, { nr: stan.historia.length + 1, ile: D.etapy.length });
+      if (e.etykieta && T.etykieta_meta) meta += " · " + wstaw(T.etykieta_meta, { etykieta: e.etykieta });
+      ui.meta.textContent = meta;
+      ui.sytuacja.textContent = e.sytuacja;
+      opcjeWidoczne = STALA ? e.opcje.slice() : Gm.tasuj(e.opcje, los || undefined);
+      ui.opcje.innerHTML = "";
+      ui.przyciski = [];
+      opcjeWidoczne.forEach(function (o, i) {
+        var b = el("button", "gm-przycisk gm-przycisk--cichy gm-sc__opcja");
+        b.type = "button";
+        b.setAttribute("data-opcja", o.id);
+        if (i < 9) b.setAttribute("aria-keyshortcuts", String(i + 1));
+        var n = el("span", "gm-sc__nr", String(i + 1));
+        n.setAttribute("aria-hidden", "true");
+        b.appendChild(n);
+        b.appendChild(el("span", "gm-sc__opcja-t", o.tekst));
+        b.addEventListener("click", function () { wybierz(o.id); });
+        ui.przyciski.push(b);
+        ui.opcje.appendChild(b);
+      });
+      pokazWskazniki();
+      /* fokus na karcie sytuacji: czytnik czyta „Sytuacja 2 z 8” i treść; klawisze 1–N działają od razu */
+      try { ui.karta.focus(wskaznik ? { preventScroll: true } : undefined); } catch (er) { ui.karta.focus(); }
+      if (!wskaznik && ui.karta.scrollIntoView) ui.karta.scrollIntoView({ block: "nearest" });
+      ostatniTik = Date.now();
+    }
+
+    function wybierz(idOpcji) {
+      if (ekranStan !== "gra" || faza !== "wybor" || (pauza && pauza.wstrzymane())) return;
+      var e = D.etapy[stan.etap], o = null;
+      e.opcje.forEach(function (x) { if (x.id === idOpcji) o = x; });
+      if (!o) return;
+      faza = "info";
+      stan = Model.wybierz(bank, stan, o.id);
+      ui.przyciski.forEach(function (b) {
+        b.setAttribute("aria-disabled", "true");
+        if (b.getAttribute("data-opcja") === o.id) {
+          b.classList.add("gm-sc__opcja--wybrana");
+          var zn = el("span", "gm-sc__wybor", T.twoj_wybor || "");
+          b.appendChild(zn);
+        }
+      });
+      /* przy informacji: wartości po skutkach tej decyzji (zgodne z napisem „Skutki: …”); zmiana „po etapie”
+         (MC: FOMO samo opada) dochodzi przy następnej sytuacji — jak w oryginale */
+      pokazWskazniki(stan.posrednie);
+      var ost = !!stan.koniec;
+      c.informacja(ui.po, {
+        naglowek: T.wybor_naglowek ? wstaw(T.wybor_naglowek, { tekst: o.tekst }) : "",
+        tekst: o.wyjasnienie + " " + listaSkutkow(o.skutki) + zrodlo(o),
+        dalej: ost ? (T.zobacz_wynik || c.napis("dalej")) : (T.dalej || c.napis("dalej")),
+        naDalej: function () { if (stan.koniec) koniec(); else pokazEtap(false); }
+      });
+    }
+
+    /* ——— presja czasu (tylko poziom „presja”) ——— */
+    function tik() {
+      var teraz = Date.now(), dt = (teraz - ostatniTik) / 1000;
+      ostatniTik = teraz;
+      if (ekranStan !== "gra" || faza !== "wybor" || (pauza && pauza.wstrzymane()) || document.hidden) return;
+      if (dt <= 0 || dt > 1) return;   /* przerwa w zegarze (uśpiona karta) nie dolicza czasu */
+      stan = Model.presja(bank, stan, dt);
+      pokazWskazniki();
+      if (stan.koniec) { wynikPresji = true; koniec(); }
+    }
+    function zatrzymajZegar() { if (zegar) { global.clearInterval(zegar); zegar = 0; } }
+
+    /* ——— pauza (tylko z presją — coś biegnie). Plansza schowana: pauza nie służy do podglądania (T5). ——— */
+    function naPauze(powod) {
+      ui.pauzaInfo.style.minHeight = ui.plansza.offsetHeight + "px";
+      ui.plansza.hidden = true;
+      ui.pauzaInfo.hidden = false;
+      ui.pauzaTxt.textContent = powod === "karta" ? (T.pauza_info_karta || T.pauza_info) : T.pauza_info;
+      c.mow(T.pauza_ogl || c.napis("pauzaOgl"));
+    }
+    function naWznow() {
+      ui.plansza.hidden = false;
+      ui.pauzaInfo.hidden = true;
+      ostatniTik = Date.now();
+      c.mow(T.wznow_ogl || c.napis("wznowOgl"));
+      /* po „Wznów” fokus nie zostaje na przycisku pauzy (Piaskownica 12.10): „Dalej”, gdy informacja czeka;
+         inaczej element listy, na którym był; inaczej karta sytuacji (klawisze 1–N działają od razu) */
+      if (document.activeElement === ui.pauza) {
+        var dalej = ui.po.querySelector(".gm-cw__dalej");
+        var cel = dalej || (ostatniFokus && ui.plansza.contains(ostatniFokus) && ostatniFokus.getAttribute("aria-disabled") !== "true" ? ostatniFokus : null) || ui.karta;
+        cel.focus();
+      }
+    }
+
+    /* ——— klawiatura: 1–N wybiera opcję, tylko wewnątrz ćwiczenia (2.1.4) ——— */
+    c.klawisze(function (e) {
+      if (ekranStan !== "gra" || faza !== "wybor" || !ui || e.shiftKey) return;
+      if (!/^[1-9]$/.test(e.key)) return;
+      var o = opcjeWidoczne[Number(e.key) - 1];
+      if (!o) return;
+      var t = e.target;
+      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA")) return;
+      e.preventDefault();
+      if (!e.repeat) wybierz(o.id);
+    });
+
+    /* ——— start / koniec ——— */
+    function zacznij(idPoziomu, wskaznik) {
+      zatrzymajZegar();
+      if (pauza) { pauza.odlacz(); pauza = null; }
+      c.wyczysc();
+      poziom = idPoziomu === "presja" && D.presja ? "presja" : "bez-presji";
+      stan = Model.start(bank);
+      wynikPresji = false;
+      ekranStan = "gra";
+      budujEkran();
+      pokazEtap(wskaznik);
+      if (poziom === "presja") {
+        ostatniTik = Date.now();
+        zegar = global.setInterval(tik, 200);
+        if (T.presja_ogl) c.mow(T.presja_ogl, 400);
+      }
+    }
+
+    function koniec() {
+      zatrzymajZegar();
+      ekranStan = "koniec"; faza = null;
+      if (pauza) { pauza.odlacz(); pauza = null; }
+      var f = Model.final(bank, stan.koniec);
+      /* stan dla wniosków adaptacyjnych: finał, liczba decyzji, czy kończyła presja, wartości wskaźników (zaokrąglone) */
+      var stanW = { final: stan.koniec, decyzji: stan.historia.length, presja: wynikPresji };
+      D.wskazniki.forEach(function (d) { stanW[d.id] = Math.round(stan.w[d.id]); });
+      var o = {
+        naglowek: f && f.tytul ? f.tytul : (T.koniec || ""),
+        info: [],
+        dopiski: f ? [{ tekst: Model.tekstFinalu(bank, f, stan.w), klasa: "gm-sc__final" }] : [],
+        liczby: D.wskazniki.filter(function (d) { return d.widoczny !== false; })
+                 .map(function (d) { return { etyk: d.nazwa, wart: liczba(Math.round(stan.w[d.id])) + (d.jednostka || "") }; }),
+        wnioskiTytul: T.wn_tytul,
+        wnioski: c.wniosek(T.wn, stanW),
+        przyciski: [{ tekst: T.jeszcze || c.napis("jeszcze"), fn: function (w) { zacznij(poziom, w); } }]
+      };
+      if (T.koniec_info) o.info.push(T.koniec_info);
+      /* decyzje jako lista, nie tabela: trzy kolumny z długą sytuacją rozpychały ekran przy 320 px (zrzut 2D) */
+      if (stan.historia.length && T.decyzje_tytul) {
+        o.sekcje = [{ tytul: T.decyzje_tytul, lista: stan.historia.map(function (h) {
+          var e = null, op = null;
+          D.etapy.forEach(function (x) { if (x.id === h.etap) e = x; });
+          e.opcje.forEach(function (x) { if (x.id === h.opcja) op = x; });
+          var z = Model.skutkiWidoczne(bank, op.skutki).map(function (x) { return x.nazwa + " " + zmiana(x.zmiana); }).join(", ");
+          return { mocne: e.sytuacja, tekst: op.tekst, dalej: z ? wstaw(T.skutki, { lista: z }) : (T.bez_skutkow || "") };
+        }) }];
+      }
+      if (o.liczby.length === 0) delete o.liczby;
+      ui = null;
+      c.podsumowanie(o);
+    }
+
+    /* Uchwyt dla testów (B11 — bot gra ścieżkami z przeszukania banku). Ćwiczenie z tego nie korzysta. */
+    korzen.__widok = {
+      stan: function () {
+        return { ekran: ekranStan, faza: faza, poziom: poziom,
+                 etap: stan ? D.etapy[stan.etap].id : null, nr: stan ? stan.historia.length + 1 : 0,
+                 opcje: opcjeWidoczne.map(function (o) { return o.id; }),
+                 w: stan ? JSON.parse(JSON.stringify(stan.w)) : null, koniec: stan ? stan.koniec : null,
+                 historia: stan ? stan.historia.map(function (h) { return [h.etap, h.opcja]; }) : [],
+                 presja: wynikPresji, pauza: !!(pauza && pauza.wstrzymane()) };
+      }
+    };
+
+    /* wersja tekstowa w widgecie Strony — ta sama treść i kolejność co pozycje_wersji_tekstowej() generatora */
+    function opisWarunku(f) {
+      var cz = [];
+      D.wskazniki.forEach(function (d) {
+        var g = (f.warunek || {})[d.id];
+        if (!g) return;
+        if (g.min != null) cz.push(wstaw(T.warunek_min || "{nazwa} ≥ {wartosc}", { nazwa: d.nazwa, wartosc: liczba(g.min) }));
+        if (g.max != null) cz.push(wstaw(T.warunek_max || "{nazwa} ≤ {wartosc}", { nazwa: d.nazwa, wartosc: liczba(g.max) }));
+      });
+      return cz.length ? cz.join(T.warunek_i || " i ") : (T.warunek_zawsze || "");
+    }
+    var pozycje = D.etapy.map(function (e) {
+      var opcje = e.opcje.map(function (o, i) {
+        var z = Model.skutkiWidoczne(bank, o.skutki).map(function (x) { return x.nazwa + " " + zmiana(x.zmiana); }).join(", ");
+        return (i + 1) + ") " + o.tekst + (z ? " [" + z + "]" : "") + ": " + o.wyjasnienie + zrodlo(o);
+      });
+      return [e.sytuacja, opcje.join(" ")];
+    });
+    D.finaly.forEach(function (f) {
+      var tekst = String(f.tekst).replace(/\{([a-z][a-z0-9_]*)\}/g, function (m, id) {
+        var d = Model.wskaznik(bank, id);
+        return d ? "[" + d.nazwa + "]" : m;
+      });
+      pozycje.push([(T.final_etyk || "") + (f.tytul ? ": " + f.tytul : "") + " (" + opisWarunku(f) + ")", tekst]);
+    });
+    c.wersjaTekstowa(pozycje);
+
+    ekranStart();
+    return c;
+  }
+
+  Cw.zarejestruj("scenariusz", uruchom);
+})(window);
+
+</script>
+</body>
+</html>

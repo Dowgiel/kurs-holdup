@@ -1,0 +1,15 @@
+{
+  "plugin": "gry-moodle",
+  "wersja": "0.9.0",
+  "format": "html",
+  "tryb": null,
+  "ukonczenie": "brak",
+  "id": "kolo-fortuny",
+  "bank": "gry/kolo-fortuny/bank.json",
+  "bank_sha256": "2f9c6fcda40d033f77253bdbb30d9d01f4276c87806ddcdd512f2a92d7cbdb19",
+  "zbudowano": "2026-10-22T01:23:40",
+  "odstepstwa_tresci": [],
+  "pliki": {
+    "index.html": "7aee148b3130fc4362bd5626c4c0216c00414fa12dcfee6fda36ec796f725752"
+  }
+}

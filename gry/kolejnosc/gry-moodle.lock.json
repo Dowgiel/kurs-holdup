@@ -1,0 +1,38 @@
+{
+  "plugin": "gry-moodle",
+  "wersja": "0.9.0",
+  "pliki": {
+    "index.html#rdzen.css": {
+      "zrodlo": "rdzen/rdzen.css",
+      "sha256": "e0be428abba38e1172a75f2c0c18d4bca7147b59724c2058a0c32f2d165e3ed1"
+    },
+    "index.html#strona.css": {
+      "zrodlo": "formaty/wspolne/strona.css",
+      "sha256": "c39d7442dee178e346b90ac548e5cfdf3939ac3c5a203d94914ff7e421b3ad43"
+    },
+    "index.html#cwiczenie.css": {
+      "zrodlo": "cwiczenia/cwiczenie.css",
+      "sha256": "f2a99ad04b1c2b1c3bae9324e3a927f027585744e7ed11a770f9f2e99e6c3985"
+    },
+    "index.html#kolejnosc.css": {
+      "zrodlo": "mechaniki/kolejnosc/kolejnosc.css",
+      "sha256": "01d2f71188aa375acdfc0269b078afc921e8d43444bb4146d4d5ca9138b40e86"
+    },
+    "index.html#rdzen.js": {
+      "zrodlo": "rdzen/rdzen.js",
+      "sha256": "ac7a3cc5eb41f50e438db44c760e0d5d9dd45df334114be8d311322915f1dda5"
+    },
+    "index.html#cwiczenie.js": {
+      "zrodlo": "cwiczenia/cwiczenie.js",
+      "sha256": "c3c823e6367e4afd3b5340fe32c1c5640f47b65e0115eb5ca54d57e1a99472be"
+    },
+    "index.html#kolejnosc-model.js": {
+      "zrodlo": "mechaniki/kolejnosc/model.js",
+      "sha256": "45206f111f1cb9d2faa08009ab57f4e972f73c8025555c4c92bbd45721c8b3b7"
+    },
+    "index.html#kolejnosc-cwiczenie.js": {
+      "zrodlo": "mechaniki/kolejnosc/cwiczenie.js",
+      "sha256": "40c79b2e8d2caae62b242eaee4cb04c8d9c17f302cdea7872abd390a786d425c"
+    }
+  }
+}

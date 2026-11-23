@@ -1,0 +1,15 @@
+{
+  "plugin": "gry-moodle",
+  "wersja": "0.9.0",
+  "format": "html",
+  "tryb": null,
+  "ukonczenie": "brak",
+  "id": "mit-fakt",
+  "bank": "gry/mit-fakt/bank.json",
+  "bank_sha256": "eeb7ab9115441a15de3a84b6c66e555e275f96c1a3492630d669ecd01a2c4b4b",
+  "zbudowano": "2026-10-22T01:21:47",
+  "odstepstwa_tresci": [],
+  "pliki": {
+    "index.html": "297a47843f74b760310beb21c9a0bcfc9503f52443dbdfc72f77d14988b8ae9c"
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "plugin": "gry-moodle",
+  "wersja": "0.9.0",
+  "pliki": {
+    "index.html#rdzen.css": {
+      "zrodlo": "rdzen/rdzen.css",
+      "sha256": "e0be428abba38e1172a75f2c0c18d4bca7147b59724c2058a0c32f2d165e3ed1"
+    },
+    "index.html#strona.css": {
+      "zrodlo": "formaty/wspolne/strona.css",
+      "sha256": "c39d7442dee178e346b90ac548e5cfdf3939ac3c5a203d94914ff7e421b3ad43"
+    },
+    "index.html#gra.css": {
+      "zrodlo": "gry/gra.css",
+      "sha256": "50d039fb2591f474d8202f571a63422cf2124f879dfbe2c1bb9d9be452988b3a"
+    },
+    "index.html#rdzen.js": {
+      "zrodlo": "rdzen/rdzen.js",
+      "sha256": "ac7a3cc5eb41f50e438db44c760e0d5d9dd45df334114be8d311322915f1dda5"
+    },
+    "index.html#gra.js": {
+      "zrodlo": "gry/gra.js",
+      "sha256": "f63b5096bbe050297cb05dd8a93ceedc2a0a849d045cf212e690189a415b245e"
+    },
+    "index.html#klasyfikacja-model.js": {
+      "zrodlo": "mechaniki/klasyfikacja/model.js",
+      "sha256": "b5fada6a45c7dcf9402bd4a893c5cbc166944c003366f6790c5409e87d5f166d"
+    },
+    "index.html#klasyfikacja-gra-tor.js": {
+      "zrodlo": "mechaniki/klasyfikacja/gra-tor.js",
+      "sha256": "868c6266ba09eb50aa4799058f0bd64fb32b37746e652543f702a7ff189cf9eb"
+    }
+  }
+}

@@ -1,0 +1,2891 @@
+<!DOCTYPE html>
+<html lang="pl" data-gm-motyw="jasny">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="generator" content="gry-moodle 0.9.0">
+<title>Koło fortuny: pojęcia kluczowe z kursu</title>
+<style>
+/* ——— rdzen.css ——— */
+/* gry-moodle 0.2.0 — NIE EDYTUJ W KURSIE, poprawiaj w PLUGIN/gry-moodle (~/.claude/local-marketplace-maciek/plugins/gry-moodle) */
+/* rdzen.css — warstwa wspólna: tokeny motywu, [hidden], klasy pomocnicze, fokus, tryby systemowe.
+   Paleta domyślna = paleta zmierzona kursu ZZR (13/13 par WCAG AA, `ZZR/_produkcja/scorm/kontrast.py`).
+   Kurs nadpisuje tokeny polem `motyw` banku (generator dopisuje własny arkusz po tym). */
+
+:root {
+  --tlo:            #F7F4EF;
+  --tlo-karta:      #FFFFFF;
+  --tlo-glebia:     #0E4F63;
+  --tekst:          #1C2B33;
+  --tekst-slaby:    #4A5C66;
+  --glowny:         #0E4F63;
+  --akcent:         #B8432A;
+  --akcent-ciemny:  #8F3320;
+  --pozytyw:        #1F6B55;
+  --uwaga:          #8A5A00;
+  --ramka:          #D8D0C4;   /* separatory dekoracyjne */
+  --ramka-kontrolka:#8A8175;   /* granice pól i przycisków — 1.4.11 */
+  --na-glebi:       #DCE9EE;   /* tekst i linie na tle sceny */
+  --na-glownym:     #FFFFFF;   /* tekst na wypełnieniu --glowny / --akcent */
+  --tlo-ok:         #F1F8F5;
+  --tlo-zle:        #FDF3F1;
+  --gm-nakladka:    rgba(14, 79, 99, .84);
+  --promien: 10px;
+}
+
+/* Motyw ciemny — tylko gdy strona go zamówi (data-gm-motyw="ciemny" albo "auto" + ustawienie systemu).
+   Paczka ZZR-owa i pilot jadą w jasnym, jak oryginał. */
+:root[data-gm-motyw="ciemny"] {
+  --tlo: #121A1F; --tlo-karta: #1B262D; --tlo-glebia: #0B2E3A; --tekst: #E8EEF1; --tekst-slaby: #B4C2CA;
+  --glowny: #8FD0E3; --akcent: #F0997F; --akcent-ciemny: #F6B6A2; --pozytyw: #7FD1B4; --uwaga: #E8C26A;
+  --ramka: #33434D; --ramka-kontrolka: #8C9DA7; --na-glebi: #DCE9EE; --na-glownym: #0B1B22;
+  --tlo-ok: #16302A; --tlo-zle: #3A2019; --gm-nakladka: rgba(6, 22, 28, .86);
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-gm-motyw="auto"] {
+    --tlo: #121A1F; --tlo-karta: #1B262D; --tlo-glebia: #0B2E3A; --tekst: #E8EEF1; --tekst-slaby: #B4C2CA;
+    --glowny: #8FD0E3; --akcent: #F0997F; --akcent-ciemny: #F6B6A2; --pozytyw: #7FD1B4; --uwaga: #E8C26A;
+    --ramka: #33434D; --ramka-kontrolka: #8C9DA7; --na-glebi: #DCE9EE; --na-glownym: #0B1B22;
+    --tlo-ok: #16302A; --tlo-zle: #3A2019; --gm-nakladka: rgba(6, 22, 28, .86);
+  }
+}
+
+/* Atrybut hidden chowa ZAWSZE. Reguła przeglądarki [hidden]{display:none} przegrywa z każdą regułą autora,
+   która ustawia display (decyduje pochodzenie reguły, nie swoistość) — TOP 15 #7, MK REGULA_HIDDEN.
+   Wariant .gm [hidden] jest dla formatu Strona, gdzie arkusz siedzi w cudzej stronie. */
+[hidden], .gm [hidden] { display: none !important; }
+
+/* tylko dla czytnika ekranu */
+.gm-sr {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+}
+
+/* ——— klasy, których używa silnik (dawniej klasy strony-gospodarza ZZR: przycisk, reakcja, slaby,
+   tylko-czytnik). Z prefiksem gm-, żeby nie zderzały się z komponentami kursu (L13). ——— */
+.gm-przycisk {
+  display: inline-flex; align-items: center; gap: .5em;
+  min-height: 44px; padding: .7em 1.3em;           /* 2.5.8 */
+  background: var(--akcent); color: var(--na-glownym);
+  border: 2px solid var(--akcent);
+  border-radius: var(--promien);
+  font: inherit; font-weight: 600; cursor: pointer;
+  text-decoration: none;
+}
+.gm-przycisk:hover { background: var(--akcent-ciemny); border-color: var(--akcent-ciemny); }
+.gm-przycisk[aria-disabled="true"], .gm-przycisk:disabled {
+  background: var(--tlo); color: var(--tekst-slaby);
+  border-color: var(--ramka-kontrolka); cursor: not-allowed;
+}
+.gm-przycisk--cichy { background: transparent; color: var(--akcent); border-color: var(--ramka-kontrolka); }
+.gm-przycisk--cichy:hover { background: var(--tlo); color: var(--akcent-ciemny); }
+
+.gm-reakcja {
+  border-left: 4px solid var(--glowny);
+  background: var(--tlo);
+  padding: .9em 1.1em; border-radius: 0 var(--promien) var(--promien) 0;
+  margin: .8em 0 0;
+}
+.gm-reakcja--ok  { border-left-color: var(--pozytyw); }
+.gm-reakcja--zle { border-left-color: var(--akcent); }
+.gm-reakcja--uwaga { border-left-color: var(--uwaga); }
+.gm-reakcja p:first-child { margin-top: 0; }
+.gm-reakcja p:last-child  { margin-bottom: 0; }
+
+.gm-slaby { color: var(--tekst-slaby); font-size: .92em; }
+
+/* ——— widoczny fokus (2.4.7, 2.4.11). Nigdy bez zamiennika. ——— */
+.gm-przycisk:focus-visible, .gra :focus-visible {
+  outline: 3px solid var(--akcent-ciemny);
+  outline-offset: 2px;
+}
+
+/* ——— tryby systemowe ——— */
+@media (prefers-reduced-motion: reduce) {
+  .gra *, .gra *::before, .gra *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+@media (forced-colors: active) {
+  .gm-przycisk, .gm-reakcja { border: 2px solid ButtonText; }
+  .gm-przycisk:focus-visible, .gra :focus-visible { outline-color: Highlight; }
+}
+
+/* ——— strona.css ——— */
+/* gry-moodle 0.2.0 — NIE EDYTUJ W KURSIE, poprawiaj w PLUGIN/gry-moodle (~/.claude/local-marketplace-maciek/plugins/gry-moodle) */
+/* formaty/wspolne/strona.css — strona wokół gry w formatach SCORM (paczka) i samodzielny HTML:
+   nagłówek, karty, wersja tekstowa z pytaniami, lista źródeł. Wzór: ZZR `szablon/zasoby/styl.css` (paleta 13/13 AA).
+   Klasy z prefiksem gm- (L13). Tokeny kolorów — z rdzen.css. W formacie Strona ten arkusz NIE jest używany. */
+
+:root {
+  --cien: 0 1px 3px rgba(28, 43, 51, .10), 0 6px 16px rgba(28, 43, 51, .06);
+  --odstep: clamp(16px, 4vw, 32px);
+  --szerokosc: 62rem;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+
+body.gm-strona {
+  margin: 0;
+  background: var(--tlo);
+  color: var(--tekst);
+  font: 400 clamp(16px, 1rem + .2vw, 18px)/1.65 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  letter-spacing: normal;   /* 1.4.12 — odstępy nie mogą być zablokowane */
+  word-spacing: normal;
+}
+
+.gm-strona :focus-visible { outline: 3px solid var(--akcent-ciemny); outline-offset: 2px; border-radius: 4px; }
+.gm-strona :focus:not(:focus-visible) { outline: none; }
+
+/* pomijanie nawigacji (2.4.1) */
+.gm-pomin {
+  position: absolute; left: -9999px;
+  background: var(--tlo-karta); color: var(--akcent-ciemny);
+  padding: 12px 20px; border-radius: var(--promien); font-weight: 600;
+  border: 2px solid var(--ramka-kontrolka);
+}
+.gm-pomin:focus { left: var(--odstep); top: 12px; z-index: 50; }
+
+/* szkielet */
+.gm-pas { background: var(--tlo-glebia); color: var(--tlo-karta); padding: var(--odstep); }
+.gm-pas h1 { margin: 0; font-size: clamp(1.35rem, 1.1rem + 1.4vw, 2rem); line-height: 1.25; }
+.gm-pas p  { margin: .4em 0 0; color: var(--na-glebi); }
+.gm-stopka { margin-top: 3rem; }
+.gm-stopka p { margin: 0; font-size: .92em; }
+
+.gm-strona main { max-width: var(--szerokosc); margin: 0 auto; padding: var(--odstep); }
+.gm-strona h2 { color: var(--glowny); font-size: clamp(1.2rem, 1rem + 1vw, 1.6rem); line-height: 1.3; margin: 2em 0 .6em; }
+.gm-strona h3 { color: var(--glowny); font-size: clamp(1.05rem, .95rem + .6vw, 1.3rem); margin: 1.6em 0 .5em; }
+.gm-strona h2:first-child, .gm-strona h3:first-child { margin-top: 0; }
+.gm-strona p, .gm-strona li { max-width: 68ch; }
+.gm-strona a { color: var(--akcent); text-underline-offset: 3px; overflow-wrap: anywhere; }
+.gm-strona a:hover { color: var(--akcent-ciemny); }
+
+.gm-karta {
+  background: var(--tlo-karta);
+  border: 1px solid var(--ramka);
+  border-radius: var(--promien);
+  box-shadow: var(--cien);
+  padding: var(--odstep);
+  margin: 1.5em 0;
+}
+/* „scena pierwsza” (ARCH §4.2, L43): karta z grą bez górnego marginesu — w ramce SCORM 500 px liczy się każdy piksel */
+.gm-karta--gra { margin-top: 0; }
+.gm-karta--gra > h2 { margin-bottom: .3em; }
+
+/* pytania wersji tekstowej */
+.gm-pytanie-blok { margin: 1.8em 0 0; padding-top: 1.2em; border-top: 1px solid var(--ramka); }
+fieldset.gm-pytanie { border: 0; margin: 0; padding: 0; min-width: 0; }   /* min-width:0 — 320 px bez przewijania */
+.gm-pytanie legend { font-weight: 600; color: var(--glowny); padding: 0; }
+.gm-pytanie__sprawdz { margin-top: .6em; }
+.gm-odpowiedz {
+  display: flex; align-items: flex-start; flex-wrap: wrap; gap: .7em;
+  min-height: 44px; padding: .7em .9em;
+  border: 2px solid var(--ramka-kontrolka);
+  border-radius: var(--promien);
+  margin: .5em 0; cursor: pointer; background: var(--tlo-karta);
+}
+.gm-odpowiedz > span:not(.gm-odpowiedz__znak) { flex: 1 1 12ch; min-width: 0; }
+.gm-odpowiedz:hover { background: var(--tlo); }
+.gm-odpowiedz input { margin: .25em 0 0; width: 1.15em; height: 1.15em; accent-color: var(--akcent); flex: none; }
+.gm-odpowiedz--ok  { border-color: var(--pozytyw); background: var(--tlo-ok); }
+.gm-odpowiedz--zle { border-color: var(--akcent);  background: var(--tlo-zle); }
+.gm-odpowiedz:has(input:checked:not(:disabled)) { border-color: var(--glowny); }
+@supports selector(:has(*)) {
+  .gm-odpowiedz:has(input:focus-visible) { outline: 3px solid var(--akcent-ciemny); outline-offset: 2px; }
+  .gm-odpowiedz input:focus-visible { outline: none; }
+}
+/* stan odpowiedzi nie samym kolorem (1.4.1) — znacznik tekstowy */
+.gm-odpowiedz__znak { font-weight: 700; margin-left: auto; flex: none; }
+.gm-odpowiedz--ok  .gm-odpowiedz__znak { color: var(--pozytyw); }
+.gm-odpowiedz--zle .gm-odpowiedz__znak { color: var(--akcent); }
+.gm-postep { margin-bottom: 0; }
+
+/* pełna lista elementów gry w wersji tekstowej */
+.gm-lista-elementow { margin-top: 1.8em; }
+.gm-lista-elementow > summary { cursor: pointer; font-weight: 600; color: var(--glowny); min-height: 44px; padding: .5em 0; }
+.gm-lista-elementow ol { padding-left: 1.4em; }
+.gm-lista-elementow li { margin: .6em 0; }
+
+/* źródła */
+.gm-zrodla { margin: 0; padding: 0; list-style: none; }
+.gm-zrodla li { padding: .6em 0; border-top: 1px solid var(--ramka); max-width: 68ch; }
+.gm-zrodla li:first-child { border-top: 0; }
+
+/* 1.4.10 Reflow: 320 px bez poziomego przewijania */
+@media (max-width: 26rem) {
+  :root { --odstep: 16px; }
+  .gm-strona .gm-przycisk { width: 100%; justify-content: center; }
+  .gm-odpowiedz__znak { width: 100%; margin-left: 0; text-align: right; }
+}
+
+/* ——— cwiczenie.css ——— */
+/* gry-moodle 0.2.0 — NIE EDYTUJ W KURSIE, poprawiaj w PLUGIN/gry-moodle (~/.claude/local-marketplace-maciek/plugins/gry-moodle) */
+/* cwiczenia/cwiczenie.css — warstwa ćwiczeń: nagłówek, polecenie, ekran startowy z poziomami, informacja zwrotna,
+   kafle liczb, podsumowanie z tabelą. Kolory WYŁĄCZNIE z tokenów rdzen.css (kurs nadpisuje je polem `motyw` banku).
+   Tokeny opcjonalne: --fokus (obrys fokusu; domyślnie --akcent-ciemny), --wyroznik (akcent ostrzegawczy;
+   domyślnie --akcent), --tlo-blok (tło bloków i kafli; domyślnie --tlo-karta), --nad (napis nad tytułem; domyślnie --na-glebi). Bez `opacity` (B8 — znosi wyjątek kontrastu); stany nie samym kolorem (1.4.1). */
+
+.gm-cw { display: block; min-width: 0; }
+.gm-cw *, .gm-cw *::before, .gm-cw *::after { box-sizing: border-box; }
+.gm-cw p, .gm-cw ul, .gm-cw ol, .gm-cw li, .gm-cw figure,
+.gm-cw h2, .gm-cw h3, .gm-cw h4, .gm-cw h5, .gm-cw h6 { margin: 0; padding: 0; }
+.gm-cw fieldset { margin: 0; }   /* bez padding: 0 — reset (0,1,1) przebijałby klasy pól (0,1,0) */
+
+/* nagłówek (format Strona: pas z „nad” i tytułem) */
+.gm-cw__glowa { background: var(--tlo-glebia); color: var(--na-glebi); padding: 14px 20px;
+  display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; }
+.gm-cw__nad { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; font-weight: 700; color: var(--nad, var(--na-glebi)); }
+.gm-cw__tytul { width: 100%; font-size: 20px; font-weight: 700; line-height: 1.25; color: var(--na-glownym); }
+.gm-cw__cialo { padding: 20px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.gm-cw__cialo > * { min-width: 0; }
+/* scorm/html: ćwiczenie siedzi w karcie strony, która ma własny odstęp — bez drugiego wcięcia */
+.gm-cw[data-gm-tytul="ukryj"] > .gm-cw__cialo { padding: 0; }
+.gm-cw__polecenie { font-weight: 600; color: var(--tekst); max-width: 62ch; }
+
+/* ekran — kolumna z auto-marginesami (skill widgety-moodle-strona: max-width zawsze z marginesami auto) */
+.gm-cw__ekran { display: flex; flex-direction: column; gap: 14px; min-width: 0; width: 100%; max-width: 46rem;
+  margin-left: auto; margin-right: auto; container-type: inline-size; }
+.gm-cw__ekran > * { min-width: 0; }
+.gm-cw__lead { font-size: 17px; max-width: 62ch; }
+.gm-cw p.gm-cw__uwaga { font-size: 14px; color: var(--tekst-slaby); border-left: 3px solid var(--ramka-kontrolka);
+  padding: 8px 12px; background: var(--tlo-blok, var(--tlo-karta)); }
+
+/* wybór poziomu */
+.gm-cw__poziomy { border: 1px solid var(--ramka); border-radius: 6px; padding: 12px 14px; background: var(--tlo-blok, var(--tlo-karta));
+  margin: 0; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.gm-cw__pyt { font-weight: 700; }
+.gm-cw__opcja { display: flex; align-items: flex-start; gap: 10px; border: 2px solid var(--ramka-kontrolka); border-radius: 6px;
+  padding: 9px 12px; cursor: pointer; background: var(--tlo-karta); min-height: 44px; margin: 0; }
+.gm-cw__opcja:hover { background: var(--tlo); }
+.gm-cw__opcja:has(.gm-cw__radio:checked) { border-color: var(--tekst); background: var(--tlo); }
+.gm-cw__opcja:focus-within { outline: 3px solid var(--fokus, var(--akcent-ciemny)); outline-offset: 2px; }
+.gm-cw__radio { width: 20px; height: 20px; accent-color: var(--wyroznik, var(--akcent)); margin: 2px 0 0; flex: none; }
+.gm-cw__opt { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.gm-cw__optnazwa { font-weight: 700; }
+.gm-cw__opttekst { color: var(--tekst-slaby); font-size: 14px; }
+
+/* szczegóły zasad */
+.gm-cw__szczegoly { border: 1px solid var(--ramka); border-radius: 6px; background: var(--tlo-blok, var(--tlo-karta)); padding: 0 14px; }
+.gm-cw__szczegoly summary { cursor: pointer; font-weight: 700; min-height: 44px; display: flex; align-items: center;
+  justify-content: space-between; gap: 10px; padding: 6px 0; list-style: none; }
+.gm-cw__szczegoly summary::-webkit-details-marker { display: none; }
+.gm-cw__szczegoly summary::after { content: ""; flex: none; width: 9px; height: 9px; border-right: 2px solid var(--tekst);
+  border-bottom: 2px solid var(--tekst); transform: rotate(45deg); margin: -4px 4px 0 10px; }
+.gm-cw__szczegoly[open] summary::after { transform: rotate(-135deg); margin-top: 4px; }
+.gm-cw__szczegoly ul { padding-bottom: 12px; }
+
+/* listy z kwadratowym znacznikiem */
+.gm-cw ul.gm-cw__lista { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.gm-cw ul.gm-cw__lista > li { padding-left: 18px; position: relative; }
+.gm-cw ul.gm-cw__lista > li::before { content: ""; position: absolute; left: 0; top: .62em; width: 7px; height: 7px;
+  background: var(--wyroznik, var(--akcent)); border-radius: 1px; }
+.gm-cw ul.gm-cw__lista--odstep { gap: 14px; }
+.gm-cw__lista--odstep li > * + * { margin-top: 4px; }
+.gm-cw__wyj { color: var(--tekst-slaby); }
+
+/* przyciski warstwy */
+.gm-cw .gm-przycisk { justify-content: center; text-align: center; }
+.gm-cw .gm-przycisk:focus-visible, .gm-cw :focus-visible { outline: 3px solid var(--fokus, var(--akcent-ciemny)); outline-offset: 2px; }
+.gm-cw__duzy { font-size: 18px; min-height: 52px; width: 100%; }
+.gm-cw__przyciski { display: flex; flex-wrap: wrap; gap: 10px; }
+
+/* kafle liczb (HUD i podsumowanie) */
+.gm-cw__hud { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.gm-cw__hud--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.gm-cw__hud--1 { grid-template-columns: minmax(0, 1fr); }
+@container (min-width: 28rem) { .gm-cw__hud--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.gm-cw__kafel { border: 1px solid var(--ramka); background: var(--tlo-blok, var(--tlo-karta)); border-radius: 6px; padding: 8px 10px; min-width: 0;
+  display: flex; flex-direction: column; gap: 2px; justify-content: flex-start; }
+.gm-cw__kafel-n { font-size: 13px; font-weight: 700; color: var(--tekst-slaby); line-height: 20px; }
+.gm-cw__kafel-w { font-size: 22px; font-weight: 700; line-height: 1.15; color: var(--tekst); font-variant-numeric: tabular-nums; }
+
+/* informacja zwrotna (czeka na „Dalej”) */
+.gm-cw__info { border: 2px solid var(--ramka-kontrolka); border-left-width: 6px; background: var(--tlo-karta); border-radius: 8px;
+  padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+.gm-cw__info--ok { border-color: var(--pozytyw); background: var(--tlo-ok); }
+.gm-cw__info--zle { border-color: var(--wyroznik, var(--akcent)); background: var(--tlo-zle); }
+.gm-cw__info:focus { outline: none; }
+
+/* pytanie z „Sprawdź” */
+.gm-cw__pytanie { border: 0; padding: 0; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.gm-cw__legenda { font-weight: 700; padding: 0; font-size: 1em; }
+.gm-cw__odp { display: flex; align-items: flex-start; gap: 10px; min-height: 44px; padding: 9px 12px; margin: 0;
+  border: 2px solid var(--ramka-kontrolka); border-radius: 8px; background: var(--tlo-karta); cursor: pointer; }
+.gm-cw__odp input { width: 20px; height: 20px; margin: 2px 0 0; flex: none; accent-color: var(--wyroznik, var(--akcent)); }
+.gm-cw__odp > span { flex: 1 1 auto; min-width: 0; }
+.gm-cw__odp--ok { border-color: var(--pozytyw); background: var(--tlo-ok); }
+.gm-cw__odp--zle { border-color: var(--wyroznik, var(--akcent)); background: var(--tlo-zle); }
+.gm-cw__odp > .gm-cw__znak { flex: none; font-weight: 700; }
+.gm-cw__brak { font-weight: 700; color: var(--tekst); border-left: 4px solid var(--uwaga); padding-left: 10px; }
+
+/* podsumowanie */
+.gm-cw__koniec { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.gm-cw__koniec > * { min-width: 0; }
+.gm-cw__wynik-h { font-size: 22px; font-weight: 700; line-height: 1.25; }
+.gm-cw__wynik-h:focus { outline: none; }
+.gm-cw__wynik-h:focus-visible { outline: 2px solid var(--tekst); outline-offset: 3px; }
+.gm-cw .gm-cw__sekcja { font-size: 17px; font-weight: 700; padding-top: 6px; }
+.gm-cw__tabela { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+.gm-cw__tabela caption { text-align: left; font-weight: 700; padding-bottom: 6px; }
+.gm-cw__tabela th, .gm-cw__tabela td { border: 1px solid var(--ramka); padding: 6px 8px; text-align: left; vertical-align: top; }
+/* wersja tekstowa w widgecie (format Strona) */
+.gm-cw__wt { border-top: 1px solid var(--ramka); padding-top: 10px; }
+.gm-cw__wt > summary { cursor: pointer; font-weight: 700; min-height: 44px; padding: 10px 0; }
+.gm-cw__wt > * + * { margin-top: 10px; }
+.gm-cw ol.gm-cw__wt-lista { padding-left: 1.6em; display: flex; flex-direction: column; gap: 8px; }
+.gm-cw__awaria { border-left: 4px solid var(--uwaga); padding: 10px 12px; background: var(--tlo-karta); }
+
+@media (max-width: 420px) {
+  .gm-cw__cialo { padding: 15px; gap: 10px; }
+  .gm-cw__glowa { padding: 12px 15px; }
+  .gm-cw__ekran { gap: 10px; }
+  .gm-cw__kafel { padding: 6px 8px; }
+  .gm-cw__kafel-w { font-size: 20px; }
+}
+@media (forced-colors: active) {
+  .gm-cw__opcja, .gm-cw__odp, .gm-cw__info { border-color: CanvasText; }
+}
+
+/* ——— kolo-fortuny.css ——— */
+/* gry-moodle 0.9.0 — NIE EDYTUJ W KURSIE, poprawiaj w PLUGIN/gry-moodle (~/.claude/local-marketplace-maciek/plugins/gry-moodle) */
+/* mechaniki/kolo-fortuny/kolo-fortuny.css — widok „Koło fortuny”: hasło jako rząd pól, koło (SVG z JS), klawiatura liter, panel kroków.
+   Kolory WYŁĄCZNIE z tokenów rdzen.css (jak kolko-krzyzyk.css). Tokeny opcjonalne: --fokus, --wyroznik, --tlo-blok.
+   Pole zakryte = wypełnienie --akcent, odsłonięte = biała karta z literą (litera jest tekstem, nie samym kolorem, 1.4.1).
+   Sektory koła: punkty na przemian --akcent / karta, „Bankrut” = --glowny, „Strata” = --uwaga, „Bonus” = --pozytyw — każdy z napisem.
+   Bez `opacity` (B8). Obrót koła i odsłonięcie litery (transform) tylko przy prefers-reduced-motion: no-preference.
+   Układ: ekran ćwiczenia jest kontenerem; od 44rem koło i panel kroków stoją obok siebie. */
+
+.gm-kf .gm-kf__hud { grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr)); }
+.gm-kf p.gm-kf__stan { font-weight: 700; color: var(--tekst); min-height: 4.6em; }
+@container (min-width: 30rem) { .gm-kf p.gm-kf__stan { min-height: 3em; } }
+.gm-kf p.gm-kf__klaw-info { font-size: 14px; color: var(--tekst-slaby); }
+
+/* podpowiedź i hasło */
+.gm-kf__haslo-blok { display: flex; flex-direction: column; gap: 10px; min-width: 0; border: 1px solid var(--ramka); border-radius: 8px;
+  background: var(--tlo-blok, var(--tlo-karta)); padding: 14px 12px; }
+.gm-kf p.gm-kf__podp { border-left: 4px solid var(--akcent); padding-left: 10px; font-size: 17px; line-height: 1.45; max-width: 62ch; }
+.gm-kf .gm-kf__podp-e { color: var(--tekst); }
+.gm-kf__haslo { --kf-w: clamp(1.05rem, calc((100cqw - 3rem) / var(--kf-n, 10) - .2rem), 2.7rem);
+  display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px 4px; min-width: 0; }
+.gm-kf__slowo { display: flex; flex-wrap: wrap; justify-content: center; gap: 3px; min-width: 0; }
+.gm-kf__pole { box-sizing: border-box; display: flex; align-items: center; justify-content: center; flex: none;
+  width: var(--kf-w); height: calc(var(--kf-w) * 1.3); border: 2px solid var(--akcent-ciemny); border-radius: 6px; background: var(--akcent);
+  color: var(--tekst); }
+.gm-kf__pole--spacja { width: calc(var(--kf-w) * .45); height: calc(var(--kf-w) * 1.3); border: 0; background: transparent; border-radius: 0; }
+.gm-kf__pole.gm-kf--odslonieta { background: var(--tlo-karta); border-color: var(--glowny); }
+.gm-kf__lit { font-weight: 800; font-size: calc(var(--kf-w) * .62); line-height: 1; text-transform: uppercase; color: var(--tekst); }
+
+/* scena: koło + panel */
+.gm-kf__scena { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-items: start; }
+@container (min-width: 44rem) { .gm-kf__scena { grid-template-columns: 20rem minmax(0, 1fr); gap: 22px; } }
+.gm-kf__kolo-blok { display: flex; flex-direction: column; align-items: center; gap: 10px; min-width: 0; }
+.gm-kf__kolo-blok > * { max-width: 100%; }
+.gm-kf__kolo { position: relative; width: min(100%, 19rem); aspect-ratio: 1 / 1; margin-top: 14px; }
+.gm-kf__tarcza { position: absolute; inset: 0; border-radius: 50%; will-change: transform; }
+.gm-kf__svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.gm-kf__sek { stroke: var(--ramka-kontrolka); stroke-width: .8; }
+.gm-kf__sek--a { fill: var(--akcent); }
+.gm-kf__sek--b { fill: var(--tlo-karta); }
+.gm-kf__sek--bankrut { fill: var(--glowny); }
+.gm-kf__sek--strata { fill: var(--uwaga); }
+.gm-kf__sek--bonus { fill: var(--pozytyw); }
+.gm-kf__sek-t { stroke: none; font-weight: 800; font-size: 14px; font-family: inherit; }
+.gm-kf__sek-t--slowo { font-size: 11.5px; letter-spacing: .02em; }
+.gm-kf__sek-t.gm-kf__sek--a, .gm-kf__sek-t.gm-kf__sek--bankrut, .gm-kf__sek-t.gm-kf__sek--strata, .gm-kf__sek-t.gm-kf__sek--bonus { fill: var(--na-glownym); }
+.gm-kf__sek-t.gm-kf__sek--b { fill: var(--tekst); }
+.gm-kf__obrzeze { fill: none; stroke: var(--glowny); stroke-width: 3; }
+.gm-kf__piasta { fill: var(--glowny); stroke: var(--tlo-karta); stroke-width: 3; }
+.gm-kf__wskaznik { position: absolute; top: -14px; left: 50%; width: 30px; height: 34px; margin-left: -15px; z-index: 1; }
+.gm-kf__wskaznik-k { fill: var(--akcent-ciemny); stroke: var(--tlo-karta); stroke-width: 2.5; stroke-linejoin: round; }
+.gm-kf .gm-kf__zakrec { width: min(100%, 19rem); }
+.gm-kf p.gm-kf__zakrec-info { font-size: 14px; text-align: center; }
+.gm-kf p.gm-kf__ost-wynik { font-weight: 700; text-align: center; min-height: 1.5em; }
+.gm-kf__sektory { width: 100%; max-width: 19rem; }
+
+/* panel kroków */
+.gm-kf__panel { min-width: 0; }
+.gm-kf__dialog { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.gm-kf .gm-kf__panel-h { font-size: 17px; font-weight: 700; line-height: 1.3; }
+.gm-kf__pytanie { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.gm-kf .gm-kf__rezygnuj { align-self: flex-start; }
+.gm-kf p.gm-kf__rez-info, .gm-kf p.gm-kf__kup-info { font-size: 14px; }
+.gm-kf [aria-disabled="true"].gm-kf__btn-kup { cursor: not-allowed; }
+.gm-kf__koniec-panel { display: flex; flex-direction: column; gap: 10px; border: 2px solid var(--ramka-kontrolka); border-radius: 8px;
+  background: var(--tlo-blok, var(--tlo-karta)); padding: 12px 14px; }
+.gm-kf p.gm-kf__koniec-tekst { font-weight: 700; }
+.gm-kf p.gm-kf__uzyte { font-size: 14px; }
+
+/* klawiatura liter: spółgłoski i samogłoski */
+.gm-kf__klaw { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.gm-kf__klaw-grupa { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.gm-kf p.gm-kf__klaw-nazwa { font-size: 13px; font-weight: 700; color: var(--tekst-slaby); }
+.gm-kf__klaw-rzad { display: grid; grid-template-columns: repeat(auto-fill, minmax(2.75rem, 1fr)); gap: 6px; }
+.gm-kf__klaw-btn { position: relative; box-sizing: border-box; min-width: 0; min-height: 44px; margin: 0; padding: 0; font: inherit; font-size: 18px; font-weight: 700;
+  border: 2px solid var(--ramka-kontrolka); border-radius: 8px; background: var(--tlo-karta); color: var(--tekst); cursor: pointer; }
+.gm-kf__klaw-btn:hover { background: var(--tlo); border-color: var(--tekst); }
+.gm-kf .gm-kf__klaw-btn:focus-visible { outline: 3px solid var(--fokus, var(--akcent-ciemny)); outline-offset: 2px; }
+.gm-kf__klaw-btn[aria-disabled="true"] { cursor: not-allowed; }
+.gm-kf__klaw-btn.gm-kf--niedostepna { background: var(--tlo); color: var(--tekst-slaby); border-style: dashed; }
+.gm-kf__klaw-btn.gm-kf--uzyta { background: var(--tlo); color: var(--tekst-slaby); border-style: dotted; text-decoration: line-through; }
+.gm-kf__klaw-btn.gm-kf--uzyta-jest { border-color: var(--pozytyw); }
+.gm-kf__klaw-btn.gm-kf--uzyta-brak { border-color: var(--akcent); }
+.gm-kf__klaw-btn[aria-disabled="true"]:hover { background: var(--tlo); border-color: var(--ramka-kontrolka); }
+.gm-kf__klaw-btn.gm-kf--uzyta-jest:hover { border-color: var(--pozytyw); }
+.gm-kf__klaw-btn.gm-kf--uzyta-brak:hover { border-color: var(--akcent); }
+.gm-kf__znacznik { position: absolute; top: 1px; right: 4px; font-size: 11px; line-height: 1; text-decoration: none; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .gm-kf__pole.gm-kf--nowa .gm-kf__lit { animation: gm-kf-odslon .5s ease-out; }
+  .gm-kf__pole.gm-kf--nowa { animation: gm-kf-pole .5s ease-out; }
+}
+@keyframes gm-kf-odslon { from { transform: scale(.2); } 60% { transform: scale(1.25); } to { transform: none; } }
+@keyframes gm-kf-pole { from { transform: translateY(-6px); } to { transform: none; } }
+@media (forced-colors: active) {
+  .gm-kf__pole { border-color: CanvasText; }
+  .gm-kf__pole.gm-kf--odslonieta { border-color: Highlight; }
+  .gm-kf__klaw-btn { border-color: CanvasText; }
+  .gm-kf__sek { stroke: CanvasText; }
+  .gm-kf__sek-t { fill: CanvasText; }
+  .gm-kf__obrzeze, .gm-kf__wskaznik-k { stroke: CanvasText; fill: none; }
+}
+
+</style>
+</head>
+<body class="gm-strona">
+
+<a class="gm-pomin" href="#tresc">Przejdź do treści</a>
+
+<header class="gm-pas">
+  <h1>Koło fortuny: pojęcia kluczowe z kursu</h1>
+  <p></p>
+</header>
+
+<main id="tresc" tabindex="-1">
+<div class="gm-karta gm-karta--gra">
+  <h2>Koło fortuny: pojęcia kluczowe z kursu</h2>
+  <div data-gra data-gra-id="kolo-fortuny" data-gra-przestrzen="holdup" data-gm-ukonczenie="brak" data-gm-mechanika="kolo-fortuny" data-gm-widok="cwiczenie" data-gm-naglowek="2" data-gm-tytul="ukryj"></div>
+  <noscript><div class="gm-reakcja gm-reakcja--uwaga"><p>Ćwiczenie wymaga JavaScriptu. Tę samą treść bez ćwiczenia znajdziesz niżej, w części „Wersja tekstowa”.</p></div></noscript>
+</div>
+
+<section class="gm-karta" id="wersja-tekstowa" data-gm-wersja-tekstowa data-gra-id="kolo-fortuny">
+  <h2>Wersja tekstowa</h2>
+  <p>Te same hasła i pytania bez gry. Haseł: 17, pytań: 26.</p>
+  <details class="gm-lista-elementow">
+    <summary>Hasła i pytania z gry (43)</summary>
+    <ol>
+      <li><strong>PHISHING</strong> — Podpowiedź: Wyłudzanie danych przez podszywanie się pod zaufany podmiot, na przykład bank, kuriera, uczelnię, urząd albo szkołę dziecka. Źródło: Kurs HoldUp: Phishing, BLIK „na kolegę” i fałszywy kurier, rozwinięcie posta, definicja.</li>
+      <li><strong>RANSOMWARE</strong> — Podpowiedź: Złośliwy program, który szyfruje dane na urządzeniu i żąda okupu za klucz. Źródło: Kurs HoldUp: Złośliwe programy: kradzież haseł, przejęte konta i okup, rozwinięcie posta, dwie rodziny złośliwych programów.</li>
+      <li><strong>DEEPFAKE</strong> — Podpowiedź: Obraz, nagranie lub dźwięk wygenerowane albo przerobione przez AI tak, by pokazywały kogoś, kto czegoś nie zrobił ani nie powiedział. Źródło: Kurs HoldUp: Deepfake: jak się bronić, gdy to Ty jesteś bohaterem, rozwinięcie posta, definicja.</li>
+      <li><strong>SHARENTING</strong> — Podpowiedź: Zjawisko publikowania w sieci zdjęć dziecka przez jego rodziców, zanim samo zdążyło zdecydować o swoim publicznym wizerunku. Źródło: Kurs HoldUp: Ślad cyfrowy, rekrutacja i zdjęcia z dzieciństwa, rozwinięcie posta, ślad pozostawiony przez innych.</li>
+      <li><strong>HALUCYNACJA</strong> — Podpowiedź: Odpowiedź modelu językowego, która brzmi płynnie i pewnie, a jest nieprawdziwa. Źródło: Kurs HoldUp: Halucynacje AI: dlaczego model zmyśla pewnym tonem, rozwinięcie posta, czym jest.</li>
+      <li><strong>ŚLAD CYFROWY</strong> — Podpowiedź: Wszystko, co po Tobie zostaje w sieci: świadomie opublikowane treści, ale też historia aktywności, lokalizacje i dane zebrane przez serwisy. Źródło: Kurs HoldUp: Ślad cyfrowy, rekrutacja i zdjęcia z dzieciństwa, rozwinięcie posta, pierwszy akapit.</li>
+      <li><strong>SEKSTORSJA</strong> — Podpowiedź: Szantaż intymnymi materiałami: sprawca grozi ich rozesłaniem i żąda pieniędzy, kolejnych materiałów lub innych działań. Źródło: Kurs HoldUp: Sekstorsja: szantaż intymnymi materiałami, rozwinięcie posta, definicja.</li>
+      <li><strong>CATFISHING</strong> — Podpowiedź: Udawanie kogoś innego w sieci za pomocą cudzych zdjęć i zmyślonej biografii, niekoniecznie w celu wyłudzenia pieniędzy. Źródło: Kurs HoldUp: Oszustwa uczuciowe i catfishing, podsumowanie posta, drugi punkt.</li>
+      <li><strong>SWATTING</strong> — Podpowiedź: Fałszywe zgłoszenie na numer alarmowy, by wysłać uzbrojoną interwencję pod cudzy adres. Źródło: Kurs HoldUp: Doxxing i swatting: kiedy adres staje się bronią, podsumowanie posta, drugi punkt.</li>
+      <li><strong>SŁUP FINANSOWY</strong> — Podpowiedź: Osoba, która użycza swojego konta, karty lub BLIK-a albo wypłaca i przekazuje pieniądze pochodzące z przestępstwa. Źródło: Kurs HoldUp: „Szybkie 200 zł”: słup finansowy na zleceniu, rozwinięcie posta, definicja.</li>
+      <li><strong>PATOSTREAMING</strong> — Podpowiedź: Transmisje na żywo, w których twórca zarabia na przemocy, upokorzeniu, alkoholu lub innych zachowaniach na granicy prawa. Źródło: Kurs HoldUp: Patostreamy i donejty: upokorzenie na zamówienie, rozwinięcie posta, definicja.</li>
+      <li><strong>CZYTANIE BOCZNE</strong> — Podpowiedź: Metoda weryfikacji: zamiast zagłębiać się w podejrzaną stronę, opuszczasz ją i sprawdzasz w innych źródłach, co o niej mówią. Źródło: Kurs HoldUp: Dezinformacja: jak sprawdzić w pół minuty, rozwinięcie posta, metoda weryfikacji.</li>
+      <li><strong>PREBUNKING</strong> — Podpowiedź: Uprzedzające szczepienie przed technikami manipulacji. Źródło: Kurs HoldUp: Dezinformacja: jak sprawdzić w pół minuty, podsumowanie posta, spór o sposoby walki z dezinformacją.</li>
+      <li><strong>KRYPTOWALUTA</strong> — Podpowiedź: Zapis w rejestrze transakcji, który prowadzi jednocześnie wiele komputerów, bez jednego banku pośrodku. Źródło: Kurs HoldUp: Kryptowaluty: czym są, skąd kurs i co grozi, rozwinięcie posta, czym są.</li>
+      <li><strong>WYCIEK DANYCH</strong> — Podpowiedź: Sytuacja, w której informacje o Tobie trafiły do osób, które nie powinny ich mieć. Źródło: Kurs HoldUp: Wycieki danych: co się dzieje z Twoim PESEL-em, rozwinięcie posta, pierwszy akapit.</li>
+      <li><strong>DEZINFORMACJA</strong> — Podpowiedź: Fałszywe treści rozpowszechniane celowo, w odróżnieniu od błędnej informacji podanej bez złych intencji. Źródło: Kurs HoldUp: Dezinformacja: jak sprawdzić w pół minuty, rozwinięcie posta, pierwszy akapit.</li>
+      <li><strong>PASSKEYS</strong> — Podpowiedź: Sposób logowania, który eliminuje hasło i jest związany z prawdziwą stroną. Źródło: Kurs HoldUp: Hasła, 2FA, passkeys i mit zmiany co 30 dni, podsumowanie posta, trzeci punkt.</li>
+      <li><strong>Kiedy według posta o hasłach warto zmienić hasło?</strong> — Poprawna odpowiedź: Gdy pojawi się podejrzenie wycieku. Błędne odpowiedzi: Co 30 dni, zawsze w tym samym terminie.; Dopiero wtedy, gdy konto przestanie działać. Post zaleca zmianę hasła przy podejrzeniu wycieku, a nie według kalendarza. Wytyczne NIST odradzają wymuszania okresowej zmiany haseł bez powodu. Źródło: Kurs HoldUp: Hasła, 2FA, passkeys i mit zmiany co 30 dni, podsumowanie i rozwinięcie posta.</li>
+      <li><strong>Dostajesz z komunikatora prośbę od znajomego: „pożycz kod BLIK, oddam jutro”. Co według posta robisz?</strong> — Poprawna odpowiedź: Weryfikujesz prośbę telefonem na znany Ci numer. Błędne odpowiedzi: Odsyłasz kod, bo pisze znajomy.; Pytasz w tym samym czacie, czy to na pewno on, i wysyłasz kod po odpowiedzi. Schemat „BLIK na kolegę” polega na przejęciu konta w komunikatorze. Prośbę o pieniądze zweryfikuj telefonem na znany numer. Źródło: Kurs HoldUp: Phishing, BLIK „na kolegę” i fałszywy kurier, Co robić i rozwinięcie posta.</li>
+      <li><strong>Czym różni się smishing od phishingu?</strong> — Poprawna odpowiedź: To ten sam trik, tylko w wiadomości SMS. Błędne odpowiedzi: To atak wyłącznie na firmy, nigdy na osoby prywatne.; To atak przez rozmowę telefoniczną z „konsultantem”.; To atak, który wymaga zainstalowania programu na komputerze. Post wyjaśnia: smishing to ten sam trik w SMS-ie, a vishing przez telefon. Źródło: Kurs HoldUp: Phishing, BLIK „na kolegę” i fałszywy kurier, rozwinięcie posta, definicja.</li>
+      <li><strong>Dlaczego drugi składnik logowania nie chroni przed programem, który kradnie zalogowaną sesję?</strong> — Poprawna odpowiedź: Ciasteczko sesji działa jak przepustka bez hasła i bez kodu. Błędne odpowiedzi: Bo takie programy za każdym razem odgadują kod z aplikacji uwierzytelniającej.; Bo drugi składnik działa wyłącznie przy logowaniu przez wiadomość SMS. Post opisuje, że ciasteczko zalogowanej sesji działa jak przepustka bez hasła i bez kodu. Drugi składnik wciąż jest jednak potrzebny. Źródło: Kurs HoldUp: Złośliwe programy: kradzież haseł, przejęte konta i okup, podsumowanie posta, drugi punkt.</li>
+      <li><strong>Co w sprawie zapłaty okupu radzą Europol i partnerzy projektu No More Ransom?</strong> — Poprawna odpowiedź: Ogólnie nie płacić. Błędne odpowiedzi: Płacić od razu, bo to najszybsza droga do odzyskania danych.; Płacić tylko wtedy, gdy atak dotyczy podmiotu publicznego. Post podaje, że nie ma gwarancji odzyskania danych ani pewności, że nie zostaną ujawnione; czasem istnieje też darmowy dekryptor. Źródło: Kurs HoldUp: Złośliwe programy: kradzież haseł, przejęte konta i okup, podsumowanie posta, trzeci punkt.</li>
+      <li><strong>Dlaczego model językowy potrafi zmyślać pewnym tonem?</strong> — Poprawna odpowiedź: Przewiduje kolejne słowa, nie sprawdza faktów, a trening nagradza zgadywanie. Błędne odpowiedzi: Bo celowo wprowadza użytkownika w błąd.; Bo zagląda do bazy faktów, która jest przestarzała.; Bo odpowiada tylko na pytania o rzeczy często opisywane. Post wyjaśnia, że w modelu nie ma bazy faktów, do której zagląda przed odpowiedzią, tylko wyuczone prawdopodobieństwa, a testy premiują pewną odpowiedź. Źródło: Kurs HoldUp: Halucynacje AI: dlaczego model zmyśla pewnym tonem, podsumowanie i rozwinięcie posta.</li>
+      <li><strong>Co zrobić z sygnaturą wyroku podaną przez czat AI?</strong> — Poprawna odpowiedź: Sprawdzić ją w oryginale, na przykład w bazie orzeczeń. Błędne odpowiedzi: Przyjąć ją bez sprawdzania, jeśli odpowiedź brzmi pewnie i szczegółowo.; Zapytać ten sam czat, czy na pewno się nie myli, i uznać sprawę za zamkniętą. Post radzi traktować odpowiedź AI jako szkic do sprawdzenia i weryfikować nazwiska, liczby, daty, cytaty i sygnatury w oryginale. Źródło: Kurs HoldUp: Halucynacje AI: dlaczego model zmyśla pewnym tonem, Co robić.</li>
+      <li><strong>Co według posta robisz, gdy ktoś szantażuje Cię intymnymi materiałami?</strong> — Poprawna odpowiedź: Nie płacisz, robisz zrzuty ekranu i zgłaszasz sprawę platformie oraz policji. Błędne odpowiedzi: Płacisz raz, żeby szantaż się skończył.; Od razu kasujesz konto i rozmowę, żeby zniknął ślad.; Odpisujesz sprawcy, że wiesz, kim jest, i żądasz usunięcia materiałów. Post: nie płać i nie odpisuj, zabezpiecz dowody zrzutami ekranu, nie kasuj konta ani rozmowy przed zabezpieczeniem dowodów, zgłoś sprawę. Wstyd nie jest Twoją winą. Źródło: Kurs HoldUp: Sekstorsja: szantaż intymnymi materiałami, Co robić dziś.</li>
+      <li><strong>Dlaczego płacenie szantażyście nie kończy sprawy?</strong> — Poprawna odpowiedź: Pokazuje, że ofiara płaci, więc żądania zwykle rosną. Błędne odpowiedzi: Bo sprawca musi odebrać pieniądze osobiście, więc i tak się ujawni.; Bo bank i tak cofa taką płatność po tygodniu i szantaż traci sens. Post: płacenie nie kończy szantażu, tylko pokazuje, że ofiara płaci. Żądanie pieniędzy lub kolejnych materiałów zwykle rośnie. Źródło: Kurs HoldUp: Sekstorsja: szantaż intymnymi materiałami, podsumowanie posta, trzeci punkt.</li>
+      <li><strong>Czym według posta catfishing różni się od oszustwa uczuciowego?</strong> — Poprawna odpowiedź: Catfishing to udawanie kogoś innego, niekoniecznie w celu wyłudzenia pieniędzy. Błędne odpowiedzi: Catfishing zawsze kończy się prośbą o przelew.; Catfishing to rozmowa z prawdziwą osobą na portalu randkowym.; Catfishing dotyczy wyłącznie znanych osób. Post: romance scam buduje fałszywą relację, by wyłudzić pieniądze, a catfishing to udawanie kogoś innego w sieci, nie zawsze dla pieniędzy. Źródło: Kurs HoldUp: Oszustwa uczuciowe i catfishing, podsumowanie posta, pierwszy i drugi punkt.</li>
+      <li><strong>Co radzi post, zanim zaufasz osobie poznanej w sieci?</strong> — Poprawna odpowiedź: Sprawdzić jej zdjęcia wyszukiwaniem odwrotnym. Błędne odpowiedzi: Poprosić o niewielki przelew próbny na swoje konto, żeby sprawdzić uczciwość.; Zaufać od razu, jeśli ma dużo zdjęć na profilu i opisuje swoje życie. Post radzi sprawdzić zdjęcia wyszukiwaniem odwrotnym i umówić rozmowę wideo na żywo, choć deepfake potrafi zmienić twarz i głos. Źródło: Kurs HoldUp: Oszustwa uczuciowe i catfishing, Co robić.</li>
+      <li><strong>Co robisz, gdy Twoje dane zostały opublikowane w sieci po kłótni?</strong> — Poprawna odpowiedź: Robisz zrzuty ekranu z adresem strony i datą, zgłaszasz treść platformie i sprawę policji. Błędne odpowiedzi: Od razu usuwasz konto i nic nie zgłaszasz.; Publikujesz dane drugiej strony w odwecie. Post radzi zachować dowody (zrzuty z adresem strony, datą, nazwą konta), zgłosić treść platformie, zablokować konto i zgłosić sprawę policji. Źródło: Kurs HoldUp: Doxxing i swatting: kiedy adres staje się bronią, Co robić.</li>
+      <li><strong>Dlaczego swatting nie jest „niewinnym żartem”?</strong> — Poprawna odpowiedź: Grupa interwencyjna zakłada realne zagrożenie, a w USA jedno zgłoszenie zabiło niewinnego człowieka. Błędne odpowiedzi: Bo służby zawsze zjawiają się bez broni i bez zagrożenia dla mieszkańców.; Bo kara grozi tylko za fałszywy alarm bombowy w dużej instytucji, nie pod adresem. Post opisuje zdarzenie z USA z grudnia 2017 r. oraz koszty: służby zajęte fałszywym alarmem nie dojadą do prawdziwych ofiar. Źródło: Kurs HoldUp: Doxxing i swatting: kiedy adres staje się bronią, podsumowanie i komentarze do posta.</li>
+      <li><strong>Co jest wspólną cechą ofert werbujących słupów finansowych?</strong> — Poprawna odpowiedź: Proste zadanie i duża nagroda w stosunku do wysiłku. Błędne odpowiedzi: Wymóg wieloletniego doświadczenia w bankowości.; Konieczność osobistego spotkania ze zleceniodawcą. Post: oferta pojawia się jako „praca zdalna”, „pośrednik płatności” lub „test systemu”, a wspólna cecha to proste zadanie i duża nagroda. Źródło: Kurs HoldUp: „Szybkie 200 zł”: słup finansowy na zleceniu, rozwinięcie posta, definicja.</li>
+      <li><strong>Co radzi post, jeśli już przekazałeś komuś dostęp do konta, karty lub BLIK-a?</strong> — Poprawna odpowiedź: Od razu zadzwonić do banku (numer z aplikacji lub karty) i zgłosić sprawę policji. Błędne odpowiedzi: Poczekać kilka dni, czy ktoś się odezwie w sprawie przekazanych danych.; Zmienić tylko wygląd karty w aplikacji bankowej i nie zgłaszać nic więcej. Post: samodzielne zgłoszenie bywa korzystne dla Ciebie, a „nie wiedziałem” nie zawsze chroni. Źródło: Kurs HoldUp: „Szybkie 200 zł”: słup finansowy na zleceniu, Co robić.</li>
+      <li><strong>Jaka jest skuteczna kolejność usuwania niechcianego zdjęcia z sieci?</strong> — Poprawna odpowiedź: Usunąć treść u źródła, zgłosić serwisowi, potem poprosić o usunięcie linku. Błędne odpowiedzi: Najpierw poprosić wyszukiwarkę o usunięcie linku, a potem szukać autora.; Wystarczy zmienić imię i nazwisko na profilu. Post wskazuje skuteczną kolejność: treść u źródła, prośba do serwisu, dopiero potem link w wyszukiwarce. Link znika z wyników, ale treść zostaje na stronie. Źródło: Kurs HoldUp: Ślad cyfrowy, rekrutacja i zdjęcia z dzieciństwa, rozwinięcie posta, prawo do usunięcia danych.</li>
+      <li><strong>Dlaczego zdjęcia z dzieciństwa wrzucone przez rodziców są osobnym tematem?</strong> — Poprawna odpowiedź: Publikacja nie była Twoją decyzją, ale ślad jest Twój. Błędne odpowiedzi: Bo prawo zabrania rodzicom publikowania jakichkolwiek zdjęć.; Bo rekruterzy nie patrzą na takie zdjęcia. Post: takie zdjęcia tworzą publiczny wizerunek człowieka, zanim ten zdążył o nim zdecydować. Radzi porozmawiać z rodzicem, a potem poprosić o usunięcie z serwisu. Źródło: Kurs HoldUp: Ślad cyfrowy, rekrutacja i zdjęcia z dzieciństwa, podsumowanie i rozwinięcie posta.</li>
+      <li><strong>Co robili zawodowi fact-checkerzy, że oceniali strony trafniej od historyków?</strong> — Poprawna odpowiedź: Opuszczali stronę i sprawdzali, co o niej mówią inne źródła. Błędne odpowiedzi: Czytali ją w głąb, od pierwszego do ostatniego akapitu, w skupieniu.; Ufali stronom z rozbudowaną i profesjonalnie napisaną zakładką „O nas”. Post cytuje badanie Wineburga i McGrew (2019): fact-checkerzy nie zagłębiali się w stronę, tylko opuszczali ją i sprawdzali w innych źródłach. Źródło: Kurs HoldUp: Dezinformacja: jak sprawdzić w pół minuty, podsumowanie i rozwinięcie posta.</li>
+      <li><strong>Jaki sygnał ostrzegawczy przy obrazach „porwanej przez wodę” dziewczynki z powodzi 2024 można sprawdzić bez żadnego narzędzia?</strong> — Poprawna odpowiedź: Czy ta sama „tragedia” dzieje się naraz w wielu miejscowościach. Błędne odpowiedzi: Czy zdjęcie ma wysoką rozdzielczość i wyraźne kolory.; Czy post ma więcej niż sto polubień od znajomych. Post, za Demagogiem: obrazy wygenerowane przez AI pojawiały się także w miejscach, których powódź nie dotknęła, na przykład w Warszawie. Źródło: Kurs HoldUp: Dezinformacja: jak sprawdzić w pół minuty, rozwinięcie posta.</li>
+      <li><strong>Czym jest donejt w patostreamingu?</strong> — Poprawna odpowiedź: Dotacją widza, często powiązaną z „zadaniem” dla streamera. Błędne odpowiedzi: Rodzajem kary nakładanej na streamera przez platformę.; Kodem, który ukrywa transmisję przed moderacją platformy. Post: za określoną kwotę streamer zrobi lub zniesie coś konkretnego, a widz staje się współautorem sceny. Źródło: Kurs HoldUp: Patostreamy i donejty: upokorzenie na zamówienie, rozwinięcie posta, definicja.</li>
+      <li><strong>Co pokazuje przykład wycieku z systemu CKE z kwietnia 2025 r.?</strong> — Poprawna odpowiedź: Systemu nie przełamano: ktoś użył konta pracownika, który tego samego hasła używał prywatnie. Błędne odpowiedzi: Wyciek był efektem ataku genialnego hakera na serwery.; Wyciek dotyczył milionów rekordów ze wszystkich szkół. Post: w danych były m.in. PESEL, adres i data urodzenia, poniżej 150 rekordów z jednej szkoły; hasło ujawnione w jednym miejscu jest próbowane w kolejnych. Źródło: Kurs HoldUp: Wycieki danych: co się dzieje z Twoim PESEL-em, podsumowanie posta, pierwszy punkt.</li>
+      <li><strong>Dlaczego warto zastrzec PESEL?</strong> — Poprawna odpowiedź: Wyciekły PESEL zostaje w obiegu na lata, a instytucje mają obowiązek sprawdzać zastrzeżenie. Błędne odpowiedzi: Bo zastrzeżenie zmienia numer PESEL na nowy, więc stary traci ważność.; Bo to jedyna ochrona przed wyciekiem danych z każdej bazy w kraju. Post: PESEL zmienia się tylko z wąskich powodów, a zastrzeżenie w mObywatelu jest darmowe; banki i inne instytucje sprawdzają je od 1 czerwca 2024. Źródło: Kurs HoldUp: Wycieki danych: co się dzieje z Twoim PESEL-em, podsumowanie posta, trzeci punkt.</li>
+      <li><strong>Co radzi post w sprawie frazy odzyskiwania kryptowalut?</strong> — Poprawna odpowiedź: Zapisać ją offline i nie podawać osobom, które powołują się na pomoc techniczną. Błędne odpowiedzi: Przechowywać ją w wiadomości do siebie na komunikatorze, żeby była pod ręką.; Przesłać ją giełdzie, żeby zawsze miała kopię na wypadek utraty dostępu. Post: utrata klucza lub frazy odzyskiwania oznacza utratę środków, więc fraza ma być zapisana offline i tajna. Źródło: Kurs HoldUp: Kryptowaluty: czym są, skąd kurs i co grozi, Co robić i rozwinięcie posta.</li>
+      <li><strong>Co według posta o deepfake’ach i oszustwach przestało dowodzić tożsamości?</strong> — Poprawna odpowiedź: Wideo i głos. Błędne odpowiedzi: Podpis na umowie.; Numer telefonu w kontaktach. Post: wideo, na którym widzisz dyrektora, i rozmowa głosowa ze znajomym przestały dowodzić tożsamości; weryfikacja ma opierać się na procedurze. Źródło: Kurs HoldUp: Głos szefa, twarz znanej osoby: oszustwa z deepfake i klonem, podsumowanie i rozwinięcie posta.</li>
+      <li><strong>Co radzi post ustalić z bliskimi i w pracy na wypadek oszustwa z klonem głosu?</strong> — Poprawna odpowiedź: Tajne słowo lub pytanie kontrolne. Błędne odpowiedzi: Że każdą prośbę o przelew wykonujecie bez pytań, jeśli brzmi znajomo.; Że ważne sprawy załatwiacie tylko wiadomością głosową. Post: przy każdej nietypowej prośbie o pieniądze rozłącz się i oddzwoń na numer, który sam znajdziesz. Źródło: Kurs HoldUp: Głos szefa, twarz znanej osoby: oszustwa z deepfake i klonem, Co robić dziś.</li>
+      <li><strong>Co realnie grozi w publicznej sieci Wi-Fi według CERT Polska?</strong> — Poprawna odpowiedź: Fałszywy hotspot z fałszywą stroną logowania. Błędne odpowiedzi: Każdy odwiedzany serwis ujawnia hasła wszystkim w kawiarni.; Samo włączenie Wi-Fi niszczy telefon. Post: większość ładowań stron idzie dziś przez szyfrowane HTTPS, a realne ryzyko to fałszywy hotspot. Źródło: Kurs HoldUp: Wi-Fi, router i kamerka: co naprawdę grozi w sieci poza dome, podsumowanie posta, pierwszy punkt.</li>
+    </ol>
+  </details>
+</section>
+
+<div class="gm-karta">
+  <h2>Źródła</h2>
+  <p>Hasła, pytania i wyjaśnienia pochodzą z postów kursu HoldUp (edukacja cyfrowa dla dorosłych); przy każdym wyjaśnieniu podano post.</p>
+  <ul class="gm-zrodla">
+    <li>Kurs HoldUp, edukacja cyfrowa dla dorosłych, post „Phishing, BLIK „na kolegę” i fałszywy kurier”.</li>
+    <li>Kurs HoldUp, edukacja cyfrowa dla dorosłych, post „Hasła, 2FA, passkeys i mit zmiany co 30 dni”.</li>
+    <li>Kurs HoldUp, edukacja cyfrowa dla dorosłych, post „Wycieki danych: co się dzieje z Twoim PESEL-em”.</li>
+    <li>Kurs HoldUp, edukacja cyfrowa dla dorosłych, post „Oszustwa uczuciowe i catfishing”.</li>
+    <li>Kurs HoldUp, edukacja cyfrowa dla dorosłych, post „Doxxing i swatting: kiedy adres staje się bronią”.</li>
+    <li>Kurs HoldUp, edukacja cyfrowa dla dorosłych, post „Sekstorsja: szantaż intymnymi materiałami”.</li>
+    <li>Kurs HoldUp, edukacja cyfrowa dla dorosłych, post „Ślad cyfrowy, rekrutacja i zdjęcia z dzieciństwa”.</li>
+    <li>Kurs HoldUp, edukacja cyfrowa dla dorosłych, post „„Szybkie 200 zł”: słup finansowy na zleceniu”.</li>
+    <li>Kurs HoldUp, edukacja cyfrowa dla dorosłych, post „Patostreamy i donejty: upokorzenie na zamówienie”.</li>
+    <li>Kurs HoldUp, edukacja cyfrowa dla dorosłych, post „Dezinformacja: jak sprawdzić w pół minuty”.</li>
+    <li>Kurs HoldUp, edukacja cyfrowa dla dorosłych, post „Deepfake: jak się bronić, gdy to Ty jesteś bohaterem”.</li>
+    <li>Kurs HoldUp, edukacja cyfrowa dla dorosłych, post „Głos szefa, twarz znanej osoby: oszustwa z deepfake i klonem głosu”.</li>
+    <li>Kurs HoldUp, edukacja cyfrowa dla dorosłych, post „Kryptowaluty: czym są, skąd kurs i co grozi”.</li>
+    <li>Kurs HoldUp, edukacja cyfrowa dla dorosłych, post „Halucynacje AI: dlaczego model zmyśla pewnym tonem”.</li>
+    <li>Kurs HoldUp, edukacja cyfrowa dla dorosłych, post „Wi-Fi, router i kamerka: co naprawdę grozi w sieci poza domem i w domu”.</li>
+    <li>Kurs HoldUp, edukacja cyfrowa dla dorosłych, post „Złośliwe programy: kradzież haseł, przejęte konta i okup”.</li>
+  </ul>
+</div>
+</main>
+
+
+<script data-gm-plik="rdzen.js">
+/* gry-moodle 0.2.0 — NIE EDYTUJ W KURSIE, poprawiaj w PLUGIN/gry-moodle (~/.claude/local-marketplace-maciek/plugins/gry-moodle) */
+/* rdzen.js — WARSTWA WSPÓLNA gier i ćwiczeń. Ładowana zawsze, przed gra.js / cwiczenie.js.
+ *
+ * Rdzeń nie zna gier ani mechanik. Daje przestrzeń globalną `Gm`:
+ *   Gm.bezpieczny(t), Gm.tekstZHtml(h), Gm.gotowe(fn)
+ *   Gm.losowanie(ziarno) → funkcja 0..1 (powtarzalna, gdy ziarno podane; bez ziarna Math.random)
+ *   Gm.tasuj(a, ziarnoAlboLos), Gm.losuj(a, los), Gm.ogranicz, Gm.lerp, Gm.wygladz, Gm.rgba
+ *   Gm.ogloszenia(kontener) → {powiedz(tekst), el}   region aria-live TWORZONY PRZY STARCIE (przed pierwszym
+ *                           komunikatem — region dodany w chwili mówienia czytnik często pomija)
+ *   Gm.dzwiek(ustawienia)  → {graj, muzyka, odblokuj}   Web Audio, odzywa się dopiero PO GEŚCIE gracza
+ *   Gm.klucz(przestrzen, …czesci) → "<przestrzen>-…"; Gm.magazyn.czytaj/zapisz (localStorage w try/catch)
+ *   Gm.ustawienia(przestrzen, domyslne) → {wartosci, zapisz()}   klucz "<przestrzen>-gry-ustawienia"
+ *   Gm.rekord(przestrzen, id, punkty) → {rekord, nowy}           klucz "<przestrzen>-gra-<id>-rekord"
+ *   Gm.tempo.{TEMPO, ustaw(konf), czasZeSlow(tekst) → ms, domyslneTempo(konf) → "spokojne"|"normalne"}
+ *   Gm.ukoncz({tryb:"gra"|"modul"|"brak", przestrzen, id, korzen})  — raz na wczytanie strony na grę
+ *   Gm.lms.{start(), zakoncz()}  — globalny `Scorm` (most z paczki), a gdy go brak — własne szukanie API SCORM 1.2
+ *   Gm.wersjaTekstowa.{przejdz(), uruchom(kontener, naKoniec)}  — odsyłacz i zaliczenie z wersji tekstowej
+ *   Gm.wstrzyknijCss(nazwa, css)  — element style do head raz na nazwę i wersję rdzenia (format Strona, widoki mechanik)
+ *   Gm.konfiguracja(korzen) → {id, przestrzen, ukonczenie, dane}   dane = window.GM_DANE[data-gra-id] (lekcja L12)
+ *
+ * Do Moodle idzie wyłącznie „ukończone” (decyzja 9). Wyniku punktowego rdzeń nie wysyła i nie umie wysłać.
+ */
+(function (global) {
+  "use strict";
+
+  var WERSJA = "0.2.0";
+  if (global.Gm && global.Gm.wersja === WERSJA) return;   /* dwie gry na jednej stronie — rdzeń raz */
+
+  var doc = global.document;
+
+  /* ——— drobne narzędzia ——— */
+
+  function bezpieczny(t) {
+    /* [<] zamiast samego < : ciąg „</” (np. w /</g) generator formatu Strona zamienia na „<\/” — w wyrażeniu regularnym to błąd */
+    return String(t == null ? "" : t).replace(/&/g, "&amp;").replace(/[<]/g, "&lt;")
+      .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+  function tekstZHtml(h) {
+    var d = doc.createElement("div");
+    d.innerHTML = h;
+    return (d.textContent || "").replace(/\s+/g, " ").trim();
+  }
+  function gotowe(fn) {
+    if (doc.readyState === "loading") doc.addEventListener("DOMContentLoaded", fn);
+    else fn();
+  }
+  function ogranicz(v, a, b) { return Math.max(a, Math.min(b, v)); }
+  function lerp(a, b, t) { return a + (b - a) * t; }
+  function wygladz(t) { t = ogranicz(t, 0, 1); return 1 - Math.pow(1 - t, 3); }
+  function rgba(hex, alfa) {
+    var h = String(hex).replace("#", "").trim();
+    if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+    var n = parseInt(h, 16);
+    if (isNaN(n)) return String(hex);   /* token w innym zapisie niż #hex — oddajemy bez przezroczystości */
+    return "rgba(" + ((n >> 16) & 255) + "," + ((n >> 8) & 255) + "," + (n & 255) + "," + alfa + ")";
+  }
+
+  /* ——— losowanie z ziarnem ———
+     Ziarno (tekst albo liczba) daje powtarzalną kolejność: generator i testy losują to samo przy każdym
+     uruchomieniu. Bez ziarna — Math.random (runda w grze ma być za każdym razem inna). */
+  function hasz(tekst) {
+    var h = 2166136261 >>> 0, s = String(tekst);
+    for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+    return h >>> 0;
+  }
+  function losowanie(ziarno) {
+    if (ziarno == null || ziarno === "") return Math.random;
+    var a = typeof ziarno === "number" ? (ziarno >>> 0) : hasz(ziarno);
+    return function () {   /* mulberry32 */
+      a = (a + 0x6D2B79F5) >>> 0;
+      var t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function jakoLos(z) { return typeof z === "function" ? z : losowanie(z); }
+  /* Fisher–Yates; zwraca NOWĄ tablicę. */
+  function tasuj(a, ziarnoAlboLos) {
+    var los = jakoLos(ziarnoAlboLos), b = a.slice();
+    for (var i = b.length - 1; i > 0; i--) {
+      var j = Math.floor(los() * (i + 1));
+      var t = b[i]; b[i] = b[j]; b[j] = t;
+    }
+    return b;
+  }
+  function losuj(a, ziarnoAlboLos) { return a[Math.floor(jakoLos(ziarnoAlboLos)() * a.length)]; }
+
+  /* ——— magazyn i klucze ———
+     Wszystkie paczki SCORM na jednym Moodle dzielą origin, a więc i localStorage (L15, TOP 15 #11):
+     każdy klucz ma przestrzeń kursu i identyfikator gry. */
+  function klucz(przestrzen) {
+    var czesci = [przestrzen || "gm"];
+    for (var i = 1; i < arguments.length; i++) czesci.push(arguments[i]);
+    return czesci.join("-");
+  }
+  var magazyn = {
+    czytaj: function (k) {
+      try { return global.localStorage.getItem(k); } catch (e) { return null; }   /* prywatne okno, blokada */
+    },
+    zapisz: function (k, v) {
+      try { global.localStorage.setItem(k, String(v)); return true; } catch (e) { return false; }
+    }
+  };
+
+  /* Ustawienia gracza wspólne dla wszystkich gier kursu (tempo, dźwięk, muzyka).
+     Tempo z magazynu liczy się TYLKO wtedy, gdy gracz sam je wybrał (tempoWybrane) — inaczej obowiązuje
+     domyślne tempo pluginu „bez pośpiechu” (decyzja 10). Stare zapisy gier ZZR nie mają tej flagi,
+     więc ich „normalne” (zapisane przy okazji przełączenia dźwięku) nie przykrywa nowego domyślnego. */
+  function ustawienia(przestrzen, domyslne) {
+    var k = klucz(przestrzen, "gry", "ustawienia");
+    var u = {
+      tempo: domyslne && domyslne.tempo === "normalne" ? "normalne" : "spokojne",
+      tempoWybrane: false,
+      dzwiek: !(domyslne && domyslne.dzwiek === false),
+      muzyka: !!(domyslne && domyslne.muzyka)
+    };
+    try {
+      var z = JSON.parse(magazyn.czytaj(k) || "null");
+      if (z && typeof z === "object") {
+        if (z.tempoWybrane === true && (z.tempo === "spokojne" || z.tempo === "normalne")) {
+          u.tempo = z.tempo; u.tempoWybrane = true;
+        }
+        if (typeof z.dzwiek === "boolean") u.dzwiek = z.dzwiek;
+        if (typeof z.muzyka === "boolean") u.muzyka = z.muzyka;
+      }
+    } catch (e) { /* uszkodzony zapis — domyślne */ }
+    return {
+      wartosci: u,
+      zapisz: function () { magazyn.zapisz(k, JSON.stringify(u)); }
+    };
+  }
+
+  function rekord(przestrzen, id, punkty) {
+    var k = klucz(przestrzen, "gra", id, "rekord");
+    var stary = Number(magazyn.czytaj(k)) || 0;
+    if (punkty > stary) magazyn.zapisz(k, punkty);
+    return { rekord: Math.max(stary, punkty), nowy: punkty > stary && stary > 0 };
+  }
+
+  /* ——— tempo ———
+     TOP 15 #4: domyślnie BEZ limitu; czas na przeczytanie liczony ze słów, jedna stała TEMPO
+     (większa = wolniej). Konfiguracja przychodzi z banku: tempo {domyslne, TEMPO, bazowo_s, na_slowo_s, min_s}. */
+  var tempo = {
+    TEMPO: 1.0, bazowo_s: 6, na_slowo_s: 0.45, min_s: 4.5,
+    ustaw: function (konf) {
+      konf = konf || {};
+      ["TEMPO", "bazowo_s", "na_slowo_s", "min_s"].forEach(function (p) {
+        if (typeof konf[p] === "number" && konf[p] > 0) tempo[p] = konf[p];
+      });
+      return tempo;
+    },
+    slowa: function (t) {
+      var s = String(t == null ? "" : t).replace(/<[^>]*>/g, " ").trim();
+      return s ? s.split(/\s+/).length : 0;
+    },
+    czasZeSlow: function (t) {
+      var s = Math.max(tempo.min_s, tempo.bazowo_s + tempo.na_slowo_s * tempo.slowa(t));
+      return Math.round(s * tempo.TEMPO * 1000);
+    },
+    /* "bez-limitu" (domyślne pluginu) → silnik startuje w tempie spokojnym; "normalne" tylko świadomie */
+    domyslneTempo: function (konf) {
+      return konf && konf.domyslne === "normalne" ? "normalne" : "spokojne";
+    }
+  };
+
+  /* ——— ogłoszenia dla czytnika ——— */
+  function ogloszenia(kontener) {
+    var p = doc.createElement("p");
+    p.className = "gm-sr";
+    p.setAttribute("aria-live", "polite");
+    p.setAttribute("aria-atomic", "true");
+    (kontener || doc.body).appendChild(p);
+    var zegar = 0;
+    return {
+      el: p,
+      powiedz: function (tekst) {
+        p.textContent = "";
+        global.clearTimeout(zegar);
+        /* pusty → treść: czytnik odczyta także to samo zdanie powtórzone drugi raz */
+        zegar = global.setTimeout(function () { p.textContent = tekst; }, 60);
+      }
+    };
+  }
+
+  /* ——— dźwięk: syntezowany, bez plików, dopiero po geście ———
+     AudioContext tworzony przed gestem gracza jest wstrzymany przez przeglądarkę i sypie ostrzeżeniami.
+     Dlatego graj()/muzyka() milczą, dopóki gra nie zawoła odblokuj() z obsługi kliknięcia. */
+  function dzwiek(ust) {
+    var ctx = null, glowny = null, muzykaWzmocnienie = null, poGescie = false;
+    var planista = null, nastepnaNuta = 0, krok = 0, konf = { tempo: 96, podstawa: 0 };
+
+    function gotowy() {
+      if (!poGescie) return false;
+      if (ctx) {
+        if (ctx.state === "suspended" && ctx.resume) ctx.resume();
+        return true;
+      }
+      var AC = global.AudioContext || global.webkitAudioContext;
+      if (!AC) return false;
+      try { ctx = new AC(); } catch (e) { return false; }
+      glowny = ctx.createGain();
+      glowny.gain.value = 0.22;
+      glowny.connect(ctx.destination);
+      muzykaWzmocnienie = ctx.createGain();
+      muzykaWzmocnienie.gain.value = 0;
+      muzykaWzmocnienie.connect(glowny);
+      return true;
+    }
+    function odblokuj() { poGescie = true; return gotowy(); }
+
+    function nuta(hz, start, dlugosc, typ, glosnosc, doHz, cel) {
+      var o = ctx.createOscillator(), w = ctx.createGain();
+      o.type = typ || "sine";
+      o.frequency.setValueAtTime(hz, start);
+      if (doHz) o.frequency.exponentialRampToValueAtTime(doHz, start + dlugosc);
+      w.gain.setValueAtTime(0.0001, start);
+      w.gain.exponentialRampToValueAtTime(glosnosc || 0.4, start + Math.min(0.02, dlugosc / 3));
+      w.gain.exponentialRampToValueAtTime(0.0001, start + dlugosc);
+      o.connect(w);
+      w.connect(cel || glowny);
+      o.start(start);
+      o.stop(start + dlugosc + 0.03);
+    }
+
+    /* [Hz, przesunięcie s, długość s, kształt, głośność, glissando do Hz] */
+    var EFEKTY = {
+      klik: [[880, 0, 0.05, "square", 0.1]],
+      tik: [[1250, 0, 0.03, "sine", 0.14]],
+      ok: [[660, 0, 0.09, "triangle", 0.42], [990, 0.08, 0.15, "triangle", 0.42]],
+      zbierz: [[784, 0, 0.07, "sine", 0.38], [1175, 0.06, 0.13, "sine", 0.34]],
+      blad: [[208, 0, 0.2, "sawtooth", 0.2, 139]],
+      zdarzenie: [[523, 0, 0.08, "triangle", 0.34], [659, 0.09, 0.08, "triangle", 0.34], [784, 0.18, 0.15, "triangle", 0.34]],
+      alarm: [[440, 0, 0.12, "square", 0.14], [330, 0.15, 0.18, "square", 0.14]],
+      poziom: [[523, 0, 0.1, "triangle", 0.38], [659, 0.1, 0.1, "triangle", 0.38], [784, 0.2, 0.1, "triangle", 0.38], [1047, 0.3, 0.28, "triangle", 0.42]],
+      koniec: [[392, 0, 0.16, "triangle", 0.38], [523, 0.16, 0.16, "triangle", 0.38], [659, 0.32, 0.16, "triangle", 0.38], [784, 0.48, 0.45, "triangle", 0.42]],
+      start: [[330, 0, 0.1, "triangle", 0.34], [494, 0.1, 0.1, "triangle", 0.34], [659, 0.2, 0.22, "triangle", 0.4]]
+    };
+
+    function graj(nazwa) {
+      if (!ust.dzwiek || !gotowy()) return;
+      var e = EFEKTY[nazwa];
+      if (!e) return;
+      var t = ctx.currentTime + 0.01;
+      for (var i = 0; i < e.length; i++) nuta(e[i][0], t + e[i][1], e[i][2], e[i][3], e[i][4], e[i][5]);
+    }
+
+    /* Muzyka: łagodny, generowany motyw pentatoniczny — tło, nie melodia do zapamiętania. */
+    var PENTATONIKA = [0, 2, 4, 7, 9];
+    var BASY = [0, 5, 7, 3];
+    function hz(polton) { return 220 * Math.pow(2, polton / 12); }
+    function planuj() {
+      if (!ctx) return;
+      var osemka = 60 / (konf.tempo || 96) / 2;
+      while (nastepnaNuta < ctx.currentTime + 0.3) {
+        var wTakcie = krok % 16, takt = Math.floor(krok / 16);
+        if (wTakcie % 8 === 0) {
+          nuta(hz((konf.podstawa || 0) - 12 + BASY[takt % 4]), nastepnaNuta, osemka * 7, "triangle", 0.16, null, muzykaWzmocnienie);
+        }
+        if (wTakcie % 2 === 0 && (krok * 7) % 5 !== 0) {
+          var st = PENTATONIKA[(krok * 3 + takt) % 5] + (wTakcie > 10 ? 12 : 0);
+          nuta(hz((konf.podstawa || 0) + st), nastepnaNuta, osemka * 0.9, "sine", 0.09, null, muzykaWzmocnienie);
+        }
+        nastepnaNuta += osemka;
+        krok++;
+      }
+    }
+    function muzyka(wlacz, nowaKonf) {
+      if (nowaKonf) konf = nowaKonf;
+      var gra = !!(wlacz && ust.muzyka);
+      if (!gra && !ctx) return;
+      if (!gotowy()) return;
+      var teraz = ctx.currentTime;
+      muzykaWzmocnienie.gain.cancelScheduledValues(teraz);
+      muzykaWzmocnienie.gain.setTargetAtTime(gra ? 0.5 : 0, teraz, 0.25);
+      if (gra && !planista) {
+        nastepnaNuta = ctx.currentTime + 0.1;
+        planista = global.setInterval(planuj, 100);
+      } else if (!gra && planista) {
+        global.clearInterval(planista);
+        planista = null;
+      }
+    }
+
+    return { graj: graj, muzyka: muzyka, odblokuj: odblokuj };
+  }
+
+  /* ——— LMS: tylko „ukończone” ———
+     Gdy paczka ma most `Scorm` (formaty/scorm/scorm.js) — używamy go. Gdy nie ma (np. gra wstawiona
+     do cudzej paczki, PS — RAPORT-A §2 p. 6), rdzeń sam szuka API SCORM 1.2 w oknach nadrzędnych.
+     `completed` BEZ LMSFinish — sesję zamyka beforeunload (L63: po LMSFinish nic się już nie zapisuje). */
+  var lms = (function () {
+    var api = null, szukano = false, polaczono = false;
+    function szukaj(okno) {
+      var i = 0;
+      try {
+        while (okno && okno.API == null && okno.parent && okno.parent !== okno && i < 12) { i++; okno = okno.parent; }
+        return (okno && okno.API) || null;
+      } catch (e) { return null; }   /* ramka z innego origin */
+    }
+    function znajdz() {
+      if (szukano) return api;
+      szukano = true;
+      api = szukaj(global);
+      try { if (!api && global.opener && !global.opener.closed) api = szukaj(global.opener); } catch (e) { api = null; }
+      return api;
+    }
+    function wywolaj(m, a) {
+      if (!api) return "";
+      try { return api[m].apply(api, a || []); } catch (e) { return ""; }
+    }
+    return {
+      start: function () {
+        if (global.Scorm && global.Scorm.start) { try { return global.Scorm.start(); } catch (e) { return false; } }
+        if (polaczono || !znajdz()) return polaczono;
+        polaczono = wywolaj("LMSInitialize", [""]) === "true";
+        if (polaczono) {
+          var s = wywolaj("LMSGetValue", ["cmi.core.lesson_status"]);
+          if (!s || s === "not attempted") {
+            wywolaj("LMSSetValue", ["cmi.core.lesson_status", "incomplete"]);
+            wywolaj("LMSCommit", [""]);
+          }
+          global.addEventListener("beforeunload", function () {
+            if (polaczono) { wywolaj("LMSCommit", [""]); wywolaj("LMSFinish", [""]); }
+          });
+        }
+        return polaczono;
+      },
+      zakoncz: function () {
+        if (global.Scorm && global.Scorm.zakoncz) { try { global.Scorm.zakoncz(true); } catch (e) { /* podgląd */ } return; }
+        if (!polaczono) lms.start();
+        if (!polaczono) return;
+        wywolaj("LMSSetValue", ["cmi.core.lesson_status", "completed"]);
+        wywolaj("LMSCommit", [""]);
+      }
+    };
+  })();
+
+  /* ——— ukończenie: trzy tryby (ARCHITEKTURA §4.2) ———
+     gra   — gra jest osobną paczką: LMS dostaje „completed”
+     modul — gra jest ekranem modułu: tylko zdarzenie, LMS-em rządzi moduł kursu
+     brak  — Strona / samodzielny HTML: zapis lokalny + zdarzenie
+     We wszystkich trybach zostaje znacznik lokalny "<przestrzen>-gra-<id>-ukonczona" (jak w ZZR). */
+  var ukonczone = {};
+  function ukoncz(o) {
+    o = o || {};
+    var id = o.id || "bez-id";
+    var znak = klucz(o.przestrzen, "gra", id);
+    if (ukonczone[znak]) return false;
+    ukonczone[znak] = true;
+    var tryb = o.tryb === "modul" || o.tryb === "brak" ? o.tryb : "gra";
+    if (tryb === "gra") lms.zakoncz();
+    magazyn.zapisz(znak + "-ukonczona", "1");
+    var cel = o.korzen || doc;
+    try {
+      cel.dispatchEvent(new CustomEvent("gm:ukonczone", { bubbles: true, detail: { id: id, tryb: tryb, zrodlo: o.zrodlo || "gra" } }));
+    } catch (e) { /* stara przeglądarka bez CustomEvent */ }
+    return true;
+  }
+
+  /* ——— wstrzykiwanie CSS (format Strona: filtr Moodle wycina znacznik style z treści — CSS przychodzi z JS) ——— */
+  function wstrzyknijCss(nazwa, css) {
+    var znacznik = nazwa + "@" + WERSJA;
+    var istn = doc.querySelectorAll("style[data-gm-css]");
+    for (var i = 0; i < istn.length; i++) if (istn[i].getAttribute("data-gm-css") === znacznik) return false;
+    var st = doc.createElement("style");
+    st.setAttribute("data-gm-css", znacznik);
+    st.appendChild(doc.createTextNode(css));
+    (doc.head || doc.documentElement).appendChild(st);
+    return true;
+  }
+
+  /* ——— konfiguracja gry z korzenia i banku ——— */
+  function konfiguracja(korzen) {
+    var id = korzen.getAttribute("data-gra-id") || "";
+    var dane = (global.GM_DANE && global.GM_DANE[id]) || null;
+    return {
+      id: id,
+      przestrzen: korzen.getAttribute("data-gra-przestrzen") || (dane && dane.przestrzen) || "gm",
+      ukonczenie: korzen.getAttribute("data-gm-ukonczenie") || (dane && dane.ukonczenie) || (global.Scorm ? "gra" : "brak"),
+      dane: dane
+    };
+  }
+
+  /* ——— wersja tekstowa: odsyłacz i zaliczenie ———
+     Pytanie zatwierdza przycisk „Sprawdź odpowiedź”, nie samo zaznaczenie — zatwierdzanie na „change”
+     blokowało odpowiedzi 3 i 4 z klawiatury (L64). Stan pokazany znakiem i kolorem (1.4.1);
+     fokus na reakcji (4.1.3). Odpowiedź na wszystkie pytania zalicza materiał tak samo jak gra. */
+  var wersjaTekstowa = {
+    przejdz: function (idCelu) {
+      var cel = doc.getElementById(idCelu || "wersja-tekstowa");
+      if (!cel) return false;
+      if (cel.tagName === "DETAILS") cel.open = true;
+      cel.scrollIntoView({ block: "start" });
+      var h = cel.querySelector("h2, h3, summary");
+      if (h) {
+        if (h.tagName !== "SUMMARY") h.tabIndex = -1;
+        try { h.focus({ preventScroll: true }); } catch (e) { h.focus(); }
+      }
+      return true;
+    },
+    uruchom: function (kontener, naKoniec) {
+      var pytania = kontener.querySelectorAll("[data-gm-pytanie]");
+      var stan = { odpowiedziano: 0, wszystkich: pytania.length };
+      function postep() {
+        var l = kontener.querySelector("[data-gm-postep]");
+        if (l) l.textContent = stan.odpowiedziano + " z " + stan.wszystkich;
+        if (stan.wszystkich > 0 && stan.odpowiedziano === stan.wszystkich && naKoniec) naKoniec();
+      }
+      function znak(opcja, tekst) {
+        var s = doc.createElement("span");
+        s.className = "gm-odpowiedz__znak";
+        s.textContent = tekst;
+        opcja.appendChild(s);
+      }
+      Array.prototype.forEach.call(pytania, function (pytanie) {
+        var opcje = pytanie.querySelectorAll(".gm-odpowiedz");
+        var reakcja = pytanie.querySelector(".gm-reakcja");
+        if (!reakcja || !opcje.length) return;
+        reakcja.setAttribute("tabindex", "-1");
+        var przycisk = doc.createElement("button");
+        przycisk.type = "button";
+        przycisk.className = "gm-przycisk gm-pytanie__sprawdz";
+        przycisk.textContent = "Sprawdź odpowiedź";
+        reakcja.parentNode.insertBefore(przycisk, reakcja);
+        przycisk.addEventListener("click", function () {
+          if (pytanie.getAttribute("data-gm-zamkniete") === "tak") return;
+          var wybrana = null;
+          Array.prototype.forEach.call(opcje, function (o) {
+            var w = o.querySelector("input");
+            if (w && w.checked) wybrana = o;
+          });
+          if (!wybrana) {
+            reakcja.className = "gm-reakcja gm-reakcja--uwaga";
+            reakcja.innerHTML = "<p>Zaznacz jedną odpowiedź, a potem ją sprawdź.</p>";
+            reakcja.hidden = false;
+            reakcja.focus();
+            return;
+          }
+          pytanie.setAttribute("data-gm-zamkniete", "tak");
+          var dobra = wybrana.getAttribute("data-poprawna") === "tak";
+          stan.odpowiedziano += 1;
+          Array.prototype.forEach.call(opcje, function (o) {
+            var w = o.querySelector("input");
+            if (w) w.disabled = true;
+          });
+          wybrana.classList.add(dobra ? "gm-odpowiedz--ok" : "gm-odpowiedz--zle");
+          znak(wybrana, dobra ? "✓ dobrze" : "✗ nie tym razem");
+          if (!dobra) {
+            var wlasciwa = pytanie.querySelector('.gm-odpowiedz[data-poprawna="tak"]');
+            if (wlasciwa) { wlasciwa.classList.add("gm-odpowiedz--ok"); znak(wlasciwa, "✓ właściwa"); }
+          }
+          reakcja.className = "gm-reakcja " + (dobra ? "gm-reakcja--ok" : "gm-reakcja--zle");
+          reakcja.innerHTML = '<p><span class="gm-sr">' + (dobra ? "Dobrze. " : "Nie tym razem. ") + "</span>" +
+            bezpieczny(wybrana.getAttribute("data-reakcja") || "") + "</p>";
+          reakcja.hidden = false;
+          reakcja.focus();
+          przycisk.hidden = true;
+          postep();
+        });
+      });
+      postep();
+      return stan;
+    }
+  };
+
+  /* Na starcie strony: połączenie z LMS (status „incomplete”) i uruchomienie wersji tekstowych.
+     Wersja tekstowa wskazuje swoją grę przez data-gra-id — zalicza tak samo jak gra (równoważna, TOP 15 #10). */
+  gotowe(function () {
+    if (doc.querySelector('[data-gm-ukonczenie="gra"]')) lms.start();
+    Array.prototype.forEach.call(doc.querySelectorAll("[data-gm-wersja-tekstowa]"), function (k) {
+      if (k.getAttribute("data-gm-init")) return;
+      k.setAttribute("data-gm-init", "1");
+      var id = k.getAttribute("data-gra-id") || "";
+      var korzen = id ? doc.querySelector('[data-gra][data-gra-id="' + id + '"]') : null;
+      wersjaTekstowa.uruchom(k, function () {
+        var konf = korzen ? konfiguracja(korzen) : { id: id, przestrzen: k.getAttribute("data-gra-przestrzen") || "gm",
+          ukonczenie: k.getAttribute("data-gm-ukonczenie") || "brak" };
+        ukoncz({ tryb: konf.ukonczenie, przestrzen: konf.przestrzen, id: konf.id, korzen: korzen || k, zrodlo: "wersja-tekstowa" });
+      });
+    });
+  });
+
+  global.Gm = {
+    wersja: WERSJA,
+    bezpieczny: bezpieczny, tekstZHtml: tekstZHtml, gotowe: gotowe,
+    losowanie: losowanie, hasz: hasz, tasuj: tasuj, losuj: losuj,
+    ogranicz: ogranicz, lerp: lerp, wygladz: wygladz, rgba: rgba,
+    ogloszenia: ogloszenia, dzwiek: dzwiek,
+    klucz: klucz, magazyn: magazyn, ustawienia: ustawienia, rekord: rekord,
+    tempo: tempo, lms: lms, ukoncz: ukoncz,
+    wersjaTekstowa: wersjaTekstowa, wstrzyknijCss: wstrzyknijCss, konfiguracja: konfiguracja
+  };
+})(window);
+
+</script>
+<script data-gm-plik="cwiczenie.js">
+/* gry-moodle 0.2.0 — NIE EDYTUJ W KURSIE, poprawiaj w PLUGIN/gry-moodle (~/.claude/local-marketplace-maciek/plugins/gry-moodle) */
+/* cwiczenia/cwiczenie.js — WARSTWA ĆWICZEŃ (decyzja 7): bez pętli gry, bez zegara domyślnie.
+ *
+ * Wymaga: rdzen.js (Gm). Daje przestrzeń globalną `GmCwiczenie`:
+ *   GmCwiczenie.zarejestruj(mechanika, uruchom)  — widok mechaniki zgłasza się sam; warstwa uruchamia go na każdym
+ *       korzeniu [data-gra][data-gm-widok="cwiczenie"][data-gm-mechanika="<mechanika>"] (raz — data-gm-init).
+ *   GmCwiczenie.utworz(korzen) → c   — szkielet jednego ćwiczenia (używa go uruchom()).
+ *
+ * Szkielet c:
+ *   c.bank, c.konf, c.T (teksty.widok), c.punkty (bank.punkty.wlaczone — w ćwiczeniu domyślnie WYŁĄCZONE, decyzja 9)
+ *   c.el(tag, klasa, tekst), c.wstaw(szablon, {klucz: wartość}), c.h(wzgl, tekst, klasa) — nagłówek poziomu bazowy+wzgl
+ *   c.ekran — kontener bieżącego ekranu; c.mow(tekst, opoznienieMs) — region aria-live TWORZONY PRZY STARCIE
+ *   c.ekranStartowy({...}) — opis, wybór poziomu (radio w fieldset), szczegóły zasad, przycisk startu
+ *   c.stoper — rosnący, bez limitu (tylko gdy punkty włączone; pauza go zatrzymuje)
+ *   c.pauza({naPauze, naWznow, czyMozna}) — przycisk + samoczynne wstrzymanie przy ukryciu karty przeglądarki
+ *   c.informacja(cel, {ton, naglowek, tekst, dalej, naDalej}) — informacja zwrotna; „Dalej” dostaje fokus
+ *   c.pytanie(cel, {legenda, opcje, ocen, dalej, naDalej}) — „Sprawdź” → informacja zwrotna → „Dalej” z fokusem
+ *   c.podsumowanie({...}) — nagłówek z fokusem, kafle liczb, tabela z <caption>, sekcje, wnioski, „Jeszcze raz”
+ *   c.wniosek(lista, stan) — adaptacyjny wniosek: napis albo {gdy:{pole: wartość | {min, max}}, tekst}
+ *   c.rekord(poziom, wartosc, {mniejszyLepszy}) — rekord per poziom w localStorage (<przestrzen>-gra-<id>-rekord-<poziom>)
+ *   c.klawisze(fn) — skróty TYLKO wewnątrz kontenera (WCAG 2.1.4); bez Alt/Ctrl/Meta
+ *   c.ukoncz() — Gm.ukoncz w trybie z konfiguracji (gra | modul | brak)
+ *   c.czas(ms) „m:ss”, c.czasSlowami(ms), c.odmiana(n, jeden, dwa, piec)
+ *
+ * Poziom nagłówków: data-gm-naglowek (domyślnie 3 — Strona Moodle ma własne h1/h2); tytuł ćwiczenia rysowany, gdy
+ * data-gm-tytul ≠ "ukryj" (samodzielny HTML i SCORM mają tytuł w karcie strony). Sekcje podsumowania = poziom + 1.
+ * Klasy z prefiksem gm-cw (L13). Treść wyłącznie z banku (decyzja 8): warstwa nie ma żadnego napisu merytorycznego,
+ * a napisy techniczne („Sprawdź”, „Dalej”) bierze z teksty.widok, gdy bank je podaje.
+ */
+(function (global) {
+  "use strict";
+
+  var Gm = global.Gm;
+  if (!Gm) return;
+  if (global.GmCwiczenie && global.GmCwiczenie.wersja === Gm.wersja) return;   /* dwa ćwiczenia na stronie — warstwa raz */
+
+  var doc = global.document;
+  var rejestr = {};
+
+  /* napisy techniczne warstwy — bank może je nadpisać w teksty.widok */
+  var DOMYSLNE = {
+    sprawdz: "Sprawdź", dalej: "Dalej", jeszcze: "Zagraj jeszcze raz", pauza: "Pauza", wznow: "Wznów",
+    zaznaczNajpierw: "Zaznacz jedną odpowiedź, a potem ją sprawdź.", dobrze: "Dobrze.", zle: "Nie tym razem.",
+    pauzaOgl: "Wstrzymane.", wznowOgl: "Wznowione.", wersjaTekstowa: "Wersja tekstowa"
+  };
+
+  function el(tag, klasa, tekst) {
+    var e = doc.createElement(tag);
+    if (klasa) e.className = klasa;
+    if (tekst !== undefined && tekst !== null) e.textContent = tekst;
+    return e;
+  }
+
+  /* {klucz} → wartość; brakujący klucz zostaje widoczny (bramka B3 łapie literówki w banku) */
+  function wstaw(s, m) {
+    var out = String(s == null ? "" : s);
+    for (var k in m) {
+      if (Object.prototype.hasOwnProperty.call(m, k)) out = out.split("{" + k + "}").join(String(m[k]));
+    }
+    return out;
+  }
+
+  function odmiana(n, jeden, dwa, piec) {
+    var m10 = n % 10, m100 = n % 100;
+    if (n === 1) return jeden;
+    if (m10 >= 2 && m10 <= 4 && !(m100 >= 12 && m100 <= 14)) return dwa;
+    return piec;
+  }
+  function czas(ms) {
+    var s = Math.floor(ms / 1000), m = Math.floor(s / 60);
+    s = s % 60;
+    return m + ":" + (s < 10 ? "0" : "") + s;
+  }
+  function czasSlowami(ms) {
+    var s = Math.floor(ms / 1000), m = Math.floor(s / 60), out = "";
+    s = s % 60;
+    if (m > 0) out = m + " " + odmiana(m, "minuta", "minuty", "minut");
+    if (s > 0 || m === 0) out += (out ? " i " : "") + s + " " + odmiana(s, "sekunda", "sekundy", "sekund");
+    return out;
+  }
+
+  function utworz(korzen) {
+    var konf = Gm.konfiguracja(korzen);
+    var bank = konf.dane;
+    if (!bank) return null;
+    var teksty = bank.teksty || {};
+    var T = teksty.widok || {};
+    function napis(k) { return T[k] != null ? T[k] : DOMYSLNE[k]; }
+    var poziomBazowy = Math.max(2, Math.min(5, parseInt(korzen.getAttribute("data-gm-naglowek") || "3", 10) || 3));
+    var timery = [];
+
+    korzen.innerHTML = "";   /* zdejmuje tekst zastępczy formatu Strona (zapas dla aplikacji mobilnej) */
+    korzen.classList.add("gm-cw");
+    if (!korzen.getAttribute("lang")) korzen.setAttribute("lang", (bank.jezyk && bank.jezyk.lang) || "pl");
+
+    function h(wzgl, tekst, klasa) {
+      var e = el("h" + Math.min(6, poziomBazowy + wzgl), klasa || null, tekst);
+      return e;
+    }
+
+    /* nagłówek: „nad” + tytuł (Strona) i polecenie stale nad ekranem (L21) */
+    var cialo;
+    if (korzen.getAttribute("data-gm-tytul") !== "ukryj") {
+      var glowa = el("div", "gm-cw__glowa");
+      if (T.nad) glowa.appendChild(el("p", "gm-cw__nad", T.nad));
+      glowa.appendChild(h(0, bank.tytul, "gm-cw__tytul"));
+      korzen.appendChild(glowa);
+    }
+    cialo = el("div", "gm-cw__cialo");
+    korzen.appendChild(cialo);
+    if (teksty.polecenie) cialo.appendChild(el("p", "gm-cw__polecenie", teksty.polecenie));
+    var ekran = el("div", "gm-cw__ekran");
+    cialo.appendChild(ekran);
+    var glos = Gm.ogloszenia(cialo);   /* region aria-live istnieje, zanim cokolwiek powiemy */
+    var zegarMowy = 0;
+
+    var c = {
+      korzen: korzen, konf: konf, bank: bank, teksty: teksty, T: T, ekran: ekran, cialo: cialo,
+      punkty: !!(bank.punkty && bank.punkty.wlaczone === true),
+      el: el, wstaw: wstaw, h: h, napis: napis, odmiana: odmiana, czas: czas, czasSlowami: czasSlowami,
+      poziomBazowy: poziomBazowy
+    };
+
+    c.mow = function (tekst, opoznienie) {
+      global.clearTimeout(zegarMowy);
+      if (opoznienie) zegarMowy = global.setTimeout(function () { glos.powiedz(tekst); }, opoznienie);
+      else glos.powiedz(tekst);
+    };
+
+    /* zegary ćwiczenia — c.wyczysc() zatrzymuje wszystkie (nowy ekran, „Jeszcze raz”) */
+    c.za = function (fn, ms) {
+      var t = global.setTimeout(function () { timery.splice(timery.indexOf(t), 1); fn(); }, ms);
+      timery.push(t);
+      return t;
+    };
+    c.anuluj = function (t) {
+      global.clearTimeout(t);
+      var i = timery.indexOf(t);
+      if (i >= 0) timery.splice(i, 1);
+    };
+    c.wyczysc = function () {
+      timery.forEach(function (t) { global.clearTimeout(t); });
+      timery = [];
+      c.stoper.stop();
+      ekran.innerHTML = "";
+    };
+
+    /* ——— ekran startowy ———
+       o: {opis, poziomy:[{id, nazwa, opis}], wybrany, legenda, pytanie, uwaga, zasadyTytul, zasady[], przycisk, naStart(id, wskaznik)}
+       Wybór poziomu tylko wtedy, gdy są co najmniej dwa. Pierwszy i domyślny — bez pośpiechu (decyzja 10). */
+    c.ekranStartowy = function (o) {
+      c.wyczysc();
+      var wybrany = o.wybrany || (o.poziomy && o.poziomy[0] && o.poziomy[0].id);
+      if (o.opis) ekran.appendChild(el("p", "gm-cw__lead", o.opis));
+      if (o.poziomy && o.poziomy.length > 1) {
+        var fs = el("fieldset", "gm-cw__poziomy");
+        var lg = el("legend", "gm-sr", o.legenda || "");
+        fs.appendChild(lg);
+        if (o.pytanie) {
+          var pt = el("p", "gm-cw__pyt", o.pytanie);
+          pt.setAttribute("aria-hidden", "true");
+          fs.appendChild(pt);
+        }
+        o.poziomy.forEach(function (p) {
+          var id = "gm-" + konf.id + "-poziom-" + p.id;
+          var lab = el("label", "gm-cw__opcja");
+          lab.setAttribute("for", id);
+          var inp = el("input", "gm-cw__radio");
+          inp.type = "radio";
+          inp.name = "gm-" + konf.id + "-poziom";
+          inp.id = id;
+          inp.value = p.id;
+          if (p.id === wybrany) inp.checked = true;
+          inp.addEventListener("change", function () { if (inp.checked) wybrany = p.id; });
+          var box = el("span", "gm-cw__opt");
+          box.appendChild(el("span", "gm-cw__optnazwa", p.nazwa));
+          if (p.opis) box.appendChild(el("span", "gm-cw__opttekst", p.opis));
+          lab.appendChild(inp);
+          lab.appendChild(box);
+          fs.appendChild(lab);
+        });
+        ekran.appendChild(fs);
+      }
+      if (o.uwaga) ekran.appendChild(el("p", "gm-cw__uwaga", o.uwaga));
+      if (o.zasady && o.zasady.length) {
+        var det = el("details", "gm-cw__szczegoly");
+        det.appendChild(el("summary", null, o.zasadyTytul || ""));
+        var ul = el("ul", "gm-cw__lista");
+        o.zasady.forEach(function (z) { ul.appendChild(el("li", null, z)); });
+        det.appendChild(ul);
+        ekran.appendChild(det);
+      }
+      var btn = el("button", "gm-przycisk gm-cw__duzy gm-cw__start", o.przycisk || "");
+      btn.type = "button";
+      /* wskaznik = kliknięcie myszą/dotykiem (detail > 0) — wtedy fokus przenosimy bez przewijania strony */
+      btn.addEventListener("click", function (ev) { o.naStart(wybrany, !!ev && ev.detail > 0); });
+      ekran.appendChild(btn);
+      return { przycisk: btn, wybrany: function () { return wybrany; } };
+    };
+
+    /* ——— stoper rosnący (bez limitu) ———
+       Mierzy, nie pogania: nic się od niego nie rozstrzyga. Tylko gdy punkty są włączone. */
+    c.stoper = (function () {
+      var zgromadzone = 0, od = 0, tm = 0, cel = null;
+      function ms() { return zgromadzone + (od ? Date.now() - od : 0); }
+      function pokaz() {
+        if (cel) { var t = czas(ms()); if (cel.textContent !== t) cel.textContent = t; }
+      }
+      function tyk() {
+        tm = 0;
+        if (!od) return;
+        pokaz();
+        tm = global.setTimeout(tyk, Math.max(40, 1000 - (ms() % 1000) + 10));
+      }
+      return {
+        ms: ms, pokaz: pokaz,
+        biegnie: function () { return !!od; },
+        wyswietlW: function (e) { cel = e; pokaz(); },
+        start: function () { if (od) return; od = Date.now(); global.clearTimeout(tm); tyk(); },
+        stop: function () { global.clearTimeout(tm); tm = 0; if (od) { zgromadzone += Date.now() - od; od = 0; } pokaz(); },
+        zeruj: function () { global.clearTimeout(tm); tm = 0; zgromadzone = 0; od = 0; cel = null; }
+      };
+    })();
+
+    /* ——— pauza i autopauza (WCAG 2.2.1 / 2.2.2) ———
+       o: {przycisk (element), naPauze(powod), naWznow(), czyMozna()} — powod: "reczna" | "karta" */
+    c.pauza = function (o) {
+      var wstrzymane = false;
+      function pauzuj(powod) {
+        if (wstrzymane || (o.czyMozna && !o.czyMozna())) return;
+        wstrzymane = true;
+        if (o.przycisk) o.przycisk.textContent = napis("wznow");
+        o.naPauze(powod);
+      }
+      function wznow() {
+        if (!wstrzymane) return;
+        wstrzymane = false;
+        if (o.przycisk) o.przycisk.textContent = napis("pauza");
+        o.naWznow();
+      }
+      if (o.przycisk) {
+        o.przycisk.addEventListener("click", function () {
+          if (o.przycisk.getAttribute("aria-disabled") === "true") return;
+          if (wstrzymane) wznow(); else pauzuj("reczna");
+        });
+      }
+      function widocznosc() {
+        if (!korzen.isConnected) { doc.removeEventListener("visibilitychange", widocznosc); return; }
+        if (doc.hidden || doc.visibilityState === "hidden") pauzuj("karta");
+      }
+      doc.addEventListener("visibilitychange", widocznosc);
+      return { pauzuj: pauzuj, wznow: wznow, wstrzymane: function () { return wstrzymane; },
+               odlacz: function () { doc.removeEventListener("visibilitychange", widocznosc); } };
+    };
+
+    /* ——— informacja zwrotna z „Dalej” ———
+       Nic nie znika samo (decyzja 10): informacja czeka, aż student naciśnie „Dalej”; fokus na „Dalej” (4.1.3, 2.4.3). */
+    c.informacja = function (cel, o) {
+      var blok = el("div", "gm-cw__info" + (o.ton ? " gm-cw__info--" + o.ton : ""));
+      blok.setAttribute("tabindex", "-1");
+      var p = el("p", "gm-cw__info-tekst");
+      if (o.naglowek) {
+        p.appendChild(el("strong", null, o.naglowek));
+        p.appendChild(doc.createTextNode(" " + (o.tekst || "")));
+      } else {
+        p.textContent = o.tekst || "";
+      }
+      blok.appendChild(p);
+      var dalej = null;
+      if (o.naDalej) {
+        dalej = el("button", "gm-przycisk gm-cw__dalej", o.dalej || napis("dalej"));
+        dalej.type = "button";
+        dalej.addEventListener("click", function () { o.naDalej(); });
+        blok.appendChild(dalej);
+      }
+      cel.appendChild(blok);
+      c.mow((o.naglowek ? o.naglowek + " " : "") + (o.tekst || ""));
+      if (dalej) {
+        dalej.focus();
+        if (dalej.scrollIntoView) dalej.scrollIntoView({ block: "nearest" });
+      }
+      return { blok: blok, dalej: dalej };
+    };
+
+    /* ——— pytanie: „Sprawdź” → informacja zwrotna → „Dalej” ———
+       o: {legenda, opcje:[{id, tekst}], ocen(id) → {dobrze, naglowek, tekst}, dalej, naDalej(id, wynik)}
+       Zatwierdza przycisk „Sprawdź”, nie samo zaznaczenie (L64). Przycisk nigdy nie dostaje `disabled`
+       (ślepy zaułek dla klawiatury) — bez wyboru mówi, co zrobić, i oddaje fokus pierwszej opcji. */
+    c.pytanie = function (cel, o) {
+      var fs = el("fieldset", "gm-cw__pytanie");
+      fs.appendChild(el("legend", "gm-cw__legenda", o.legenda));
+      var nazwa = "gm-" + konf.id + "-p-" + Math.floor(Math.random() * 1e9);
+      var pola = [];
+      o.opcje.forEach(function (op, i) {
+        var lab = el("label", "gm-cw__odp");
+        var inp = el("input");
+        inp.type = "radio";
+        inp.name = nazwa;
+        inp.value = op.id;
+        inp.id = nazwa + "-" + i;
+        lab.setAttribute("for", inp.id);
+        lab.appendChild(inp);
+        lab.appendChild(el("span", null, op.tekst));
+        fs.appendChild(lab);
+        pola.push({ inp: inp, lab: lab, op: op });
+      });
+      cel.appendChild(fs);
+      var sprawdz = el("button", "gm-przycisk gm-cw__sprawdz", napis("sprawdz"));
+      sprawdz.type = "button";
+      cel.appendChild(sprawdz);
+      var miejsce = el("div", "gm-cw__po");
+      cel.appendChild(miejsce);
+      var zamkniete = false;
+      sprawdz.addEventListener("click", function () {
+        if (zamkniete) return;
+        var w = null;
+        pola.forEach(function (p) { if (p.inp.checked) w = p; });
+        miejsce.innerHTML = "";
+        if (!w) {
+          var uw = el("p", "gm-cw__brak", napis("zaznaczNajpierw"));
+          miejsce.appendChild(uw);
+          c.mow(napis("zaznaczNajpierw"));
+          pola[0].inp.focus();
+          return;
+        }
+        zamkniete = true;
+        var wynik = o.ocen(w.op.id) || {};
+        pola.forEach(function (p) {
+          p.inp.setAttribute("aria-disabled", "true");
+          p.inp.addEventListener("click", function (e) { if (zamkniete && !p.inp.checked) e.preventDefault(); });
+        });
+        w.lab.classList.add(wynik.dobrze ? "gm-cw__odp--ok" : "gm-cw__odp--zle");
+        var znak = el("span", "gm-cw__znak", wynik.dobrze ? "✓" : "✗");
+        znak.setAttribute("aria-hidden", "true");
+        w.lab.appendChild(znak);
+        sprawdz.hidden = true;
+        c.informacja(miejsce, {
+          ton: wynik.dobrze ? "ok" : "zle",
+          naglowek: wynik.naglowek || (wynik.dobrze ? napis("dobrze") : napis("zle")),
+          tekst: wynik.tekst || "", dalej: o.dalej,
+          naDalej: function () { o.naDalej(w.op.id, wynik); }
+        });
+      });
+      return { sprawdz: sprawdz, pola: pola };
+    };
+
+    /* ——— adaptacyjny wniosek ———
+       Element listy: napis (zawsze) albo {gdy: {pole: wartość | {min, max}}, tekst}. Wniosek nie zakłada zachowania
+       gracza, którego nie było (MK lekcja 13) — warianty wybiera stan, nie domysł. */
+    c.wniosek = function (lista, stan) {
+      var out = [];
+      (lista || []).forEach(function (w) {
+        if (typeof w === "string") { out.push(w); return; }
+        var ok = true;
+        for (var k in (w.gdy || {})) {
+          if (!Object.prototype.hasOwnProperty.call(w.gdy, k)) continue;
+          var war = w.gdy[k], v = stan ? stan[k] : undefined;
+          if (war && typeof war === "object") {
+            if (war.min != null && !(v >= war.min)) ok = false;
+            if (war.max != null && !(v <= war.max)) ok = false;
+          } else if (v !== war) ok = false;
+        }
+        if (ok) out.push(w.tekst);
+      });
+      return out;
+    };
+
+    /* ——— rekord per poziom ——— */
+    var rekordPamiec = {};
+    c.rekord = function (poziom, wartosc, o) {
+      o = o || {};
+      var k = Gm.klucz(konf.przestrzen, "gra", konf.id, "rekord", poziom);
+      var stary = parseInt(Gm.magazyn.czytaj(k), 10);
+      if (isNaN(stary) || stary < 1) stary = 0;
+      if (rekordPamiec[poziom] && (!stary || (o.mniejszyLepszy ? rekordPamiec[poziom] < stary : rekordPamiec[poziom] > stary))) {
+        stary = rekordPamiec[poziom];
+      }
+      var nowy = !stary || (o.mniejszyLepszy ? wartosc < stary : wartosc > stary);
+      var zapisano = true;
+      if (nowy) {
+        rekordPamiec[poziom] = wartosc;
+        zapisano = Gm.magazyn.zapisz(k, wartosc);
+      }
+      return { rekord: nowy ? wartosc : stary, nowy: nowy, zapisano: zapisano };
+    };
+
+    /* ——— podsumowanie ———
+       o: {naglowek, info[], liczby:[{etyk, wart, wezel?}], tabela:{caption, kolumny[], wiersze[[…]]},
+           sekcje:[{tytul, lid, lista:[{mocne, tekst, dalej}] | akapity[]}], wnioskiTytul, wnioski[],
+           przyciski:[{tekst, fn(wskaznik), cichy}]}
+       Fokus na nagłówku (2.4.3); ukończenie zgłaszamy tutaj (decyzja 9 — tylko „ukończone”). */
+    c.podsumowanie = function (o) {
+      c.wyczysc();
+      var wyn = el("div", "gm-cw__koniec");
+      var nag = h(1, o.naglowek, "gm-cw__wynik-h");
+      nag.setAttribute("tabindex", "-1");
+      wyn.appendChild(nag);
+      (o.info || []).forEach(function (t) { wyn.appendChild(el("p", null, t)); });
+      if (o.liczby && o.liczby.length) {
+        var hud = el("div", "gm-cw__hud gm-cw__hud--" + o.liczby.length);
+        o.liczby.forEach(function (l) {
+          var k = el("div", "gm-cw__kafel");
+          k.appendChild(el("span", "gm-cw__kafel-n", l.etyk));
+          if (l.wezel) k.appendChild(l.wezel);
+          else k.appendChild(el("span", "gm-cw__kafel-w", l.wart));
+          hud.appendChild(k);
+        });
+        wyn.appendChild(hud);
+      }
+      (o.dopiski || []).forEach(function (d) { wyn.appendChild(el("p", d.klasa || null, d.tekst)); });
+      if (o.tabela) {
+        var tb = el("table", "gm-cw__tabela");
+        tb.appendChild(el("caption", null, o.tabela.caption));
+        var th = el("thead"), tr = el("tr");
+        o.tabela.kolumny.forEach(function (k) { var x = el("th", null, k); x.setAttribute("scope", "col"); tr.appendChild(x); });
+        th.appendChild(tr);
+        tb.appendChild(th);
+        var tbo = el("tbody");
+        o.tabela.wiersze.forEach(function (w) {
+          var r = el("tr");
+          w.forEach(function (v, i) {
+            var x = el(i === 0 ? "th" : "td", null, v);
+            if (i === 0) x.setAttribute("scope", "row");
+            r.appendChild(x);
+          });
+          tbo.appendChild(r);
+        });
+        tb.appendChild(tbo);
+        wyn.appendChild(tb);
+      }
+      (o.sekcje || []).forEach(function (s) {
+        wyn.appendChild(h(1, s.tytul, "gm-cw__sekcja"));
+        if (s.lid) wyn.appendChild(el("p", "gm-slaby", s.lid));
+        if (s.lista) {
+          var ul = el("ul", "gm-cw__lista gm-cw__lista--odstep");
+          s.lista.forEach(function (it) {
+            var li = el("li");
+            var p1 = el("p");
+            if (it.mocne) p1.appendChild(el("strong", null, it.mocne));
+            if (it.tekst) p1.appendChild(doc.createTextNode((it.mocne ? " — " : "") + it.tekst));
+            li.appendChild(p1);
+            if (it.dalej) li.appendChild(el("p", "gm-cw__wyj", it.dalej));
+            ul.appendChild(li);
+          });
+          wyn.appendChild(ul);
+        }
+        (s.akapity || []).forEach(function (a) { wyn.appendChild(el("p", null, a)); });
+      });
+      if (o.wnioski && o.wnioski.length) {
+        if (o.wnioskiTytul) wyn.appendChild(h(1, o.wnioskiTytul, "gm-cw__sekcja"));
+        o.wnioski.forEach(function (a) { wyn.appendChild(el("p", null, a)); });
+      }
+      var btny = el("div", "gm-cw__przyciski");
+      (o.przyciski || []).forEach(function (b) {
+        var x = el("button", "gm-przycisk" + (b.cichy ? " gm-przycisk--cichy" : ""), b.tekst);
+        x.type = "button";
+        x.addEventListener("click", function (ev) { b.fn(!!ev && ev.detail > 0); });
+        btny.appendChild(x);
+      });
+      wyn.appendChild(btny);
+      ekran.appendChild(wyn);
+      c.mow("");
+      nag.focus();
+      c.ukoncz();
+      return { naglowek: nag, blok: wyn };
+    };
+
+    /* ——— wersja tekstowa W widgecie (format Strona: data-gm-wt="widzet") ———
+       Na stronie scorm/html wersję tekstową składa generator jako statyczny HTML pod grą; w polu „Strona” wolno mieć tylko
+       div + skrypt, więc rysuje ją ćwiczenie — ta sama lista co w generatorze (pozycje_wersji_tekstowej), rozwijana,
+       poza ekranem gry (zostaje przy zmianie ekranu). pozycje: [[mocne, reszta]]. */
+    c.wersjaTekstowa = function (pozycje) {
+      if (korzen.getAttribute("data-gm-wt") !== "widzet" || !pozycje || !pozycje.length) return null;
+      var wt = bank.wersja_tekstowa || {};
+      var det = el("details", "gm-cw__wt");
+      det.id = korzen.id ? korzen.id + "-wersja-tekstowa" : "";
+      det.appendChild(el("summary", null, napis("wersjaTekstowa") + (wt.lista_tytul ? ": " + wt.lista_tytul : "") + " (" + pozycje.length + ")"));
+      if (wt.wstep) det.appendChild(el("p", null, wt.wstep));
+      var ol = el("ol", "gm-cw__wt-lista");
+      pozycje.forEach(function (pz) {
+        var li = el("li");
+        li.appendChild(el("strong", null, pz[0]));
+        li.appendChild(doc.createTextNode(" — " + pz[1]));
+        ol.appendChild(li);
+      });
+      det.appendChild(ol);
+      if (teksty.zrodla_wstep) det.appendChild(el("p", "gm-slaby", teksty.zrodla_wstep));
+      cialo.appendChild(det);
+      return det;
+    };
+
+    c.klawisze = function (fn) {
+      korzen.addEventListener("keydown", function (e) {
+        if (e.altKey || e.ctrlKey || e.metaKey) return;
+        fn(e);
+      });
+    };
+
+    c.ukoncz = function () {
+      return Gm.ukoncz({ tryb: konf.ukonczenie, przestrzen: konf.przestrzen, id: konf.id, korzen: korzen, zrodlo: "cwiczenie" });
+    };
+
+    return c;
+  }
+
+  function skan(mechanika) {
+    var sel = '[data-gra][data-gm-widok="cwiczenie"]' + (mechanika ? '[data-gm-mechanika="' + mechanika + '"]' : "");
+    Array.prototype.forEach.call(doc.querySelectorAll(sel), function (k) {
+      var m = k.getAttribute("data-gm-mechanika");
+      if (!rejestr[m] || k.getAttribute("data-gm-init")) return;
+      k.setAttribute("data-gm-init", "1");
+      try {
+        rejestr[m](k);
+      } catch (e) {
+        /* awaria widoku nie może zostawić pustego miejsca: komunikat + odesłanie do wersji tekstowej */
+        k.innerHTML = "";
+        var p = el("p", "gm-cw__awaria", "Ćwiczenie nie uruchomiło się w tej przeglądarce. Ta sama treść jest w wersji tekstowej.");
+        k.appendChild(p);
+        if (global.console && global.console.error) global.console.error("gry-moodle:", e);
+      }
+    });
+  }
+
+  global.GmCwiczenie = {
+    wersja: Gm.wersja,
+    utworz: utworz,
+    zarejestruj: function (mechanika, uruchom) {
+      rejestr[mechanika] = uruchom;
+      Gm.gotowe(function () { skan(mechanika); });
+    },
+    pomoc: { el: el, wstaw: wstaw, odmiana: odmiana, czas: czas, czasSlowami: czasSlowami }
+  };
+})(window);
+
+</script>
+<script data-gm-plik="dane.js">
+/* WYGENEROWANE z banku bank.json przez gry-moodle 0.9.0 (scripts/gm_zbuduj.py) — nie edytuj ręcznie, poprawiaj bank. */
+/* gry-moodle:dane */
+window.GM_DANE = window.GM_DANE || {};
+window.GM_DANE["kolo-fortuny"] = {"format":"gry-moodle/bank@1","id":"kolo-fortuny","przestrzen":"holdup","warstwa":"cwiczenie","mechanika":"kolo-fortuny","widok":"cwiczenie","tytul":"Koło fortuny: pojęcia kluczowe z kursu","teksty":{"polecenie":"Odsłoń całe hasło: odpowiadaj na pytania, kręć kołem i wskazuj litery.","opis":"Hasłem jest jedno pojęcie kluczowe z materiału, a nad planszą widzisz jego opis. Żeby zakręcić kołem, odpowiedz poprawnie na pytanie. Po zakręceniu wskazujesz spółgłoskę: za każde jej wystąpienie w haśle dostajesz punkty z koła. Samogłoski kupujesz za punkty. Grasz solo albo na zmianę z komputerem. Gra kończy się, gdy odsłonięte są wszystkie litery. Nic nie biegnie samo i nie ma limitu czasu: każdy krok czeka, aż naciśniesz „Dalej”.","zasady":["Hasło to pojęcie kluczowe, a spacje są widocznymi przerwami między polami. Zgadywania całego hasła nie ma: gra kończy się, gdy odsłonięte są wszystkie litery.","Na początku kolejki wybierasz: odpowiedź na pytanie albo kupno samogłoski.","Pytania mają jednokrotny wybór. Poprawna odpowiedź odblokowuje koło. Po błędnej odpowiedzi albo rezygnacji (klawisz Escape lub przycisk) kolejka przepada.","Koło ma sektory z punktami od 100 do 500, „Bankrut”, „Strata kolejki” oraz „Bonus: odsłoń samogłoskę”.","Po sektorze z punktami wskazujesz spółgłoskę. Jeśli jest w haśle, dostajesz punkty razy liczba wystąpień i grasz dalej. Jeśli jej nie ma, kolejka przepada.","Samogłoskę kupujesz za 200 punktów z bieżącej rundy, bez kręcenia kołem i bez pytania. Gdy w haśle zostaną same samogłoski, ich wskazanie nic nie kosztuje.","W trybach z komputerem gracie na zmianę, a każdy krok komputera czeka na „Dalej”. Wygrywa ten, kto po odsłonięciu hasła ma więcej punktów.","Na końcu zobaczysz hasło z opisem i listę pytań z tej gry."],"zapas":"Gra „Koło fortuny” — odsłanianie hasła z pytaniami, kołem z punktami i wskazywaniem liter. Jeśli się nie wczyta (na przykład w aplikacji mobilnej Moodle), otwórz tę stronę w przeglądarce internetowej.","zrodla_wstep":"Hasła, pytania i wyjaśnienia pochodzą z postów kursu HoldUp (edukacja cyfrowa dla dorosłych); przy każdym wyjaśnieniu podano post.","widok":{"tryby":{"solo":{"nazwa":"Solo","opis":"Odsłaniasz hasło bez przeciwnika. Liczą się Twoje punkty i liczba kolejek."},"spokojny":{"nazwa":"Z komputerem: spokojny","opis":"Komputer poprawnie odpowiada na połowę pytań, a litery wskazuje losowo, z przewagą liter częstych w polszczyźnie."},"uwazny":{"nazwa":"Z komputerem: uważny","opis":"Komputer poprawnie odpowiada na większość pytań i wskazuje litery od najczęstszych w polszczyźnie."},"bezbledny":{"nazwa":"Z komputerem: bezbłędny","opis":"Komputer zawsze odpowiada poprawnie, a litery dobiera także do wzorca hasła. To najtrudniejszy przeciwnik."}},"sektory":{"punkty":{"nazwa":"{punkty} punktów","krotko":""},"bankrut":{"nazwa":"Bankrut","krotko":"Bankrut","opis":"punkty tej rundy przepadają, a kolejka przechodzi dalej."},"strata":{"nazwa":"Strata kolejki","krotko":"Strata","opis":"kolejka przechodzi dalej, a punkty zostają."},"bonus":{"nazwa":"Bonus: odsłoń samogłoskę","krotko":"Bonus","opis":"odsłania jedną ukrytą samogłoskę, a gra toczy się dalej."}},"trybLegend":"Tryb gry","trybPyt":"Wybierz, jak chcesz grać","czytnik":"Hasło jest rzędem pól czytanym pole po polu, koło ma opis tekstowy, a wszystkie wyniki są ogłaszane tekstem.","zacznij":"Zacznij grę","zasadyTytul":"Zasady gry","hudEtyk":"Stan gry","lPunkty":"Punkty","lPunktyTy":"Twoje punkty","lPunktyKomp":"Punkty komputera","lKolejka":"Kolejka","lKolejki":"Liczba kolejek","lRunda":"Hasło","rundaWart":"{n} z {ile}","punktyWart":"{n}","punktyWartRundy":"{n} (łącznie {lacznie})","punktyWartKoniec":"{n}","kolejkaWart":"{n}","lPoprawne":"Poprawne odpowiedzi","poprawneWart":"{n} z {ile}","podpowiedzEtyk":"Podpowiedź:","hasloEtyk":"Hasło: odsłonięto {odsl} z {ile} liter","poleHasla":"Pole {n}: {stan}","poleZakryte":"zakryte","poleLitera":"litera {litera}","poleSpacja":"spacja","uzyteJest":"Litery, które są w haśle: {lista}.","uzyteBrak":"Litery, których nie ma w haśle: {lista}.","uzyteZadne":"Nie użyto jeszcze żadnej litery.","koloEtyk":"Koło fortuny z {ile} sektorami. Lista sektorów jest pod kołem.","zakrec":"Zakręć kołem","zakrecMozna":"Naciśnij, żeby zakręcić kołem.","zakrecNajpierw":"Koło odblokujesz, odpowiadając poprawnie na pytanie.","zakrecTrwa":"Koło się kręci.","ostWynik":"Ostatni wynik koła: {sektor}.","sektoryTytul":"Sektory koła","sektoryPunkty":"Sektory z punktami: {lista}. Za każde wystąpienie wskazanej spółgłoski w haśle dostajesz tyle punktów.","stanWybor":"Twoja kolej: odpowiedz na pytanie i zakręć kołem albo kup samogłoskę.","stanPytanie":"Odpowiedz na pytanie, żeby zakręcić kołem. Możesz też zrezygnować z kolejki.","stanOmowienie":"Przeczytaj informację i naciśnij „Dalej”.","stanKolo":"Odpowiedź poprawna: zakręć kołem.","stanKoloTrwa":"Koło się kręci.","stanSpolgloska":"Wskaż spółgłoskę.","stanSamogloska":"Wskaż samogłoskę do kupienia.","stanKomputer":"Kolej komputera. Naciskaj „Dalej”, żeby zobaczyć kolejne kroki.","stanKoniecRundy":"Hasło jest odsłonięte w całości.","losowanieSolo":"Grasz solo: odpowiedz na pytanie, zakręć kołem i odsłoń całe hasło.","losowanieGracz":"Losowanie: zaczynasz Ty.","losowanieKomputer":"Losowanie: zaczyna komputer. Naciśnij „Dalej”, żeby zobaczyć jego ruch.","podpowiedz":"Strzałki oraz klawisze Home i End przechodzą między literami, Enter albo Spacja wskazuje literę, a litera naciśnięta na klawiaturze wskazuje ją od razu. Klawisz Escape podczas pytania oddaje kolejkę. Skróty działają, gdy fokus jest w grze.","wyborH":"Twoja kolej","wyborTekst":"Żeby zakręcić kołem, odpowiedz poprawnie na pytanie. Możesz też kupić samogłoskę, bez pytania i bez kręcenia kołem.","btnPytanie":"Odpowiedz na pytanie i zakręć kołem","btnKup":"Kup samogłoskę za 200 punktów","btnKupZa":"Wskaż samogłoskę bez opłaty","kupBrakPunktow":"Na samogłoskę potrzeba 200 punktów z tej rundy, a masz {punkty}.","kupBrakSamoglosek":"Wszystkie samogłoski zostały już użyte.","kupBezplatnie":"W haśle zostały już same samogłoski, więc ich wskazanie nic nie kosztuje.","pytanieH":"Pytanie przed zakręceniem kołem","sprawdz":"Sprawdź","dalej":"Dalej","zaznaczNajpierw":"Zaznacz jedną odpowiedź, a potem ją sprawdź.","rezygnuj":"Zrezygnuj z kolejki","rezygnujInfo":"Rezygnacja (klawisz Escape albo ten przycisk) oddaje kolejkę bez kręcenia kołem.","dobrze":"Dobrze.","zle":"Nie tym razem.","dobrzeTekst":"Możesz zakręcić kołem.","zleTekst":"Kolejka przepada. Poprawna odpowiedź: „{poprawna}”.","rezygnacjaNaglowek":"Rezygnujesz z kolejki.","rezygnacjaTekst":"Kolejka przepada. Poprawna odpowiedź: „{poprawna}”.","zrodloZdanie":"Źródło: {zrodlo}.","ogPytanie":"Pytanie. Odpowiedz poprawnie, żeby zakręcić kołem.","koloH":"Zakręć kołem","koloTekst":"Odpowiedź była poprawna. Naciśnij „Zakręć kołem” pod kołem.","ogKolo":"Odpowiedź poprawna. Zakręć kołem.","ogKoloTrwa":"Koło się kręci.","ogBezRuchu":"Ustawienie przeglądarki ogranicza ruch, więc koło się nie obraca, a wynik pojawia się od razu.","ogWynik":"Wypadło: {sektor}.","ostatniWynik":"Ostatni wynik","bankrut":"Bankrut: punkty tej rundy przepadają (było ich {utracone}), a kolejka przechodzi dalej.","strata":"Strata kolejki: kolejka przechodzi dalej, punkty zostają.","bonus":"Odsłonięto samogłoskę {litera}. Liczba wystąpień w haśle: {ile}. Grasz dalej.","bonusBrak":"W haśle nie ma już ukrytych samogłosek. Grasz dalej.","kompBankrut":"Komputer traci punkty tej rundy (było ich {utracone}), a kolejka przechodzi do Ciebie.","kompStrata":"Komputer traci kolejkę, a punkty zostają.","kompBonus":"Komputer dostaje samogłoskę {litera}. Liczba wystąpień w haśle: {ile}. Komputer gra dalej.","kompBonusBrak":"W haśle nie ma już ukrytych samogłosek. Komputer gra dalej.","kompWybieraLitere":"Teraz komputer wskaże spółgłoskę.","spolgloskaH":"Wskaż spółgłoskę","spolgloskaTekst":"Wypadło: {sektor}. Za każde wystąpienie wskazanej spółgłoski w haśle dostajesz {punkty} punktów. Jeśli jej nie ma, kolejka przepada.","samogloskaH":"Wskaż samogłoskę","samogloskaTekst":"Samogłoska kosztuje 200 punktów. Cena przepada także wtedy, gdy samogłoski nie ma w haśle.","samogloskaTekstZa":"W haśle zostały same samogłoski, więc wskazanie nic nie kosztuje.","klawEtyk":"Klawiatura liter","grupaSpolgloski":"Spółgłoski","grupaSamogloski":"Samogłoski","literaEtyk":"Litera {litera}","literaUzytaJest":"Litera {litera}, już użyta, jest w haśle","literaUzytaBrak":"Litera {litera}, już użyta, nie ma jej w haśle","literaNiedostepna":"Litera {litera}, teraz niedostępna","rezygnujLitery":"Zrezygnuj z kolejki","anulujZakup":"Wróć bez kupowania","trafiona":"Jest w haśle.","pudlo":"Nie ma w haśle.","literaJest":"Litera {litera} jest w haśle. Liczba wystąpień: {ile}. Zdobywasz punktów: {punkty}. Grasz dalej.","literaBrak":"Litery {litera} nie ma w haśle. Kolejka przepada.","kupJest":"Samogłoska {litera} jest w haśle. Liczba wystąpień: {ile}. Cena: 200 punktów. Grasz dalej.","kupBrak":"Samogłoski {litera} nie ma w haśle. Cena: 200 punktów. Kolejka przepada.","rezygnacjaLiteryNaglowek":"Rezygnujesz z kolejki.","rezygnacjaLiteryTekst":"Punkty zostają, ale kolejka przechodzi dalej.","ogUzyta":"Litera {litera} jest już użyta. Wybierz inną.","ogTylkoSpolgloski":"Litera {litera} to samogłoska. Teraz wskazujesz spółgłoskę.","ogTylkoSamogloski":"Litera {litera} to spółgłoska. Teraz kupujesz samogłoskę.","ogAnulowano":"Zakup anulowany. Wybierz, co dalej.","kompKolej":"Kolej komputera. Naciśnij „Dalej”, żeby zobaczyć jego kolejny krok.","kompKontynuuje":"Komputer gra dalej. Naciśnij „Dalej”, żeby zobaczyć jego kolejny krok.","kompPytanie":"Komputer dostaje pytanie: „{tresc}”","kompPytanieDobrze":"Odpowiada poprawnie i może zakręcić kołem.","kompPytanieZle":"Odpowiada błędnie, więc jego kolejka przepada. Poprawna odpowiedź: „{poprawna}”.","kompLiteraJest":"Komputer wskazuje literę {litera}. Jest w haśle, liczba wystąpień: {ile}. Komputer zdobywa punktów: {punkty}.","kompLiteraBrak":"Komputer wskazuje literę {litera}. Nie ma jej w haśle, więc kolejka przechodzi do Ciebie.","kompKupJest":"Komputer kupuje samogłoskę {litera} za 200 punktów. Jest w haśle, liczba wystąpień: {ile}.","kompKupBrak":"Komputer kupuje samogłoskę {litera} za 200 punktów. Nie ma jej w haśle, więc kolejka przechodzi do Ciebie.","kompBezLitery":"Komputer nie ma już czego wskazać, więc kolejka przechodzi do Ciebie.","ogWybor":"Grasz dalej: odpowiedz na pytanie albo kup samogłoskę.","ogTwojaKolej":"Twoja kolej: odpowiedz na pytanie albo kup samogłoskę.","ogNowaKolejka":"Nowa kolejka: odpowiedz na pytanie albo kup samogłoskę.","ogKolejKomputera":"Kolej komputera.","ogNowaRunda":"Nowe hasło: {n} z {ile}.","koniecRundy":"Hasło jest odsłonięte w całości: {haslo}.","nastepneHaslo":"Następne hasło","zobaczPodsumowanie":"Zobacz podsumowanie","podSolo":"Hasło odsłonięte","podWygrana":"Wygrana","podPrzegrana":"Przegrana","podRemis":"Remis","infoTryb":"Tryb gry: {tryb}.","infoPierwszyGracz":"Pierwsza kolejka w tej grze: Twoja.","infoPierwszyKomputer":"Pierwsza kolejka w tej grze: komputera.","hasloH":"Hasło i jego znaczenie","hasloHWiele":"Hasła i ich znaczenie","hasloLid":"Pod hasłem jest opis pojęcia z materiałów kursu.","lZrodlo":"Źródło: {zrodlo}.","lPytaniaH":"Pytania z tej gry","lPytaniaLid":"Kolejność jest taka, w jakiej padały pytania, także te zadane komputerowi.","lTwoja":"Twoja odpowiedź: „{odp}” — {ocena}.","lKomp":"Odpowiedź komputera: „{odp}” — {ocena}.","lBrak":"Zrezygnowano z kolejki, bez odpowiedzi.","lDobrze":"dobrze","lZle":"źle","lPoprawna":"Poprawna odpowiedź: „{odp}”.","wnH":"Co z tego wynika","wn":["Wynik gry jest tylko pretekstem. Najwięcej wnoszą opisy pojęć i wyjaśnienia na liście powyżej.",{"gdy":{"bledy":{"min":1}},"tekst":"Do pytań, na które padła błędna odpowiedź albo rezygnacja, wróć w materiałach kursu. Wskazuje je źródło przy wyjaśnieniu."}],"jeszcze":"Zagraj jeszcze raz","zmien":"Zmień tryb gry"}},"zrodla":[{"id":"Z1","krotko":"Kurs HoldUp: Phishing, BLIK „na kolegę” i fałszywy kurier","opis":"Kurs HoldUp, edukacja cyfrowa dla dorosłych, post „Phishing, BLIK „na kolegę” i fałszywy kurier”"},{"id":"Z2","krotko":"Kurs HoldUp: Hasła, 2FA, passkeys i mit zmiany co 30 dni","opis":"Kurs HoldUp, edukacja cyfrowa dla dorosłych, post „Hasła, 2FA, passkeys i mit zmiany co 30 dni”"},{"id":"Z3","krotko":"Kurs HoldUp: Wycieki danych: co się dzieje z Twoim PESEL-em","opis":"Kurs HoldUp, edukacja cyfrowa dla dorosłych, post „Wycieki danych: co się dzieje z Twoim PESEL-em”"},{"id":"Z4","krotko":"Kurs HoldUp: Oszustwa uczuciowe i catfishing","opis":"Kurs HoldUp, edukacja cyfrowa dla dorosłych, post „Oszustwa uczuciowe i catfishing”"},{"id":"Z5","krotko":"Kurs HoldUp: Doxxing i swatting: kiedy adres staje się bronią","opis":"Kurs HoldUp, edukacja cyfrowa dla dorosłych, post „Doxxing i swatting: kiedy adres staje się bronią”"},{"id":"Z6","krotko":"Kurs HoldUp: Sekstorsja: szantaż intymnymi materiałami","opis":"Kurs HoldUp, edukacja cyfrowa dla dorosłych, post „Sekstorsja: szantaż intymnymi materiałami”"},{"id":"Z7","krotko":"Kurs HoldUp: Ślad cyfrowy, rekrutacja i zdjęcia z dzieciństwa","opis":"Kurs HoldUp, edukacja cyfrowa dla dorosłych, post „Ślad cyfrowy, rekrutacja i zdjęcia z dzieciństwa”"},{"id":"Z8","krotko":"Kurs HoldUp: „Szybkie 200 zł”: słup finansowy na zleceniu","opis":"Kurs HoldUp, edukacja cyfrowa dla dorosłych, post „„Szybkie 200 zł”: słup finansowy na zleceniu”"},{"id":"Z9","krotko":"Kurs HoldUp: Patostreamy i donejty: upokorzenie na zamówienie","opis":"Kurs HoldUp, edukacja cyfrowa dla dorosłych, post „Patostreamy i donejty: upokorzenie na zamówienie”"},{"id":"Z10","krotko":"Kurs HoldUp: Dezinformacja: jak sprawdzić w pół minuty","opis":"Kurs HoldUp, edukacja cyfrowa dla dorosłych, post „Dezinformacja: jak sprawdzić w pół minuty”"},{"id":"Z11","krotko":"Kurs HoldUp: Deepfake: jak się bronić, gdy to Ty jesteś bohaterem","opis":"Kurs HoldUp, edukacja cyfrowa dla dorosłych, post „Deepfake: jak się bronić, gdy to Ty jesteś bohaterem”"},{"id":"Z12","krotko":"Kurs HoldUp: Głos szefa, twarz znanej osoby: oszustwa z deepfake i klonem","opis":"Kurs HoldUp, edukacja cyfrowa dla dorosłych, post „Głos szefa, twarz znanej osoby: oszustwa z deepfake i klonem głosu”"},{"id":"Z13","krotko":"Kurs HoldUp: Kryptowaluty: czym są, skąd kurs i co grozi","opis":"Kurs HoldUp, edukacja cyfrowa dla dorosłych, post „Kryptowaluty: czym są, skąd kurs i co grozi”"},{"id":"Z14","krotko":"Kurs HoldUp: Halucynacje AI: dlaczego model zmyśla pewnym tonem","opis":"Kurs HoldUp, edukacja cyfrowa dla dorosłych, post „Halucynacje AI: dlaczego model zmyśla pewnym tonem”"},{"id":"Z15","krotko":"Kurs HoldUp: Wi-Fi, router i kamerka: co naprawdę grozi w sieci poza dome","opis":"Kurs HoldUp, edukacja cyfrowa dla dorosłych, post „Wi-Fi, router i kamerka: co naprawdę grozi w sieci poza domem i w domu”"},{"id":"Z16","krotko":"Kurs HoldUp: Złośliwe programy: kradzież haseł, przejęte konta i okup","opis":"Kurs HoldUp, edukacja cyfrowa dla dorosłych, post „Złośliwe programy: kradzież haseł, przejęte konta i okup”"}],"tempo":{"domyslne":"bez-limitu","TEMPO":1.0},"wersja_tekstowa":{"tryb":"auto","wstep":"Te same hasła i pytania bez gry. Haseł: 17, pytań: 26.","lista_tytul":"Hasła i pytania z gry"},"ukonczenie":"brak","jezyk":{"lang":"pl","rodzaj":"ukosnik-czasownik"},"dane":{"hasla":[{"id":"h01","haslo":"PHISHING","podpowiedz":"Wyłudzanie danych przez podszywanie się pod zaufany podmiot, na przykład bank, kuriera, uczelnię, urząd albo szkołę dziecka.","modul":"HoldUp","zrodlo":"Z1","miejsce":"rozwinięcie posta, definicja"},{"id":"h02","haslo":"RANSOMWARE","podpowiedz":"Złośliwy program, który szyfruje dane na urządzeniu i żąda okupu za klucz.","modul":"HoldUp","zrodlo":"Z16","miejsce":"rozwinięcie posta, dwie rodziny złośliwych programów"},{"id":"h03","haslo":"DEEPFAKE","podpowiedz":"Obraz, nagranie lub dźwięk wygenerowane albo przerobione przez AI tak, by pokazywały kogoś, kto czegoś nie zrobił ani nie powiedział.","modul":"HoldUp","zrodlo":"Z11","miejsce":"rozwinięcie posta, definicja"},{"id":"h04","haslo":"SHARENTING","podpowiedz":"Zjawisko publikowania w sieci zdjęć dziecka przez jego rodziców, zanim samo zdążyło zdecydować o swoim publicznym wizerunku.","modul":"HoldUp","zrodlo":"Z7","miejsce":"rozwinięcie posta, ślad pozostawiony przez innych"},{"id":"h05","haslo":"HALUCYNACJA","podpowiedz":"Odpowiedź modelu językowego, która brzmi płynnie i pewnie, a jest nieprawdziwa.","modul":"HoldUp","zrodlo":"Z14","miejsce":"rozwinięcie posta, czym jest"},{"id":"h06","haslo":"ŚLAD CYFROWY","podpowiedz":"Wszystko, co po Tobie zostaje w sieci: świadomie opublikowane treści, ale też historia aktywności, lokalizacje i dane zebrane przez serwisy.","modul":"HoldUp","zrodlo":"Z7","miejsce":"rozwinięcie posta, pierwszy akapit"},{"id":"h07","haslo":"SEKSTORSJA","podpowiedz":"Szantaż intymnymi materiałami: sprawca grozi ich rozesłaniem i żąda pieniędzy, kolejnych materiałów lub innych działań.","modul":"HoldUp","zrodlo":"Z6","miejsce":"rozwinięcie posta, definicja"},{"id":"h08","haslo":"CATFISHING","podpowiedz":"Udawanie kogoś innego w sieci za pomocą cudzych zdjęć i zmyślonej biografii, niekoniecznie w celu wyłudzenia pieniędzy.","modul":"HoldUp","zrodlo":"Z4","miejsce":"podsumowanie posta, drugi punkt"},{"id":"h09","haslo":"SWATTING","podpowiedz":"Fałszywe zgłoszenie na numer alarmowy, by wysłać uzbrojoną interwencję pod cudzy adres.","modul":"HoldUp","zrodlo":"Z5","miejsce":"podsumowanie posta, drugi punkt"},{"id":"h10","haslo":"SŁUP FINANSOWY","podpowiedz":"Osoba, która użycza swojego konta, karty lub BLIK-a albo wypłaca i przekazuje pieniądze pochodzące z przestępstwa.","modul":"HoldUp","zrodlo":"Z8","miejsce":"rozwinięcie posta, definicja"},{"id":"h11","haslo":"PATOSTREAMING","podpowiedz":"Transmisje na żywo, w których twórca zarabia na przemocy, upokorzeniu, alkoholu lub innych zachowaniach na granicy prawa.","modul":"HoldUp","zrodlo":"Z9","miejsce":"rozwinięcie posta, definicja"},{"id":"h12","haslo":"CZYTANIE BOCZNE","podpowiedz":"Metoda weryfikacji: zamiast zagłębiać się w podejrzaną stronę, opuszczasz ją i sprawdzasz w innych źródłach, co o niej mówią.","modul":"HoldUp","zrodlo":"Z10","miejsce":"rozwinięcie posta, metoda weryfikacji"},{"id":"h13","haslo":"PREBUNKING","podpowiedz":"Uprzedzające szczepienie przed technikami manipulacji.","modul":"HoldUp","zrodlo":"Z10","miejsce":"podsumowanie posta, spór o sposoby walki z dezinformacją"},{"id":"h14","haslo":"KRYPTOWALUTA","podpowiedz":"Zapis w rejestrze transakcji, który prowadzi jednocześnie wiele komputerów, bez jednego banku pośrodku.","modul":"HoldUp","zrodlo":"Z13","miejsce":"rozwinięcie posta, czym są"},{"id":"h15","haslo":"WYCIEK DANYCH","podpowiedz":"Sytuacja, w której informacje o Tobie trafiły do osób, które nie powinny ich mieć.","modul":"HoldUp","zrodlo":"Z3","miejsce":"rozwinięcie posta, pierwszy akapit"},{"id":"h16","haslo":"DEZINFORMACJA","podpowiedz":"Fałszywe treści rozpowszechniane celowo, w odróżnieniu od błędnej informacji podanej bez złych intencji.","modul":"HoldUp","zrodlo":"Z10","miejsce":"rozwinięcie posta, pierwszy akapit"},{"id":"h17","haslo":"PASSKEYS","podpowiedz":"Sposób logowania, który eliminuje hasło i jest związany z prawdziwą stroną.","modul":"HoldUp","zrodlo":"Z2","miejsce":"podsumowanie posta, trzeci punkt"}],"pytania":[{"id":"p01","tresc":"Kiedy według posta o hasłach warto zmienić hasło?","odpowiedzi":[{"tekst":"Gdy pojawi się podejrzenie wycieku.","poprawna":true},{"tekst":"Co 30 dni, zawsze w tym samym terminie.","poprawna":false},{"tekst":"Dopiero wtedy, gdy konto przestanie działać.","poprawna":false}],"wyjasnienie":"Post zaleca zmianę hasła przy podejrzeniu wycieku, a nie według kalendarza. Wytyczne NIST odradzają wymuszania okresowej zmiany haseł bez powodu.","zrodlo":"Z2","miejsce":"podsumowanie i rozwinięcie posta"},{"id":"p02","tresc":"Dostajesz z komunikatora prośbę od znajomego: „pożycz kod BLIK, oddam jutro”. Co według posta robisz?","odpowiedzi":[{"tekst":"Odsyłasz kod, bo pisze znajomy.","poprawna":false},{"tekst":"Weryfikujesz prośbę telefonem na znany Ci numer.","poprawna":true},{"tekst":"Pytasz w tym samym czacie, czy to na pewno on, i wysyłasz kod po odpowiedzi.","poprawna":false}],"wyjasnienie":"Schemat „BLIK na kolegę” polega na przejęciu konta w komunikatorze. Prośbę o pieniądze zweryfikuj telefonem na znany numer.","zrodlo":"Z1","miejsce":"Co robić i rozwinięcie posta"},{"id":"p03","tresc":"Czym różni się smishing od phishingu?","odpowiedzi":[{"tekst":"To atak wyłącznie na firmy, nigdy na osoby prywatne.","poprawna":false},{"tekst":"To atak przez rozmowę telefoniczną z „konsultantem”.","poprawna":false},{"tekst":"To ten sam trik, tylko w wiadomości SMS.","poprawna":true},{"tekst":"To atak, który wymaga zainstalowania programu na komputerze.","poprawna":false}],"wyjasnienie":"Post wyjaśnia: smishing to ten sam trik w SMS-ie, a vishing przez telefon.","zrodlo":"Z1","miejsce":"rozwinięcie posta, definicja"},{"id":"p04","tresc":"Dlaczego drugi składnik logowania nie chroni przed programem, który kradnie zalogowaną sesję?","odpowiedzi":[{"tekst":"Ciasteczko sesji działa jak przepustka bez hasła i bez kodu.","poprawna":true},{"tekst":"Bo takie programy za każdym razem odgadują kod z aplikacji uwierzytelniającej.","poprawna":false},{"tekst":"Bo drugi składnik działa wyłącznie przy logowaniu przez wiadomość SMS.","poprawna":false}],"wyjasnienie":"Post opisuje, że ciasteczko zalogowanej sesji działa jak przepustka bez hasła i bez kodu. Drugi składnik wciąż jest jednak potrzebny.","zrodlo":"Z16","miejsce":"podsumowanie posta, drugi punkt"},{"id":"p05","tresc":"Co w sprawie zapłaty okupu radzą Europol i partnerzy projektu No More Ransom?","odpowiedzi":[{"tekst":"Płacić od razu, bo to najszybsza droga do odzyskania danych.","poprawna":false},{"tekst":"Ogólnie nie płacić.","poprawna":true},{"tekst":"Płacić tylko wtedy, gdy atak dotyczy podmiotu publicznego.","poprawna":false}],"wyjasnienie":"Post podaje, że nie ma gwarancji odzyskania danych ani pewności, że nie zostaną ujawnione; czasem istnieje też darmowy dekryptor.","zrodlo":"Z16","miejsce":"podsumowanie posta, trzeci punkt"},{"id":"p06","tresc":"Dlaczego model językowy potrafi zmyślać pewnym tonem?","odpowiedzi":[{"tekst":"Bo celowo wprowadza użytkownika w błąd.","poprawna":false},{"tekst":"Przewiduje kolejne słowa, nie sprawdza faktów, a trening nagradza zgadywanie.","poprawna":true},{"tekst":"Bo zagląda do bazy faktów, która jest przestarzała.","poprawna":false},{"tekst":"Bo odpowiada tylko na pytania o rzeczy często opisywane.","poprawna":false}],"wyjasnienie":"Post wyjaśnia, że w modelu nie ma bazy faktów, do której zagląda przed odpowiedzią, tylko wyuczone prawdopodobieństwa, a testy premiują pewną odpowiedź.","zrodlo":"Z14","miejsce":"podsumowanie i rozwinięcie posta"},{"id":"p07","tresc":"Co zrobić z sygnaturą wyroku podaną przez czat AI?","odpowiedzi":[{"tekst":"Sprawdzić ją w oryginale, na przykład w bazie orzeczeń.","poprawna":true},{"tekst":"Przyjąć ją bez sprawdzania, jeśli odpowiedź brzmi pewnie i szczegółowo.","poprawna":false},{"tekst":"Zapytać ten sam czat, czy na pewno się nie myli, i uznać sprawę za zamkniętą.","poprawna":false}],"wyjasnienie":"Post radzi traktować odpowiedź AI jako szkic do sprawdzenia i weryfikować nazwiska, liczby, daty, cytaty i sygnatury w oryginale.","zrodlo":"Z14","miejsce":"Co robić"},{"id":"p08","tresc":"Co według posta robisz, gdy ktoś szantażuje Cię intymnymi materiałami?","odpowiedzi":[{"tekst":"Płacisz raz, żeby szantaż się skończył.","poprawna":false},{"tekst":"Od razu kasujesz konto i rozmowę, żeby zniknął ślad.","poprawna":false},{"tekst":"Odpisujesz sprawcy, że wiesz, kim jest, i żądasz usunięcia materiałów.","poprawna":false},{"tekst":"Nie płacisz, robisz zrzuty ekranu i zgłaszasz sprawę platformie oraz policji.","poprawna":true}],"wyjasnienie":"Post: nie płać i nie odpisuj, zabezpiecz dowody zrzutami ekranu, nie kasuj konta ani rozmowy przed zabezpieczeniem dowodów, zgłoś sprawę. Wstyd nie jest Twoją winą.","zrodlo":"Z6","miejsce":"Co robić dziś"},{"id":"p09","tresc":"Dlaczego płacenie szantażyście nie kończy sprawy?","odpowiedzi":[{"tekst":"Bo sprawca musi odebrać pieniądze osobiście, więc i tak się ujawni.","poprawna":false},{"tekst":"Bo bank i tak cofa taką płatność po tygodniu i szantaż traci sens.","poprawna":false},{"tekst":"Pokazuje, że ofiara płaci, więc żądania zwykle rosną.","poprawna":true}],"wyjasnienie":"Post: płacenie nie kończy szantażu, tylko pokazuje, że ofiara płaci. Żądanie pieniędzy lub kolejnych materiałów zwykle rośnie.","zrodlo":"Z6","miejsce":"podsumowanie posta, trzeci punkt"},{"id":"p10","tresc":"Czym według posta catfishing różni się od oszustwa uczuciowego?","odpowiedzi":[{"tekst":"Catfishing zawsze kończy się prośbą o przelew.","poprawna":false},{"tekst":"Catfishing to udawanie kogoś innego, niekoniecznie w celu wyłudzenia pieniędzy.","poprawna":true},{"tekst":"Catfishing to rozmowa z prawdziwą osobą na portalu randkowym.","poprawna":false},{"tekst":"Catfishing dotyczy wyłącznie znanych osób.","poprawna":false}],"wyjasnienie":"Post: romance scam buduje fałszywą relację, by wyłudzić pieniądze, a catfishing to udawanie kogoś innego w sieci, nie zawsze dla pieniędzy.","zrodlo":"Z4","miejsce":"podsumowanie posta, pierwszy i drugi punkt"},{"id":"p11","tresc":"Co radzi post, zanim zaufasz osobie poznanej w sieci?","odpowiedzi":[{"tekst":"Poprosić o niewielki przelew próbny na swoje konto, żeby sprawdzić uczciwość.","poprawna":false},{"tekst":"Sprawdzić jej zdjęcia wyszukiwaniem odwrotnym.","poprawna":true},{"tekst":"Zaufać od razu, jeśli ma dużo zdjęć na profilu i opisuje swoje życie.","poprawna":false}],"wyjasnienie":"Post radzi sprawdzić zdjęcia wyszukiwaniem odwrotnym i umówić rozmowę wideo na żywo, choć deepfake potrafi zmienić twarz i głos.","zrodlo":"Z4","miejsce":"Co robić"},{"id":"p12","tresc":"Co robisz, gdy Twoje dane zostały opublikowane w sieci po kłótni?","odpowiedzi":[{"tekst":"Od razu usuwasz konto i nic nie zgłaszasz.","poprawna":false},{"tekst":"Publikujesz dane drugiej strony w odwecie.","poprawna":false},{"tekst":"Robisz zrzuty ekranu z adresem strony i datą, zgłaszasz treść platformie i sprawę policji.","poprawna":true}],"wyjasnienie":"Post radzi zachować dowody (zrzuty z adresem strony, datą, nazwą konta), zgłosić treść platformie, zablokować konto i zgłosić sprawę policji.","zrodlo":"Z5","miejsce":"Co robić"},{"id":"p13","tresc":"Dlaczego swatting nie jest „niewinnym żartem”?","odpowiedzi":[{"tekst":"Grupa interwencyjna zakłada realne zagrożenie, a w USA jedno zgłoszenie zabiło niewinnego człowieka.","poprawna":true},{"tekst":"Bo służby zawsze zjawiają się bez broni i bez zagrożenia dla mieszkańców.","poprawna":false},{"tekst":"Bo kara grozi tylko za fałszywy alarm bombowy w dużej instytucji, nie pod adresem.","poprawna":false}],"wyjasnienie":"Post opisuje zdarzenie z USA z grudnia 2017 r. oraz koszty: służby zajęte fałszywym alarmem nie dojadą do prawdziwych ofiar.","zrodlo":"Z5","miejsce":"podsumowanie i komentarze do posta"},{"id":"p14","tresc":"Co jest wspólną cechą ofert werbujących słupów finansowych?","odpowiedzi":[{"tekst":"Wymóg wieloletniego doświadczenia w bankowości.","poprawna":false},{"tekst":"Proste zadanie i duża nagroda w stosunku do wysiłku.","poprawna":true},{"tekst":"Konieczność osobistego spotkania ze zleceniodawcą.","poprawna":false}],"wyjasnienie":"Post: oferta pojawia się jako „praca zdalna”, „pośrednik płatności” lub „test systemu”, a wspólna cecha to proste zadanie i duża nagroda.","zrodlo":"Z8","miejsce":"rozwinięcie posta, definicja"},{"id":"p15","tresc":"Co radzi post, jeśli już przekazałeś komuś dostęp do konta, karty lub BLIK-a?","odpowiedzi":[{"tekst":"Poczekać kilka dni, czy ktoś się odezwie w sprawie przekazanych danych.","poprawna":false},{"tekst":"Zmienić tylko wygląd karty w aplikacji bankowej i nie zgłaszać nic więcej.","poprawna":false},{"tekst":"Od razu zadzwonić do banku (numer z aplikacji lub karty) i zgłosić sprawę policji.","poprawna":true}],"wyjasnienie":"Post: samodzielne zgłoszenie bywa korzystne dla Ciebie, a „nie wiedziałem” nie zawsze chroni.","zrodlo":"Z8","miejsce":"Co robić"},{"id":"p16","tresc":"Jaka jest skuteczna kolejność usuwania niechcianego zdjęcia z sieci?","odpowiedzi":[{"tekst":"Usunąć treść u źródła, zgłosić serwisowi, potem poprosić o usunięcie linku.","poprawna":true},{"tekst":"Najpierw poprosić wyszukiwarkę o usunięcie linku, a potem szukać autora.","poprawna":false},{"tekst":"Wystarczy zmienić imię i nazwisko na profilu.","poprawna":false}],"wyjasnienie":"Post wskazuje skuteczną kolejność: treść u źródła, prośba do serwisu, dopiero potem link w wyszukiwarce. Link znika z wyników, ale treść zostaje na stronie.","zrodlo":"Z7","miejsce":"rozwinięcie posta, prawo do usunięcia danych"},{"id":"p17","tresc":"Dlaczego zdjęcia z dzieciństwa wrzucone przez rodziców są osobnym tematem?","odpowiedzi":[{"tekst":"Bo prawo zabrania rodzicom publikowania jakichkolwiek zdjęć.","poprawna":false},{"tekst":"Publikacja nie była Twoją decyzją, ale ślad jest Twój.","poprawna":true},{"tekst":"Bo rekruterzy nie patrzą na takie zdjęcia.","poprawna":false}],"wyjasnienie":"Post: takie zdjęcia tworzą publiczny wizerunek człowieka, zanim ten zdążył o nim zdecydować. Radzi porozmawiać z rodzicem, a potem poprosić o usunięcie z serwisu.","zrodlo":"Z7","miejsce":"podsumowanie i rozwinięcie posta"},{"id":"p18","tresc":"Co robili zawodowi fact-checkerzy, że oceniali strony trafniej od historyków?","odpowiedzi":[{"tekst":"Czytali ją w głąb, od pierwszego do ostatniego akapitu, w skupieniu.","poprawna":false},{"tekst":"Ufali stronom z rozbudowaną i profesjonalnie napisaną zakładką „O nas”.","poprawna":false},{"tekst":"Opuszczali stronę i sprawdzali, co o niej mówią inne źródła.","poprawna":true}],"wyjasnienie":"Post cytuje badanie Wineburga i McGrew (2019): fact-checkerzy nie zagłębiali się w stronę, tylko opuszczali ją i sprawdzali w innych źródłach.","zrodlo":"Z10","miejsce":"podsumowanie i rozwinięcie posta"},{"id":"p19","tresc":"Jaki sygnał ostrzegawczy przy obrazach „porwanej przez wodę” dziewczynki z powodzi 2024 można sprawdzić bez żadnego narzędzia?","odpowiedzi":[{"tekst":"Czy ta sama „tragedia” dzieje się naraz w wielu miejscowościach.","poprawna":true},{"tekst":"Czy zdjęcie ma wysoką rozdzielczość i wyraźne kolory.","poprawna":false},{"tekst":"Czy post ma więcej niż sto polubień od znajomych.","poprawna":false}],"wyjasnienie":"Post, za Demagogiem: obrazy wygenerowane przez AI pojawiały się także w miejscach, których powódź nie dotknęła, na przykład w Warszawie.","zrodlo":"Z10","miejsce":"rozwinięcie posta"},{"id":"p20","tresc":"Czym jest donejt w patostreamingu?","odpowiedzi":[{"tekst":"Rodzajem kary nakładanej na streamera przez platformę.","poprawna":false},{"tekst":"Dotacją widza, często powiązaną z „zadaniem” dla streamera.","poprawna":true},{"tekst":"Kodem, który ukrywa transmisję przed moderacją platformy.","poprawna":false}],"wyjasnienie":"Post: za określoną kwotę streamer zrobi lub zniesie coś konkretnego, a widz staje się współautorem sceny.","zrodlo":"Z9","miejsce":"rozwinięcie posta, definicja"},{"id":"p21","tresc":"Co pokazuje przykład wycieku z systemu CKE z kwietnia 2025 r.?","odpowiedzi":[{"tekst":"Wyciek był efektem ataku genialnego hakera na serwery.","poprawna":false},{"tekst":"Wyciek dotyczył milionów rekordów ze wszystkich szkół.","poprawna":false},{"tekst":"Systemu nie przełamano: ktoś użył konta pracownika, który tego samego hasła używał prywatnie.","poprawna":true}],"wyjasnienie":"Post: w danych były m.in. PESEL, adres i data urodzenia, poniżej 150 rekordów z jednej szkoły; hasło ujawnione w jednym miejscu jest próbowane w kolejnych.","zrodlo":"Z3","miejsce":"podsumowanie posta, pierwszy punkt"},{"id":"p22","tresc":"Dlaczego warto zastrzec PESEL?","odpowiedzi":[{"tekst":"Wyciekły PESEL zostaje w obiegu na lata, a instytucje mają obowiązek sprawdzać zastrzeżenie.","poprawna":true},{"tekst":"Bo zastrzeżenie zmienia numer PESEL na nowy, więc stary traci ważność.","poprawna":false},{"tekst":"Bo to jedyna ochrona przed wyciekiem danych z każdej bazy w kraju.","poprawna":false}],"wyjasnienie":"Post: PESEL zmienia się tylko z wąskich powodów, a zastrzeżenie w mObywatelu jest darmowe; banki i inne instytucje sprawdzają je od 1 czerwca 2024.","zrodlo":"Z3","miejsce":"podsumowanie posta, trzeci punkt"},{"id":"p23","tresc":"Co radzi post w sprawie frazy odzyskiwania kryptowalut?","odpowiedzi":[{"tekst":"Przechowywać ją w wiadomości do siebie na komunikatorze, żeby była pod ręką.","poprawna":false},{"tekst":"Zapisać ją offline i nie podawać osobom, które powołują się na pomoc techniczną.","poprawna":true},{"tekst":"Przesłać ją giełdzie, żeby zawsze miała kopię na wypadek utraty dostępu.","poprawna":false}],"wyjasnienie":"Post: utrata klucza lub frazy odzyskiwania oznacza utratę środków, więc fraza ma być zapisana offline i tajna.","zrodlo":"Z13","miejsce":"Co robić i rozwinięcie posta"},{"id":"p24","tresc":"Co według posta o deepfake’ach i oszustwach przestało dowodzić tożsamości?","odpowiedzi":[{"tekst":"Podpis na umowie.","poprawna":false},{"tekst":"Numer telefonu w kontaktach.","poprawna":false},{"tekst":"Wideo i głos.","poprawna":true}],"wyjasnienie":"Post: wideo, na którym widzisz dyrektora, i rozmowa głosowa ze znajomym przestały dowodzić tożsamości; weryfikacja ma opierać się na procedurze.","zrodlo":"Z12","miejsce":"podsumowanie i rozwinięcie posta"},{"id":"p25","tresc":"Co radzi post ustalić z bliskimi i w pracy na wypadek oszustwa z klonem głosu?","odpowiedzi":[{"tekst":"Tajne słowo lub pytanie kontrolne.","poprawna":true},{"tekst":"Że każdą prośbę o przelew wykonujecie bez pytań, jeśli brzmi znajomo.","poprawna":false},{"tekst":"Że ważne sprawy załatwiacie tylko wiadomością głosową.","poprawna":false}],"wyjasnienie":"Post: przy każdej nietypowej prośbie o pieniądze rozłącz się i oddzwoń na numer, który sam znajdziesz.","zrodlo":"Z12","miejsce":"Co robić dziś"},{"id":"p26","tresc":"Co realnie grozi w publicznej sieci Wi-Fi według CERT Polska?","odpowiedzi":[{"tekst":"Każdy odwiedzany serwis ujawnia hasła wszystkim w kawiarni.","poprawna":false},{"tekst":"Fałszywy hotspot z fałszywą stroną logowania.","poprawna":true},{"tekst":"Samo włączenie Wi-Fi niszczy telefon.","poprawna":false}],"wyjasnienie":"Post: większość ładowań stron idzie dziś przez szyfrowane HTTPS, a realne ryzyko to fałszywy hotspot.","zrodlo":"Z15","miejsce":"podsumowanie posta, pierwszy punkt"}],"sektory":[{"id":"s01","typ":"punkty","wartosc":200},{"id":"s02","typ":"punkty","wartosc":400},{"id":"s03","typ":"bankrut"},{"id":"s04","typ":"punkty","wartosc":150},{"id":"s05","typ":"punkty","wartosc":300},{"id":"s06","typ":"bonus"},{"id":"s07","typ":"punkty","wartosc":500},{"id":"s08","typ":"punkty","wartosc":250},{"id":"s09","typ":"strata"},{"id":"s10","typ":"punkty","wartosc":350},{"id":"s11","typ":"punkty","wartosc":100},{"id":"s12","typ":"punkty","wartosc":450}],"cena_samogloski":200,"tryby":["solo","spokojny","uwazny","bezbledny"],"rundy":1,"kto_zaczyna":"losowo"}};
+
+</script>
+<script data-gm-plik="kolo-fortuny-model.js">
+/* gry-moodle 0.9.0 — NIE EDYTUJ W KURSIE, poprawiaj w PLUGIN/gry-moodle (~/.claude/local-marketplace-maciek/plugins/gry-moodle) */
+/* mechaniki/kolo-fortuny/model.js — LOGIKA „Koła fortuny” bez DOM (testowalna w node: scripts/test/model_kolo_fortuny.test.js).
+ *
+ * Bank (`dane` wg schemat.json): hasla [{id, haslo, podpowiedz, modul?, zrodlo, miejsce?}], pytania (jak w kolko-krzyzyk),
+ * sektory [{id, typ: "punkty"|"bankrut"|"strata"|"bonus", wartosc?}], cena_samogloski, tryby ["solo"|"spokojny"|"uwazny"|"bezbledny"]
+ * (pierwszy = domyślny), rundy (domyślnie 1), kto_zaczyna "losowo" | "gracz" | "komputer" (tylko z komputerem).
+ *
+ * Reguły: hasło ma ukryte pola; gra kończy się, gdy odsłonięte są WSZYSTKIE litery (zgadywania całego hasła nie ma).
+ * Kolejka: gracz wybiera (1) „pytanie → koło” albo (2) „kup samogłoskę”. Koło zakręca się dopiero po poprawnej odpowiedzi na pytanie
+ * (błąd = kolejka przepada). Sektor „punkty” → gracz wskazuje SPÓŁGŁOSKĘ: jest w haśle → punkty × liczba wystąpień i gracz gra dalej;
+ * nie ma → kolejka przepada. „Bankrut” zeruje punkty rundy i oddaje kolejkę, „Strata kolejki” tylko oddaje kolejkę, „Bonus”
+ * odsłania jedną ukrytą samogłoskę (losowo) i gracz gra dalej. Samogłoski się kupuje za stałą cenę (bez koła i bez pytania);
+ * gdy w haśle zostały same samogłoski, kupno jest bezpłatne (inaczej gra mogłaby utknąć). Punkty rundy wpadają do sumy po odsłonięciu hasła.
+ * Z komputerem: na zmianę, każdy krok komputera to osobne wywołanie ruchKomputera() (widok czeka na „Dalej” po każdym).
+ *
+ * Fazy: "wybor" → "pytanie" → "po-odpowiedzi" → "kolo" → "spolgloska" | "po-ruchu" → … ; "samogloska" (wybór kupowanej);
+ *       "koniec-rundy" → (nowa runda | "koniec"). Klucz odpowiedzi siedzi w treści (`poprawna`), nigdy w pozycji (tasowanie przy zadaniu).
+ */
+(function (global) {
+  "use strict";
+
+  var ALFABET = "AĄBCĆDEĘFGHIJKLŁMNŃOÓPRSŚTUWYZŹŻ".split("");
+  var SAMOGLOSKI = "AĄEĘIOÓUY";
+  /* częstość liter w polszczyźnie (przybliżone %, kolejność ważniejsza niż wartości) — wybór liter komputera */
+  var CZESTOSC = { "A": 8.9, "I": 8.2, "O": 7.8, "E": 7.7, "Z": 5.6, "N": 5.5, "S": 4.8, "R": 4.7, "W": 4.6, "T": 3.9, "C": 4.0, "Y": 3.8,
+    "K": 3.5, "D": 3.3, "P": 3.1, "M": 2.8, "U": 2.5, "J": 2.3, "L": 2.1, "Ł": 1.8, "B": 1.5, "G": 1.4, "Ę": 1.1, "H": 1.1, "Ą": 1.0,
+    "Ż": 0.9, "Ó": 0.8, "Ś": 0.7, "Ć": 0.4, "F": 0.3, "Ń": 0.2, "Ź": 0.1 };
+  var POZIOMY = ["spokojny", "uwazny", "bezbledny"];
+  var TRYBY = ["solo", "spokojny", "uwazny", "bezbledny"];
+  /* komputer: szansa poprawnej odpowiedzi na pytanie i chęć kupienia samogłoski, gdy stać go na nią */
+  var P_ODPOWIEDZ = { spokojny: 0.5, uwazny: 0.75, bezbledny: 1 };
+  var P_KUPNO = { spokojny: 0.15, uwazny: 0.35, bezbledny: 0.5 };
+
+  function indeksy(n) { var o = []; for (var i = 0; i < n; i++) o.push(i); return o; }
+  function wybierz(lista, los) { return lista[Math.floor(los() * lista.length)]; }
+  function tasuj(a, los) {
+    var b = a.slice();
+    for (var i = b.length - 1; i > 0; i--) {
+      var j = Math.floor(los() * (i + 1));
+      var t = b[i]; b[i] = b[j]; b[j] = t;
+    }
+    return b;
+  }
+  function samogloska(l) { return SAMOGLOSKI.indexOf(l) >= 0; }
+  function litera(ch) { return ALFABET.indexOf(ch) >= 0; }
+
+  /* hasło → pola: {z: litera|"", spacja, odsl} */
+  function komorkiHasla(tekst) {
+    return String(tekst).toUpperCase().split("").map(function (ch) {
+      return ch === " " ? { z: "", spacja: true, odsl: true } : { z: ch, spacja: false, odsl: false };
+    });
+  }
+  function ukryte(s) { return s.komorki.filter(function (k) { return !k.spacja && !k.odsl; }); }
+  function ukryteLitery(s, czySam) {
+    var w = [];
+    ukryte(s).forEach(function (k) { if (samogloska(k.z) === czySam && w.indexOf(k.z) < 0) w.push(k.z); });
+    return w;
+  }
+  function kompletne(s) { return ukryte(s).length === 0; }
+  function odslon(s, l) {
+    var ile = 0;
+    s.komorki.forEach(function (k) { if (!k.spacja && k.z === l) { if (!k.odsl) ile++; k.odsl = true; } });
+    return ile;
+  }
+  /* wzorzec: czy słowo z listy pasuje do widocznej części hasła (długość, spacje, odsłonięte litery, brak użytych liter w ukrytych polach) */
+  function pasuje(slowo, s) {
+    slowo = String(slowo).toUpperCase();
+    if (slowo.length !== s.komorki.length) return false;
+    for (var i = 0; i < slowo.length; i++) {
+      var k = s.komorki[i], ch = slowo.charAt(i);
+      if (k.spacja) { if (ch !== " ") return false; }
+      else if (k.odsl) { if (ch !== k.z) return false; }
+      else if (ch === " " || s.uzyte[ch]) return false;
+    }
+    return true;
+  }
+
+  /* wybór litery przez komputer: spokojny = losowo z wagą częstości; uważny = najczęstsza w polszczyźnie;
+     bezbłędny = najczęstsza wśród haseł z banku, które pasują do wzorca (a bez dopasowań — jak uważny) */
+  function wybierzLitere(s, typ, poziom, los, slownik) {
+    var czySam = typ === "samogloska";
+    var kand = ALFABET.filter(function (l) { return !s.uzyte[l] && samogloska(l) === czySam; });
+    if (!kand.length) return null;
+    if (poziom === "bezbledny" && slownik && slownik.length) {
+      var pasujace = slownik.filter(function (w) { return pasuje(w, s); });
+      if (pasujace.length) {
+        var licz = {};
+        pasujace.forEach(function (w) {
+          for (var i = 0; i < w.length; i++) {
+            var ch = w.charAt(i).toUpperCase();
+            if (!s.komorki[i].spacja && !s.komorki[i].odsl) licz[ch] = (licz[ch] || 0) + 1;
+          }
+        });
+        var najl = 0, naj = [];
+        kand.forEach(function (l) {
+          var v = licz[l] || 0;
+          if (v > najl) { najl = v; naj = [l]; } else if (v === najl && v > 0) naj.push(l);
+        });
+        if (naj.length) return wybierz(naj, los);
+      }
+    }
+    if (poziom === "spokojny") {
+      var suma = 0;
+      kand.forEach(function (l) { suma += CZESTOSC[l] || 0.1; });
+      var r = los() * suma;
+      for (var i = 0; i < kand.length; i++) {
+        r -= CZESTOSC[kand[i]] || 0.1;
+        if (r <= 0) return kand[i];
+      }
+      return kand[kand.length - 1];
+    }
+    var m = -1, top = [];
+    kand.forEach(function (l) {
+      var v = CZESTOSC[l] || 0;
+      if (v > m) { m = v; top = [l]; } else if (v === m) top.push(l);
+    });
+    return wybierz(top, los);
+  }
+
+  /* kolejne pytanie: z puli nieużytych (w całej historii), bez powtórzeń w tej grze; po wyczerpaniu puli reset
+     (pytania już zadane w tej grze zostają „użyte”); gdy pula jest mniejsza niż gra — B3 temu zapobiega (≥ 12) */
+  function nastepnePytanie(s, dane, los) {
+    var n = dane.pytania.length;
+    var kandydaci = s.niezuzyte.filter(function (i) { return s.zadane.indexOf(i) < 0; });
+    if (!kandydaci.length) {
+      s.resetPuli = true;
+      s.niezuzyte = indeksy(n).filter(function (i) { return s.zadane.indexOf(i) < 0; });
+      kandydaci = s.niezuzyte.slice();
+      if (!kandydaci.length) { s.zadane = []; s.niezuzyte = indeksy(n); kandydaci = indeksy(n); }
+    }
+    var idx = wybierz(kandydaci, los);
+    s.zadane.push(idx);
+    s.niezuzyte = s.niezuzyte.filter(function (i) { return i !== idx; });
+    var q = dane.pytania[idx];
+    return {
+      idx: idx, id: q.id, tresc: q.tresc,
+      odpowiedzi: tasuj(q.odpowiedzi, los).map(function (o) { return { tekst: o.tekst, poprawna: !!o.poprawna }; })
+    };
+  }
+  function pozycjaPoprawnej(q) {
+    var p = 0;
+    q.odpowiedzi.forEach(function (o, i) { if (o.poprawna) p = i; });
+    return p;
+  }
+
+  function wybierzHasla(dane, los, zuzyte, ile) {
+    var wolne = [];
+    dane.hasla.forEach(function (h, i) { if (zuzyte.indexOf(h.id) < 0) wolne.push(i); });
+    var reset = wolne.length < ile;
+    var puli = reset ? indeksy(dane.hasla.length) : wolne;
+    var wybrane = tasuj(puli, los).slice(0, ile);
+    return { wybrane: wybrane, reset: reset };
+  }
+
+  function poczatekRundy(s, dane) {
+    var h = dane.hasla[s.kolejnoscHasel[s.runda - 1]];
+    s.hasloDane = h;
+    s.komorki = komorkiHasla(h.haslo);
+    s.uzyte = {};
+    s.gracze.forEach(function (g) { g.punktyRundy = 0; });
+    s.sektor = null;
+    s.faza = "wybor";
+    s.nastepna = null;
+  }
+
+  function cena(s, dane) { return ukryteLitery(s, false).length === 0 ? 0 : (dane.cena_samogloski || 0); }
+  function sektory(dane) { return dane.sektory; }
+
+  /* po każdym odsłonięciu: czy hasło kompletne → punkty rundy wpadają do sumy, faza „koniec-rundy” */
+  function sprawdzKoniecRundy(s) {
+    if (!kompletne(s)) return false;
+    s.gracze.forEach(function (g) { g.punkty += g.punktyRundy; });
+    s.wynikiRund.push({ haslo: s.hasloDane.id, punkty: s.gracze.map(function (g) { return g.punktyRundy; }) });
+    s.faza = "koniec-rundy";
+    return true;
+  }
+  function nastepnaKolejka(s) {
+    if (s.gracze.length > 1) s.kolej = 1 - s.kolej;
+    if (s.gracze[s.kolej].id === "gracz") s.kolejki++;
+    s.faza = "wybor";
+    s.nastepna = null;
+    return { typ: "zmiana", kto: s.gracze[s.kolej].id };
+  }
+  function wynikGry(s) {
+    var p = s.gracze.map(function (g) { return g.punkty; });
+    if (s.gracze.length === 1) return { wynik: "solo", punkty: p[0] };
+    return { wynik: p[0] > p[1] ? "gracz" : (p[0] < p[1] ? "komputer" : "remis"), punkty: p };
+  }
+
+  var Model = {
+    ALFABET: ALFABET, SAMOGLOSKI: SAMOGLOSKI, POZIOMY: POZIOMY, TRYBY: TRYBY, CZESTOSC: CZESTOSC, P_ODPOWIEDZ: P_ODPOWIEDZ,
+    samogloska: samogloska, litera: litera, komorkiHasla: komorkiHasla, wybierzLitere: wybierzLitere, pasuje: pasuje,
+    ukryte: ukryte, ukryteLitery: ukryteLitery, kompletne: kompletne, cena: cena, tasuj: tasuj,
+
+    /* nowa gra. opcje: {tryb, kto, zuzyte: [id pytań z poprzednich gier], zuzyteHasla: [id haseł z poprzednich gier]} */
+    nowaGra: function (dane, los, opcje) {
+      los = los || Math.random;
+      opcje = opcje || {};
+      var tryb = opcje.tryb || (dane.tryby && dane.tryby[0]) || "solo";
+      var poziom = tryb === "solo" ? null : tryb;
+      var rundy = Math.max(1, Math.min(dane.rundy || 1, dane.hasla.length));
+      var zuzyte = opcje.zuzyte || [];
+      var niez = [];
+      dane.pytania.forEach(function (q, i) { if (zuzyte.indexOf(q.id) < 0) niez.push(i); });
+      var zh = opcje.zuzyteHasla || [];
+      var wyb = wybierzHasla(dane, los, zh, rundy);
+      var kto = "gracz";
+      if (poziom) {
+        kto = opcje.kto || dane.kto_zaczyna || "losowo";
+        if (kto === "losowo") kto = los() < 0.5 ? "gracz" : "komputer";
+      }
+      var gracze = [{ id: "gracz", punkty: 0, punktyRundy: 0 }];
+      if (poziom) gracze.push({ id: "komputer", punkty: 0, punktyRundy: 0 });
+      var s = {
+        tryb: tryb, poziom: poziom, kto: kto, rundy: rundy, runda: 1, kolejnoscHasel: wyb.wybrane, resetHasel: wyb.reset,
+        zuzyteHasla: (wyb.reset ? [] : zh).concat(wyb.wybrane.map(function (i) { return dane.hasla[i].id; })),
+        gracze: gracze, kolej: kto === "gracz" ? 0 : 1, kolejki: kto === "gracz" ? 1 : 0,
+        biezace: null, zadane: [], niezuzyte: niez, resetPuli: false, historia: [], dobre: 0, wynikiRund: [], wynik: null,
+        ostatnia: null
+      };
+      poczatekRundy(s, dane);
+      return s;
+    },
+
+    zuzyteId: function (s, dane) {
+      var u = [];
+      dane.pytania.forEach(function (q, i) { if (s.niezuzyte.indexOf(i) < 0) u.push(q.id); });
+      return u;
+    },
+    gracz: function (s) { return s.gracze[s.kolej]; },
+    /* czy trwa runda (nie koniec rundy, nie koniec gry) */
+    trwa: function (s) { return s.faza !== "koniec-rundy" && s.faza !== "koniec"; },
+
+    /* ——— wybór na początku kolejki ——— */
+    wybierzPytanie: function (s, dane, los) {
+      los = los || Math.random;
+      if (s.faza === "pytanie") return { typ: "juz-pytanie" };
+      if (s.faza !== "wybor") return { typ: "nie-teraz" };
+      var q = nastepnePytanie(s, dane, los);
+      s.faza = "pytanie";
+      s.biezace = { pytanie: q, kto: s.gracze[s.kolej].id };
+      return { typ: "pytanie", pytanie: q };
+    },
+    kupSamogloske: function (s, dane) {
+      if (s.faza !== "wybor") return { typ: "nie-teraz" };
+      var c = cena(s, dane), g = s.gracze[s.kolej];
+      if (SAMOGLOSKI.split("").every(function (l) { return s.uzyte[l]; })) return { typ: "brak-samoglosek" };
+      if (c > g.punktyRundy) return { typ: "za-malo", cena: c, punkty: g.punktyRundy };
+      s.faza = "samogloska";
+      return { typ: "wybor-samogloski", cena: c, bezplatnie: c === 0 };
+    },
+    anulujZakup: function (s) {
+      if (s.faza !== "samogloska") return { typ: "brak" };
+      s.faza = "wybor";
+      return { typ: "anulowano" };
+    },
+
+    /* ——— pytanie ——— */
+    odpowiedz: function (s, ktora) {
+      if (s.faza !== "pytanie" || !s.biezace) return { typ: "brak" };
+      var q = s.biezace.pytanie;
+      if (!(ktora >= 0 && ktora < q.odpowiedzi.length)) return { typ: "brak" };
+      var wybrana = q.odpowiedzi[ktora], poprawna = pozycjaPoprawnej(q), dobrze = !!wybrana.poprawna;
+      var kto = s.biezace.kto;
+      if (kto === "gracz" && dobrze) s.dobre++;
+      s.historia.push({ idx: q.idx, id: q.id, kto: kto, wybrana: wybrana.tekst, poprawna: q.odpowiedzi[poprawna].tekst, dobrze: dobrze,
+                        rezygnacja: false });
+      s.faza = "po-odpowiedzi";
+      s.nastepna = dobrze ? "kolo" : "zmiana";
+      s.biezace = null;
+      return { typ: "ocena", dobrze: dobrze, poprawna: poprawna, pytanie: q };
+    },
+    /* rezygnacja z pytania (Escape albo przycisk): kolejka przepada, pytanie liczy się jako zadane */
+    rezygnuj: function (s) {
+      if (s.faza === "spolgloska") {
+        s.faza = "po-ruchu"; s.nastepna = "zmiana";
+        return { typ: "rezygnacja-litery" };
+      }
+      if (s.faza !== "pytanie" || !s.biezace) return { typ: "brak" };
+      var q = s.biezace.pytanie, poprawna = pozycjaPoprawnej(q);
+      s.historia.push({ idx: q.idx, id: q.id, kto: s.biezace.kto, wybrana: null, poprawna: q.odpowiedzi[poprawna].tekst, dobrze: false,
+                        rezygnacja: true });
+      s.faza = "po-odpowiedzi";
+      s.nastepna = "zmiana";
+      s.biezace = null;
+      return { typ: "rezygnacja", poprawna: poprawna, pytanie: q };
+    },
+
+    /* ——— „Dalej” po omówieniu / po ruchu ——— */
+    dalej: function (s, dane) {
+      if (s.faza === "po-odpowiedzi" || s.faza === "po-ruchu") {
+        var n = s.nastepna;
+        if (n === "kolo") { s.faza = "kolo"; s.nastepna = null; return { typ: "kolo" }; }
+        if (n === "wybor") { s.faza = "wybor"; s.nastepna = null; return { typ: "wybor" }; }
+        return nastepnaKolejka(s);
+      }
+      if (s.faza === "koniec-rundy") {
+        if (s.runda < s.rundy) {
+          s.runda++;
+          poczatekRundy(s, dane);
+          return { typ: "nowa-runda", runda: s.runda };
+        }
+        s.faza = "koniec";
+        s.wynik = wynikGry(s);
+        return { typ: "koniec", wynik: s.wynik };
+      }
+      return { typ: "brak" };
+    },
+
+    /* ——— koło ——— */
+    zakrec: function (s, dane, los, wymuszony) {
+      los = los || Math.random;
+      if (s.faza !== "kolo") return { typ: "brak" };
+      var lista = sektory(dane);
+      var idx = wymuszony != null && wymuszony >= 0 && wymuszony < lista.length ? wymuszony : Math.floor(los() * lista.length);
+      var sek = lista[idx], g = s.gracze[s.kolej];
+      s.sektor = { idx: idx, id: sek.id, typ: sek.typ, wartosc: sek.wartosc || 0 };
+      var wynik = { typ: "zakrecono", idx: idx, sektor: sek, efekt: sek.typ };
+      if (sek.typ === "punkty") {
+        s.faza = "spolgloska";
+      } else if (sek.typ === "bankrut") {
+        wynik.utracone = g.punktyRundy;
+        g.punktyRundy = 0;
+        s.faza = "po-ruchu"; s.nastepna = "zmiana";
+      } else if (sek.typ === "strata") {
+        s.faza = "po-ruchu"; s.nastepna = "zmiana";
+      } else {   /* bonus: jedna ukryta samogłoska, losowo; potem gracz gra dalej */
+        var ukr = ukryteLitery(s, true);
+        wynik.litera = ukr.length ? wybierz(ukr, los) : null;
+        if (wynik.litera) { s.uzyte[wynik.litera] = "jest"; wynik.ile = odslon(s, wynik.litera); }
+        s.faza = "po-ruchu"; s.nastepna = "wybor";
+        wynik.koniecRundy = sprawdzKoniecRundy(s);
+      }
+      s.ostatnia = wynik;
+      return wynik;
+    },
+
+    /* ——— litery ——— */
+    literaSpolgloska: function (s, dane, l) {
+      if (s.faza !== "spolgloska") return { typ: "nie-teraz" };
+      l = String(l).toUpperCase();
+      if (!litera(l) || samogloska(l)) return { typ: "zla-litera" };
+      if (s.uzyte[l]) return { typ: "uzyta", litera: l };
+      var g = s.gracze[s.kolej], ile = odslon(s, l);
+      s.uzyte[l] = ile ? "jest" : "brak";
+      var punkty = ile * (s.sektor ? s.sektor.wartosc : 0);
+      g.punktyRundy += punkty;
+      s.faza = "po-ruchu"; s.nastepna = ile ? "wybor" : "zmiana";
+      var w = { typ: "litera", litera: l, ile: ile, punkty: punkty };
+      w.koniecRundy = sprawdzKoniecRundy(s);
+      s.ostatnia = w;
+      return w;
+    },
+    literaSamogloska: function (s, dane, l) {
+      if (s.faza !== "samogloska") return { typ: "nie-teraz" };
+      l = String(l).toUpperCase();
+      if (!litera(l) || !samogloska(l)) return { typ: "zla-litera" };
+      if (s.uzyte[l]) return { typ: "uzyta", litera: l };
+      var c = cena(s, dane), g = s.gracze[s.kolej];
+      if (c > g.punktyRundy) return { typ: "za-malo", cena: c, punkty: g.punktyRundy };
+      g.punktyRundy -= c;
+      var ile = odslon(s, l);
+      s.uzyte[l] = ile ? "jest" : "brak";
+      s.faza = "po-ruchu"; s.nastepna = ile ? "wybor" : "zmiana";
+      var w = { typ: "samogloska", litera: l, ile: ile, cena: c };
+      w.koniecRundy = sprawdzKoniecRundy(s);
+      s.ostatnia = w;
+      return w;
+    },
+
+    /* ——— komputer: JEDEN krok na wywołanie (widok pokazuje go i czeka na „Dalej”) ——— */
+    ruchKomputera: function (s, dane, los, slownik) {
+      los = los || Math.random;
+      var g = s.gracze[s.kolej];
+      if (g.id !== "komputer") return { typ: "brak" };
+      var p = s.poziom;
+      if (s.faza === "wybor") {
+        var ukrSam = ukryteLitery(s, true), ukrSp = ukryteLitery(s, false), c = cena(s, dane);
+        var chce = ukrSam.length > 0 && c <= g.punktyRundy && (ukrSp.length === 0 || los() < P_KUPNO[p]);
+        if (chce) {
+          var lit = wybierzLitere(s, "samogloska", p, los, slownik);
+          if (lit) {
+            s.faza = "samogloska";
+            var w = Model.literaSamogloska(s, dane, lit);
+            w.typ = "komp"; w.krok = "kupno"; w.koniecRundy = !!w.koniecRundy;
+            s.ostatnia = w;
+            return w;
+          }
+        }
+        var q = nastepnePytanie(s, dane, los);
+        var dobrze = los() < P_ODPOWIEDZ[p];
+        var poprawna = pozycjaPoprawnej(q), bledna = -1;
+        q.odpowiedzi.forEach(function (o, i) { if (!o.poprawna && bledna < 0) bledna = i; });
+        var wybrana = dobrze ? poprawna : bledna;
+        s.historia.push({ idx: q.idx, id: q.id, kto: "komputer", wybrana: q.odpowiedzi[wybrana].tekst, poprawna: q.odpowiedzi[poprawna].tekst,
+                          dobrze: dobrze, rezygnacja: false });
+        if (dobrze) { s.faza = "kolo"; s.nastepna = null; } else { s.faza = "po-ruchu"; s.nastepna = "zmiana"; }
+        return { typ: "komp", krok: "pytanie", dobrze: dobrze, pytanie: q, poprawna: poprawna };
+      }
+      if (s.faza === "kolo") {
+        var z = Model.zakrec(s, dane, los);
+        z.typ = "komp"; z.krok = "kolo";
+        return z;
+      }
+      if (s.faza === "spolgloska") {
+        var l = wybierzLitere(s, "spolgloska", p, los, slownik);
+        if (!l) {   /* wszystkie spółgłoski użyte (hasło z samymi samogłoskami): kolejka przepada */
+          s.faza = "po-ruchu"; s.nastepna = "zmiana";
+          return { typ: "komp", krok: "litera", litera: null, ile: 0, punkty: 0 };
+        }
+        var r = Model.literaSpolgloska(s, dane, l);
+        r.typ = "komp"; r.krok = "litera";
+        return r;
+      }
+      return { typ: "brak" };
+    },
+
+    /* czy w trwającej rundzie jest co kupić / czy gra jest zakończona (pomoc widoku) */
+    ukryteSamogloski: function (s) { return ukryteLitery(s, true); },
+    ukryteSpolgloski: function (s) { return ukryteLitery(s, false); }
+  };
+
+  global.GmKoloFortuny = Model;
+  if (typeof module !== "undefined" && module.exports) module.exports = Model;
+})(typeof window !== "undefined" ? window : globalThis);
+
+</script>
+<script data-gm-plik="kolo-fortuny-cwiczenie.js">
+/* gry-moodle 0.9.0 — NIE EDYTUJ W KURSIE, poprawiaj w PLUGIN/gry-moodle (~/.claude/local-marketplace-maciek/plugins/gry-moodle) */
+/* mechaniki/kolo-fortuny/cwiczenie.js — WIDOK „Koła fortuny” na warstwie ćwiczeń (bez pętli gry, bez zegara).
+ *
+ * Wymaga: rdzen.js (Gm), cwiczenia/cwiczenie.js (GmCwiczenie), mechaniki/kolo-fortuny/model.js (GmKoloFortuny), dane (GM_DANE).
+ * Treść WYŁĄCZNIE z banku (decyzja 8): hasła i podpowiedzi z `dane.hasla`, pytania z `dane.pytania`, wszystkie napisy z `teksty.widok`.
+ *
+ * Przebieg: ekran startowy (tryb: solo albo z komputerem na trzech poziomach) → hasło jako rząd pól + podpowiedź → kolejka:
+ * „odpowiedz na pytanie i zakręć kołem” albo „kup samogłoskę”. Poprawna odpowiedź odblokowuje koło (SVG rysowane z JS, obrót
+ * transform 2–3 s tylko przy prefers-reduced-motion: no-preference; inaczej wynik od razu i komunikat). Sektor z punktami → klawiatura
+ * ekranowa 32 liter: wskazanie spółgłoski. Nic nie biegnie samo (decyzja 10): każdy krok, także komputera, czeka na „Dalej”.
+ * Gra kończy się, gdy odsłonięte są wszystkie litery; podsumowanie: hasło + podpowiedź + źródło, lista pytań z odpowiedziami.
+ * Klawiatura (tylko w kontenerze, 2.1.4): strzałki/Home/End po literach, Enter/Spacja wybiera, litera z klawiatury fizycznej wskazuje
+ * literę, Escape = rezygnacja z kolejki (przy kupowaniu samogłoski — powrót bez kupowania).
+ */
+(function (global) {
+  "use strict";
+
+  var Gm = global.Gm, Cw = global.GmCwiczenie, Model = global.GmKoloFortuny;
+  if (!Gm || !Cw || !Model) return;
+
+  var NS = "http://www.w3.org/2000/svg";
+  var CZAS_OBROTU = 2600;   /* ms, w zakresie 2–3 s z zamówienia */
+
+  function uruchom(korzen) {
+    var c = Cw.utworz(korzen);
+    if (!c) return null;
+    korzen.classList.add("gm-kf");
+    var bank = c.bank, D = bank.dane, T = c.T, P = D.pytania, H = D.hasla, SEK = D.sektory, el = c.el, wstaw = c.wstaw;
+    var TR = T.tryby || {}, TS = T.sektory || {};
+    var TRYBY = (D.tryby || ["solo"]).map(function (id) {
+      var t = TR[id] || {};
+      return { id: id, nazwa: t.nazwa || id, opis: t.opis || "" };
+    });
+    function trybDane(id) { for (var i = 0; i < TRYBY.length; i++) if (TRYBY[i].id === id) return TRYBY[i]; return TRYBY[0]; }
+    var tryb = TRYBY[0].id;
+    var ID = "gm-" + c.konf.id + "-kf";
+    var SLOWNIK = H.map(function (h) { return h.haslo; });
+
+    var stan = "start";   // start | gra | koniec
+    var gra = null, ui = null;
+    var rng = null, wymus = null;   // wstrzykiwane przez testy (korzen.__widok); bez nich Math.random i los koła
+    var obrot = 0, animuje = false;
+    function los() { return rng ? rng() : Math.random(); }
+
+    function kropka(t) { var k = t.charAt(t.length - 1); return (k === "." || k === "!" || k === "?" || k === "…" || k === "”") ? t : t + "."; }
+    function zrodloPelne(q) {
+      var z = null;
+      (bank.zrodla || []).forEach(function (x) { if (x.id === q.zrodlo) z = x; });
+      return z ? z.krotko + (q.miejsce ? ", " + q.miejsce : "") : "";
+    }
+    function zrodloZdanie(q) { var p = zrodloPelne(q); return p ? " " + wstaw(T.zrodloZdanie, { zrodlo: p }) : ""; }
+
+    /* ——— pule niezużytych między grami: pytania i hasła (localStorage przestrzeni kursu, w try/catch; bez niego — pamięć strony) ——— */
+    function podpis(lista, pola) {
+      var h = 5381;
+      lista.forEach(function (x) {
+        var t = pola.map(function (p) { return x[p]; }).join("|");
+        for (var i = 0; i < t.length; i++) h = (((h << 5) + h) + t.charCodeAt(i)) | 0;
+      });
+      return String(h);
+    }
+    var PODPIS_P = podpis(P, ["id", "tresc"]), PODPIS_H = podpis(H, ["id", "haslo"]);
+    var KLUCZ_P = Gm.klucz(c.konf.przestrzen, "gra", c.konf.id, "pula");
+    var KLUCZ_H = Gm.klucz(c.konf.przestrzen, "gra", c.konf.id, "hasla");
+    function wczytaj(klucz, podp) {
+      try {
+        var o = JSON.parse(Gm.magazyn.czytaj(klucz) || "null");
+        if (o && o.p === podp && Array.isArray(o.u)) return o.u;
+      } catch (e) { /* uszkodzony zapis — pula od nowa */ }
+      return [];
+    }
+    var zuzyteId = wczytaj(KLUCZ_P, PODPIS_P), zuzyteHasla = wczytaj(KLUCZ_H, PODPIS_H);
+    function zapisz(klucz, podp, lista) { Gm.magazyn.zapisz(klucz, JSON.stringify({ p: podp, u: lista })); }
+
+    /* ——— SVG rysowane z JS (filtr treści Moodle zdejmuje fill/stroke ze statycznego SVG; kolory w arkuszu, z tokenów) ——— */
+    function sv(tag, atr, klasa) {
+      var e = document.createElementNS(NS, tag);
+      for (var k in atr) if (Object.prototype.hasOwnProperty.call(atr, k)) e.setAttribute(k, String(atr[k]));
+      if (klasa) e.setAttribute("class", klasa);
+      return e;
+    }
+    function punkt(kat, r) {   // kąt w stopniach zgodnie z ruchem wskazówek od góry
+      var rad = kat * Math.PI / 180;
+      return [100 + r * Math.sin(rad), 100 - r * Math.cos(rad)];
+    }
+    function nazwaSektora(s) {
+      var t = TS[s.typ] || {};
+      return wstaw(t.nazwa || s.typ, { punkty: s.wartosc || "" });
+    }
+    function krotkaSektora(s) {
+      var t = TS[s.typ] || {};
+      return s.typ === "punkty" ? String(s.wartosc) : (t.krotko || t.nazwa || s.typ);
+    }
+    function rysujKolo() {
+      var n = SEK.length, a = 360 / n;
+      var svg = sv("svg", { viewBox: "0 0 200 200", width: "100%", height: "100%", focusable: "false", "aria-hidden": "true" }, "gm-kf__svg");
+      var ptKol = 0;
+      SEK.forEach(function (s, i) {
+        var th = i * a, p1 = punkt(th - a / 2, 96), p2 = punkt(th + a / 2, 96);
+        var kl = s.typ === "punkty" ? (ptKol++ % 2 === 0 ? "gm-kf__sek--a" : "gm-kf__sek--b") : "gm-kf__sek--" + s.typ;
+        svg.appendChild(sv("path", { d: "M100 100 L" + p1[0].toFixed(2) + " " + p1[1].toFixed(2) + " A96 96 0 0 1 " + p2[0].toFixed(2) + " " + p2[1].toFixed(2) + " Z" },
+          "gm-kf__sek " + kl));
+        // etykieta ułożona wzdłuż promienia: koniec napisu przy obrzeżu koła
+        var tk = sv("text", { x: 188, y: 100, transform: "rotate(" + (th - 90).toFixed(2) + " 100 100)", "text-anchor": "end", "dominant-baseline": "central" },
+          "gm-kf__sek-t " + kl + (s.typ === "punkty" ? "" : " gm-kf__sek-t--slowo"));
+        tk.textContent = krotkaSektora(s);
+        svg.appendChild(tk);
+      });
+      svg.appendChild(sv("circle", { cx: 100, cy: 100, r: 96 }, "gm-kf__obrzeze"));
+      svg.appendChild(sv("circle", { cx: 100, cy: 100, r: 13 }, "gm-kf__piasta"));
+      return svg;
+    }
+    function wskaznikSvg() {
+      var s = sv("svg", { viewBox: "0 0 30 34", width: "30", height: "34", focusable: "false", "aria-hidden": "true" }, "gm-kf__wskaznik");
+      s.appendChild(sv("path", { d: "M3 3 L27 3 L15 31 Z" }, "gm-kf__wskaznik-k"));
+      return s;
+    }
+
+    /* ——— ekran startowy ——— */
+    function ekranStart() {
+      gra = null; ui = null; stan = "start";
+      return c.ekranStartowy({
+        opis: c.teksty.opis, poziomy: TRYBY, wybrany: tryb, legenda: T.trybLegend, pytanie: T.trybPyt,
+        uwaga: T.czytnik, zasadyTytul: T.zasadyTytul, zasady: c.teksty.zasady, przycisk: T.zacznij,
+        naStart: function (id, wskaznik) { tryb = id; zacznij(wskaznik); }
+      });
+    }
+
+    /* ——— ekran gry ——— */
+    function kafel(etyk, wart) {
+      var k = el("div", "gm-cw__kafel");
+      k.appendChild(el("span", "gm-cw__kafel-n", etyk));
+      var w = el("span", "gm-cw__kafel-w", wart);
+      k.appendChild(w);
+      return { k: k, w: w };
+    }
+    function przycisk(tekst, klasa, fn) {
+      var b = el("button", "gm-przycisk" + (klasa ? " " + klasa : ""), tekst);
+      b.type = "button";
+      b.addEventListener("click", fn);
+      return b;
+    }
+    function budujEkranGry() {
+      c.ekran.innerHTML = "";
+      ui = { nowe: [], sprawdzone: false, klaw: null, lit: [], kolo: null, panelTyp: "" };
+      var vs = gra.gracze.length > 1;
+      var hud = el("div", "gm-cw__hud gm-kf__hud gm-kf__hud--" + (vs ? "2" : "1"));
+      hud.setAttribute("role", "group");
+      hud.setAttribute("aria-label", T.hudEtyk || "");
+      ui.kafle = {};
+      var k1 = kafel(vs ? T.lPunktyTy : T.lPunkty, ""); ui.kafle.gracz = k1.w; hud.appendChild(k1.k);
+      if (vs) { var k2 = kafel(T.lPunktyKomp, ""); ui.kafle.komputer = k2.w; hud.appendChild(k2.k); }
+      else { var k3 = kafel(T.lKolejka, ""); ui.kafle.kolejka = k3.w; hud.appendChild(k3.k); }
+      if (gra.rundy > 1) { var k4 = kafel(T.lRunda, ""); ui.kafle.runda = k4.w; hud.appendChild(k4.k); }
+      c.ekran.appendChild(hud);
+
+      ui.haslo = el("div", "gm-kf__haslo-blok");
+      var pod = el("p", "gm-kf__podp");
+      pod.appendChild(el("strong", "gm-kf__podp-e", T.podpowiedzEtyk));
+      pod.appendChild(document.createTextNode(" "));
+      ui.podpTekst = el("span", "gm-kf__podp-t");
+      pod.appendChild(ui.podpTekst);
+      ui.haslo.appendChild(pod);
+      ui.plansza = el("div", "gm-kf__haslo");
+      ui.plansza.setAttribute("role", "list");
+      ui.haslo.appendChild(ui.plansza);
+      ui.uzyte = el("p", "gm-kf__uzyte gm-slaby");
+      ui.haslo.appendChild(ui.uzyte);
+      c.ekran.appendChild(ui.haslo);
+
+      ui.stan = el("p", "gm-kf__stan");
+      c.ekran.appendChild(ui.stan);
+
+      var scena = el("div", "gm-kf__scena");
+      var kolo = el("div", "gm-kf__kolo-blok");
+      var wheel = el("div", "gm-kf__kolo");
+      wheel.setAttribute("role", "img");
+      wheel.setAttribute("aria-label", wstaw(T.koloEtyk, { ile: SEK.length }));
+      ui.tarcza = el("div", "gm-kf__tarcza");
+      ui.tarcza.appendChild(rysujKolo());
+      wheel.appendChild(ui.tarcza);
+      wheel.appendChild(wskaznikSvg());
+      kolo.appendChild(wheel);
+      ui.zakrec = przycisk(T.zakrec, "gm-cw__duzy gm-kf__zakrec", zakrec);
+      ui.zakrec.id = ID + "-zakrec";
+      ui.zakrecInfo = el("p", "gm-kf__zakrec-info gm-slaby");
+      ui.zakrecInfo.id = ID + "-zakrec-info";
+      ui.zakrec.setAttribute("aria-describedby", ui.zakrecInfo.id);
+      kolo.appendChild(ui.zakrec);
+      kolo.appendChild(ui.zakrecInfo);
+      ui.ostWynik = el("p", "gm-kf__ost-wynik");
+      kolo.appendChild(ui.ostWynik);
+      kolo.appendChild(legendaSektorow());
+      scena.appendChild(kolo);
+      ui.panel = el("div", "gm-kf__panel");
+      scena.appendChild(ui.panel);
+      c.ekran.appendChild(scena);
+      if (T.podpowiedz) c.ekran.appendChild(el("p", "gm-kf__klaw-info gm-slaby", T.podpowiedz));
+      budujHaslo();
+      odswiezHud();
+      odswiezZakrec();
+    }
+    function legendaSektorow() {
+      var det = el("details", "gm-cw__szczegoly gm-kf__sektory");
+      det.appendChild(el("summary", null, T.sektoryTytul));
+      var ul = el("ul", "gm-cw__lista");
+      var wart = [];
+      SEK.forEach(function (s) { if (s.typ === "punkty" && wart.indexOf(s.wartosc) < 0) wart.push(s.wartosc); });
+      wart.sort(function (a, b) { return a - b; });
+      if (wart.length) ul.appendChild(el("li", null, wstaw(T.sektoryPunkty, { lista: wart.join(", ") })));
+      ["bankrut", "strata", "bonus"].forEach(function (typ) {
+        if (SEK.some(function (s) { return s.typ === typ; }) && TS[typ]) ul.appendChild(el("li", null, TS[typ].nazwa + ": " + TS[typ].opis));
+      });
+      det.appendChild(ul);
+      return det;
+    }
+
+    /* hasło: rząd pól (słowa jako grupy, spacje widoczne jako przerwy); nazwy pól czytane z tekstu poza ekranem */
+    function budujHaslo() {
+      var h = gra.hasloDane;
+      ui.podpTekst.textContent = h.podpowiedz;
+      ui.plansza.innerHTML = "";
+      ui.pola = [];
+      var slowo = null, maks = 0, dl = 0;
+      gra.komorki.forEach(function (k, i) {
+        if (k.spacja) {
+          slowo = null; dl = 0;
+          var sp = el("div", "gm-kf__pole gm-kf__pole--spacja");
+          sp.setAttribute("role", "listitem");
+          sp.appendChild(el("span", "gm-sr", ""));
+          ui.plansza.appendChild(sp);
+          ui.pola.push({ e: sp, lit: null, sr: sp.firstChild, stan: "spacja" });
+          return;
+        }
+        if (!slowo) {
+          slowo = el("div", "gm-kf__slowo");
+          slowo.setAttribute("role", "none");
+          ui.plansza.appendChild(slowo);
+        }
+        dl++; if (dl > maks) maks = dl;
+        var p = el("div", "gm-kf__pole");
+        p.setAttribute("role", "listitem");
+        var lit = el("span", "gm-kf__lit");
+        lit.setAttribute("aria-hidden", "true");
+        var sr = el("span", "gm-sr", "");
+        p.appendChild(lit); p.appendChild(sr);
+        slowo.appendChild(p);
+        ui.pola.push({ e: p, lit: lit, sr: sr, stan: "" });
+      });
+      ui.plansza.style.setProperty("--kf-n", String(Math.max(maks, 6)));
+      ui.nowe = [];
+      odswiezHaslo();
+    }
+    function odswiezHaslo() {
+      var odsl = 0, ile = 0;
+      gra.komorki.forEach(function (k, i) {
+        var p = ui.pola[i];
+        if (k.spacja) { p.sr.textContent = wstaw(T.poleHasla, { n: i + 1, stan: T.poleSpacja }); return; }
+        ile++;
+        var st = k.odsl ? "litera" : "zakryte";
+        if (k.odsl) odsl++;
+        if (p.stan !== st) {
+          p.stan = st;
+          p.lit.textContent = k.odsl ? k.z : "";
+          var nowy = k.odsl && ui.nowe.indexOf(i) >= 0;
+          p.e.className = "gm-kf__pole" + (k.odsl ? " gm-kf--odslonieta" : "") + (nowy ? " gm-kf--nowa" : "");
+          if (nowy) p.e.addEventListener("animationend", function () { this.classList.remove("gm-kf--nowa"); }, { once: true });
+        }
+        p.sr.textContent = wstaw(T.poleHasla, { n: i + 1, stan: k.odsl ? wstaw(T.poleLitera, { litera: k.z }) : T.poleZakryte });
+      });
+      ui.plansza.setAttribute("aria-label", wstaw(T.hasloEtyk, { odsl: odsl, ile: ile }));
+      // użyte litery tekstem (nie tylko kolorem na klawiaturze)
+      var jest = [], brak = [];
+      Model.ALFABET.forEach(function (l) { if (gra.uzyte[l] === "jest") jest.push(l); else if (gra.uzyte[l] === "brak") brak.push(l); });
+      ui.uzyte.textContent = (jest.length || brak.length)
+        ? (jest.length ? wstaw(T.uzyteJest, { lista: jest.join(", ") }) : "") + (jest.length && brak.length ? " " : "") +
+          (brak.length ? wstaw(T.uzyteBrak, { lista: brak.join(", ") }) : "")
+        : T.uzyteZadne;
+    }
+    function odswiezHud() {
+      var vs = gra.gracze.length > 1, g0 = gra.gracze[0];
+      function pkt(g) {
+        return gra.rundy > 1 ? wstaw(T.punktyWartRundy, { n: g.punktyRundy, lacznie: g.punkty }) : wstaw(T.punktyWart, { n: g.punktyRundy });
+      }
+      ui.kafle.gracz.textContent = pkt(g0);
+      if (vs) ui.kafle.komputer.textContent = pkt(gra.gracze[1]);
+      else ui.kafle.kolejka.textContent = wstaw(T.kolejkaWart, { n: gra.kolejki });
+      if (ui.kafle.runda) ui.kafle.runda.textContent = wstaw(T.rundaWart, { n: gra.runda, ile: gra.rundy });
+    }
+    function ustawStan(t) { if (ui && ui.stan) ui.stan.textContent = t; }
+    function pustyPanel() { ui.panel.innerHTML = ""; ui.klaw = null; ui.panelTyp = ""; }
+    function czyGracz() { return gra.gracze[gra.kolej].id === "gracz"; }
+    function odswiezZakrec() {
+      var moze = gra.faza === "kolo" && czyGracz() && !animuje;
+      ui.zakrec.setAttribute("aria-disabled", moze ? "false" : "true");
+      ui.zakrecInfo.textContent = moze ? T.zakrecMozna : (animuje ? T.zakrecTrwa : T.zakrecNajpierw);
+    }
+
+    /* ——— początek kolejki gracza ——— */
+    function pokazWybor(ogl) {
+      stanGra();
+      pustyPanel();
+      ui.panelTyp = "wybor";
+      ustawStan(T.stanWybor);
+      var blok = el("div", "gm-kf__dialog");
+      blok.appendChild(c.h(1, T.wyborH, "gm-kf__panel-h"));
+      blok.appendChild(el("p", null, T.wyborTekst));
+      var b1 = przycisk(T.btnPytanie, "gm-cw__duzy gm-kf__btn-pytanie", klikPytanie);
+      blok.appendChild(b1);
+      var cena = Model.cena(gra, D), pkt = gra.gracze[gra.kolej].punktyRundy;
+      var wolne = Model.SAMOGLOSKI.split("").some(function (l) { return !gra.uzyte[l]; });
+      var b2 = przycisk(cena === 0 ? T.btnKupZa : wstaw(T.btnKup, { cena: cena }), "gm-przycisk--cichy gm-cw__duzy gm-kf__btn-kup", klikKup);
+      b2.id = ID + "-kup";
+      var powod = null;
+      if (!wolne) powod = T.kupBrakSamoglosek;
+      else if (cena > pkt) powod = wstaw(T.kupBrakPunktow, { cena: cena, punkty: pkt });
+      if (powod) {
+        b2.setAttribute("aria-disabled", "true");
+        var inf = el("p", "gm-kf__kup-info gm-slaby", powod);
+        inf.id = ID + "-kup-info";
+        b2.setAttribute("aria-describedby", inf.id);
+        blok.appendChild(b2); blok.appendChild(inf);
+      } else {
+        if (cena === 0) {
+          var bz = el("p", "gm-kf__kup-info gm-slaby", T.kupBezplatnie);
+          bz.id = ID + "-kup-info";
+          b2.setAttribute("aria-describedby", bz.id);
+          blok.appendChild(b2); blok.appendChild(bz);
+        } else blok.appendChild(b2);
+      }
+      ui.panel.appendChild(blok);
+      b1.focus({ preventScroll: true });
+      if (ogl) c.mow(ogl, 350);
+    }
+    function stanGra() { odswiezHud(); odswiezZakrec(); }
+
+    function klikKup() {
+      if (!gra || stan !== "gra" || gra.faza !== "wybor") return;
+      var r = Model.kupSamogloske(gra, D);
+      if (r.typ === "za-malo") { c.mow(wstaw(T.kupBrakPunktow, { cena: r.cena, punkty: r.punkty })); return; }
+      if (r.typ === "brak-samoglosek") { c.mow(T.kupBrakSamoglosek); return; }
+      if (r.typ !== "wybor-samogloski") return;
+      pokazLitery("samogloska");
+    }
+
+    /* ——— pytanie (warunek zakręcenia kołem) ——— */
+    function klikPytanie() {
+      if (!gra || stan !== "gra") return;
+      var r = Model.wybierzPytanie(gra, D, los);
+      if (r.typ !== "pytanie") return;
+      zuzyteId = Model.zuzyteId(gra, D);
+      zapisz(KLUCZ_P, PODPIS_P, zuzyteId);
+      pokazPytanie(r);
+    }
+    function pokazPytanie(r) {
+      pustyPanel();
+      ui.panelTyp = "pytanie";
+      ui.sprawdzone = false;
+      ustawStan(T.stanPytanie);
+      var dlg = el("div", "gm-kf__dialog");
+      dlg.setAttribute("role", "dialog");
+      dlg.setAttribute("aria-modal", "false");
+      var nag = c.h(1, T.pytanieH, "gm-kf__panel-h");
+      nag.id = ID + "-pyt-h";
+      dlg.setAttribute("aria-labelledby", nag.id);
+      dlg.appendChild(nag);
+      var cialo = el("div", "gm-kf__pytanie");
+      dlg.appendChild(cialo);
+      ui.panel.appendChild(dlg);
+      var p = c.pytanie(cialo, {
+        legenda: r.pytanie.tresc,
+        opcje: r.pytanie.odpowiedzi.map(function (o, i) { return { id: String(i), tekst: o.tekst }; }),
+        dalej: T.dalej,
+        ocen: function (id) { return ocenOdpowiedz(parseInt(id, 10)); },
+        naDalej: dalejPoOdpowiedzi
+      });
+      var fs = p.pola[0].inp.closest("fieldset");
+      var leg = fs.querySelector("legend");
+      leg.id = ID + "-pyt-l";
+      fs.setAttribute("role", "radiogroup");
+      fs.setAttribute("aria-labelledby", leg.id);
+      ui.rez = przycisk(T.rezygnuj, "gm-przycisk--cichy gm-kf__rezygnuj", rezygnujPytania);
+      ui.rez.setAttribute("aria-keyshortcuts", "Escape");
+      cialo.appendChild(ui.rez);
+      cialo.appendChild(el("p", "gm-kf__rez-info gm-slaby", T.rezygnujInfo));
+      p.pola[0].inp.focus({ preventScroll: true });
+      if (dlg.scrollIntoView) dlg.scrollIntoView({ block: "nearest" });
+      c.mow(T.ogPytanie, 300);
+    }
+    function ocenOdpowiedz(ktora) {
+      var w = Model.odpowiedz(gra, ktora);
+      ui.sprawdzone = true;
+      odswiezHud();
+      if (ui.rez) ui.rez.hidden = true;
+      var rez = ui.panel.querySelector(".gm-kf__rez-info");
+      if (rez) rez.hidden = true;
+      ustawStan(T.stanOmowienie);
+      var q = P[w.pytanie.idx], popr = w.pytanie.odpowiedzi[w.poprawna].tekst;
+      var tekst = (w.dobrze ? T.dobrzeTekst : wstaw(T.zleTekst, { poprawna: popr })) + " " + q.wyjasnienie + zrodloZdanie(q);
+      return { dobrze: w.dobrze, naglowek: w.dobrze ? T.dobrze : T.zle, tekst: tekst };
+    }
+    function rezygnujPytania() {
+      if (!gra || stan !== "gra" || gra.faza !== "pytanie") return;
+      var w = Model.rezygnuj(gra);
+      if (w.typ !== "rezygnacja") return;
+      odswiezHud();
+      pustyPanel();
+      ustawStan(T.stanOmowienie);
+      var q = P[w.pytanie.idx], popr = w.pytanie.odpowiedzi[w.poprawna].tekst;
+      var blok = el("div", "gm-kf__dialog");
+      ui.panel.appendChild(blok);
+      c.informacja(blok, {
+        ton: "zle", naglowek: T.rezygnacjaNaglowek,
+        tekst: wstaw(T.rezygnacjaTekst, { poprawna: popr }) + " " + q.wyjasnienie + zrodloZdanie(q),
+        dalej: T.dalej, naDalej: dalejPoOdpowiedzi
+      });
+    }
+    function dalejPoOdpowiedzi() {
+      if (!gra || stan !== "gra") return;
+      var r = Model.dalej(gra, D);
+      pustyPanel();
+      if (r.typ === "kolo") pokazKolo();
+      else przejscieKolejki(r);
+    }
+    function pokazKolo() {
+      ui.panelTyp = "kolo";
+      ustawStan(T.stanKolo);
+      var blok = el("div", "gm-kf__dialog");
+      blok.appendChild(c.h(1, T.koloH, "gm-kf__panel-h"));
+      blok.appendChild(el("p", null, T.koloTekst));
+      ui.panel.appendChild(blok);
+      odswiezZakrec();
+      ui.zakrec.focus({ preventScroll: true });
+      if (ui.zakrec.scrollIntoView) ui.zakrec.scrollIntoView({ block: "nearest" });
+      c.mow(T.ogKolo, 300);
+    }
+
+    /* ——— koło ——— */
+    function animujKolo(idx, po) {
+      var n = SEK.length, a = 360 / n;
+      var cel = (((-idx * a + (los() - 0.5) * a * 0.6) % 360) + 360) % 360;
+      var nowy = Math.floor(obrot / 360) * 360 + 360 * (3 + Math.floor(los() * 2)) + cel;
+      if (nowy <= obrot + 720) nowy += 360;
+      var ruch = !!(global.matchMedia && global.matchMedia("(prefers-reduced-motion: no-preference)").matches);
+      obrot = nowy;
+      if (!ruch) {
+        ui.tarcza.style.transition = "none";
+        ui.tarcza.style.transform = "rotate(" + nowy + "deg)";
+        c.mow(T.ogBezRuchu);
+        po();
+        return;
+      }
+      animuje = true;
+      odswiezZakrec();
+      c.mow(T.ogKoloTrwa);
+      ui.tarcza.style.transition = "transform " + CZAS_OBROTU + "ms cubic-bezier(.12,.6,.15,1)";
+      ui.tarcza.style.transform = "rotate(" + nowy + "deg)";
+      var gotowe = false;
+      function koniec() {
+        if (gotowe) return;
+        gotowe = true;
+        animuje = false;
+        if (!ui) return;
+        po();
+      }
+      ui.tarcza.addEventListener("transitionend", function onEnd(e) {
+        if (e.target !== ui.tarcza) return;
+        ui.tarcza.removeEventListener("transitionend", onEnd);
+        koniec();
+      });
+      c.za(koniec, CZAS_OBROTU + 500);
+    }
+    function zakrec() {
+      if (!gra || stan !== "gra" || animuje) return;
+      if (gra.faza !== "kolo" || !czyGracz()) { c.mow(T.zakrecNajpierw); return; }
+      var r = Model.zakrec(gra, D, los, wymus);
+      wymus = null;
+      ustawStan(T.stanKoloTrwa);
+      pustyPanel();
+      animujKolo(r.idx, function () { wynikKola(r, false); });
+    }
+    /* wynik zakręcenia (gracz i komputer): tekst, a potem kolejny krok */
+    function wynikKola(r, komputer) {
+      odswiezZakrec();
+      ui.ostWynik.textContent = wstaw(T.ostWynik, { sektor: nazwaSektora(r.sektor) });
+      var wynikTxt = wstaw(T.ogWynik, { sektor: nazwaSektora(r.sektor) });
+      odswiezHud();
+      if (r.efekt === "punkty") {
+        if (komputer) { pokazInfo({ ton: "ok", tekst: wynikTxt + " " + T.kompWybieraLitere, dalej: dalejKomputer }); return; }
+        pokazLitery("spolgloska", wynikTxt);
+        return;
+      }
+      var opis, ton = "zle";
+      if (r.efekt === "bankrut") opis = wstaw(komputer ? T.kompBankrut : T.bankrut, { utracone: r.utracone });
+      else if (r.efekt === "strata") opis = komputer ? T.kompStrata : T.strata;
+      else {
+        ton = "ok";
+        odswiezHaslo();
+        if (r.litera) opis = wstaw(komputer ? T.kompBonus : T.bonus, { litera: r.litera, ile: r.ile });
+        else opis = komputer ? T.kompBonusBrak : T.bonusBrak;
+      }
+      pokazInfo({ ton: ton, naglowek: wynikTxt, tekst: opis, dalej: komputer ? dalejKomputer : dalejPoRuchu });
+    }
+    function pokazInfo(o) {
+      pustyPanel();
+      var blok = el("div", "gm-kf__dialog");
+      ui.panel.appendChild(blok);
+      ui.panelTyp = "info";
+      ustawStan(T.stanOmowienie);
+      c.informacja(blok, { ton: o.ton, naglowek: o.naglowek, tekst: o.tekst, dalej: o.etykietaDalej || T.dalej, naDalej: o.dalej });
+    }
+
+    /* ——— klawiatura ekranowa: 32 litery w dwóch grupach ——— */
+    function pokazLitery(typ, wstep) {
+      pustyPanel();
+      ui.panelTyp = typ;
+      var sam = typ === "samogloska";
+      ustawStan(sam ? T.stanSamogloska : T.stanSpolgloska);
+      var blok = el("div", "gm-kf__dialog");
+      blok.appendChild(c.h(1, sam ? T.samogloskaH : T.spolgloskaH, "gm-kf__panel-h"));
+      var tekst = sam ? (Model.cena(gra, D) === 0 ? T.samogloskaTekstZa : wstaw(T.samogloskaTekst, { cena: D.cena_samogloski }))
+                      : wstaw(T.spolgloskaTekst, { sektor: nazwaSektora(gra.sektor), punkty: gra.sektor.wartosc });
+      var p = el("p", null, tekst);
+      p.id = ID + "-lit-opis";
+      blok.appendChild(p);
+      var klaw = el("div", "gm-kf__klaw");
+      klaw.setAttribute("role", "group");
+      klaw.setAttribute("aria-label", T.klawEtyk);
+      ui.lit = [];
+      [{ nazwa: T.grupaSpolgloski, sam: false }, { nazwa: T.grupaSamogloski, sam: true }].forEach(function (gr) {
+        var g = el("div", "gm-kf__klaw-grupa");
+        g.setAttribute("role", "group");
+        g.setAttribute("aria-label", gr.nazwa);
+        g.appendChild(el("p", "gm-kf__klaw-nazwa", gr.nazwa)).setAttribute("aria-hidden", "true");
+        var rzad = el("div", "gm-kf__klaw-rzad");
+        Model.ALFABET.forEach(function (l) {
+          if (Model.samogloska(l) !== gr.sam) return;
+          var b = el("button", "gm-kf__klaw-btn", l);
+          b.type = "button";
+          b.setAttribute("tabindex", "-1");
+          b.__lit = l;
+          b.addEventListener("click", function () { literaWybrana(l); });
+          b.addEventListener("focus", function () { ustawRovingLit(b); });
+          ui.lit.push(b);
+          rzad.appendChild(b);
+        });
+        g.appendChild(rzad);
+        klaw.appendChild(g);
+      });
+      blok.appendChild(klaw);
+      var rez = przycisk(sam ? T.anulujZakup : T.rezygnujLitery, "gm-przycisk--cichy gm-kf__rezygnuj", sam ? anulujZakup : rezygnujLitery);
+      rez.setAttribute("aria-keyshortcuts", "Escape");
+      blok.appendChild(rez);
+      ui.panel.appendChild(blok);
+      ui.klaw = { typ: typ };
+      odswiezKlawiature();
+      var pierwsza = ui.lit.filter(function (b) { return dostepna(b.__lit); })[0] || ui.lit[0];
+      ustawRovingLit(pierwsza);
+      pierwsza.focus({ preventScroll: true });
+      if (blok.scrollIntoView) blok.scrollIntoView({ block: "nearest" });
+      c.mow((wstep ? wstep + " " : "") + tekst, 300);
+    }
+    function dostepna(l) {
+      if (!ui.klaw || gra.uzyte[l]) return false;
+      return (ui.klaw.typ === "samogloska") === Model.samogloska(l);
+    }
+    function odswiezKlawiature() {
+      ui.lit.forEach(function (b) {
+        var l = b.__lit, u = gra.uzyte[l];
+        var ok = dostepna(l);
+        b.className = "gm-kf__klaw-btn" + (u ? " gm-kf--uzyta gm-kf--uzyta-" + u : "") + (!u && !ok ? " gm-kf--niedostepna" : "");
+        b.setAttribute("aria-disabled", ok ? "false" : "true");
+        b.setAttribute("aria-label", u ? wstaw(u === "jest" ? T.literaUzytaJest : T.literaUzytaBrak, { litera: l })
+                       : wstaw(ok ? T.literaEtyk : T.literaNiedostepna, { litera: l }));
+        b.innerHTML = "";
+        b.appendChild(document.createTextNode(l));
+        if (u) {
+          var z = el("span", "gm-kf__znacznik", u === "jest" ? "✓" : "✗");
+          z.setAttribute("aria-hidden", "true");
+          b.appendChild(z);
+        }
+      });
+    }
+    function ustawRovingLit(b) { ui.lit.forEach(function (x) { x.setAttribute("tabindex", x === b ? "0" : "-1"); }); }
+    function sasiadLitery(b, dx, dy) {
+      var r = b.getBoundingClientRect(), best = null, bd = 1e9;
+      ui.lit.forEach(function (x) {
+        if (x === b) return;
+        var q = x.getBoundingClientRect();
+        var ddx = (q.left + q.width / 2) - (r.left + r.width / 2), ddy = (q.top + q.height / 2) - (r.top + r.height / 2);
+        if (dx && (Math.abs(ddy) > r.height / 2 || ddx * dx <= 0)) return;
+        if (dy && (ddy * dy <= 0)) return;
+        var d = dx ? Math.abs(ddx) : Math.abs(ddy) * 1000 + Math.abs(ddx);
+        if (d < bd) { bd = d; best = x; }
+      });
+      return best;
+    }
+    function literaWybrana(l) {
+      if (!gra || stan !== "gra" || !ui.klaw) return;
+      var typ = ui.klaw.typ;
+      if (gra.uzyte[l]) { c.mow(wstaw(T.ogUzyta, { litera: l })); return; }
+      if (!dostepna(l)) { c.mow(wstaw(typ === "samogloska" ? T.ogTylkoSamogloski : T.ogTylkoSpolgloski, { litera: l })); return; }
+      var r = typ === "samogloska" ? Model.literaSamogloska(gra, D, l) : Model.literaSpolgloska(gra, D, l);
+      if (r.typ !== "litera" && r.typ !== "samogloska") return;
+      ui.nowe = [];
+      gra.komorki.forEach(function (k, i) { if (k.z === l && k.odsl) ui.nowe.push(i); });
+      odswiezHaslo();
+      odswiezHud();
+      var ton = r.ile ? "ok" : "zle", tekst;
+      if (r.typ === "litera") tekst = r.ile ? wstaw(T.literaJest, { litera: l, ile: r.ile, punkty: r.punkty }) : wstaw(T.literaBrak, { litera: l });
+      else tekst = r.ile ? wstaw(T.kupJest, { litera: l, ile: r.ile, cena: r.cena }) : wstaw(T.kupBrak, { litera: l, cena: r.cena });
+      pokazInfo({ ton: ton, naglowek: r.ile ? T.trafiona : T.pudlo, tekst: tekst, dalej: dalejPoRuchu });
+    }
+    function anulujZakup() {
+      if (!gra || stan !== "gra" || gra.faza !== "samogloska") return;
+      Model.anulujZakup(gra);
+      c.mow(T.ogAnulowano);
+      pokazWybor();
+    }
+    function rezygnujLitery() {
+      if (!gra || stan !== "gra" || gra.faza !== "spolgloska") return;
+      Model.rezygnuj(gra);
+      pokazInfo({ ton: "zle", naglowek: T.rezygnacjaLiteryNaglowek, tekst: T.rezygnacjaLiteryTekst, dalej: dalejPoRuchu });
+    }
+
+    /* ——— po ruchu gracza ——— */
+    function dalejPoRuchu() {
+      if (!gra || stan !== "gra") return;
+      if (gra.faza === "koniec-rundy") { pokazKoniecRundy(); return; }
+      var r = Model.dalej(gra, D);
+      pustyPanel();
+      przejscieKolejki(r);
+    }
+    function przejscieKolejki(r) {
+      odswiezHud(); odswiezZakrec();
+      if (r.typ === "wybor") {
+        if (czyGracz()) pokazWybor(T.ogWybor);
+        else dalejKomputerStart();
+        return;
+      }
+      if (czyGracz()) {
+        var vs = gra.gracze.length > 1;
+        pokazWybor(vs ? T.ogTwojaKolej : T.ogNowaKolejka);
+      } else {
+        dalejKomputerStart(T.ogKolejKomputera);
+      }
+    }
+    function dalejKomputerStart(ogl) {
+      pustyPanel();
+      ustawStan(T.stanKomputer);
+      var blok = el("div", "gm-kf__dialog");
+      ui.panel.appendChild(blok);
+      c.informacja(blok, { tekst: ogl ? T.kompKolej : T.kompKontynuuje, dalej: T.dalej, naDalej: krokKomputera });
+    }
+
+    /* ——— komputer: jeden krok = jedno „Dalej” ——— */
+    function krokKomputera() {
+      if (!gra || stan !== "gra") return;
+      var r = Model.ruchKomputera(gra, D, los, SLOWNIK);
+      if (r.typ !== "komp") return;
+      zuzyteId = Model.zuzyteId(gra, D);
+      zapisz(KLUCZ_P, PODPIS_P, zuzyteId);
+      odswiezHud();
+      pustyPanel();
+      if (r.krok === "pytanie") {
+        var q = P[r.pytanie.idx];
+        var t = wstaw(T.kompPytanie, { tresc: q.tresc }) + " " +
+          (r.dobrze ? T.kompPytanieDobrze : wstaw(T.kompPytanieZle, { poprawna: r.pytanie.odpowiedzi[r.poprawna].tekst }));
+        pokazInfo({ ton: r.dobrze ? "ok" : "zle", tekst: t, dalej: dalejKomputer });
+        return;
+      }
+      if (r.krok === "kolo") {
+        ustawStan(T.stanKoloTrwa);
+        animujKolo(r.idx, function () { wynikKola(r, true); });
+        return;
+      }
+      ui.nowe = [];
+      var l = r.litera;
+      if (l) gra.komorki.forEach(function (k, i) { if (k.z === l && k.odsl) ui.nowe.push(i); });
+      odswiezHaslo();
+      var tekst;
+      if (r.krok === "kupno") {
+        tekst = r.ile ? wstaw(T.kompKupJest, { litera: l, ile: r.ile, cena: r.cena }) : wstaw(T.kompKupBrak, { litera: l, cena: r.cena });
+      } else if (!l) tekst = T.kompBezLitery;
+      else tekst = r.ile ? wstaw(T.kompLiteraJest, { litera: l, ile: r.ile, punkty: r.punkty }) : wstaw(T.kompLiteraBrak, { litera: l });
+      pokazInfo({ ton: r.ile ? "ok" : "zle", tekst: tekst, dalej: dalejKomputer });
+    }
+    function dalejKomputer() {
+      if (!gra || stan !== "gra") return;
+      if (gra.faza === "koniec-rundy") { pokazKoniecRundy(); return; }
+      if (gra.faza === "po-ruchu") {
+        var r = Model.dalej(gra, D);
+        pustyPanel();
+        odswiezHud();
+        if (r.typ === "wybor") { krokKomputera(); return; }
+        przejscieKolejki(r);
+        return;
+      }
+      krokKomputera();
+    }
+
+    /* ——— koniec rundy / gry ——— */
+    function pokazKoniecRundy() {
+      pustyPanel();
+      odswiezHud(); odswiezZakrec();
+      ui.panelTyp = "koniec-rundy";
+      ustawStan(T.stanKoniecRundy);
+      var ostatnia = gra.runda >= gra.rundy;
+      var blok = el("div", "gm-kf__koniec-panel");
+      blok.appendChild(el("p", "gm-kf__koniec-tekst", wstaw(T.koniecRundy, { haslo: gra.hasloDane.haslo })));
+      var btn = przycisk(ostatnia ? T.zobaczPodsumowanie : T.nastepneHaslo, "gm-cw__duzy gm-kf__podsumowanie", function () {
+        var r = Model.dalej(gra, D);
+        if (r.typ === "koniec") { podsumuj(); return; }
+        pustyPanel();
+        budujHaslo();
+        ui.ostWynik.textContent = "";
+        odswiezHud();
+        przejscieNowejRundy();
+      });
+      blok.appendChild(btn);
+      ui.panel.appendChild(blok);
+      btn.focus({ preventScroll: true });
+      if (btn.scrollIntoView) btn.scrollIntoView({ block: "nearest" });
+      c.mow(wstaw(T.koniecRundy, { haslo: gra.hasloDane.haslo }));
+    }
+    function przejscieNowejRundy() {
+      c.mow(wstaw(T.ogNowaRunda, { n: gra.runda, ile: gra.rundy }), 200);
+      if (czyGracz()) pokazWybor();
+      else dalejKomputerStart(T.ogKolejKomputera);
+    }
+
+    function podsumuj() {
+      if (!gra || gra.faza !== "koniec") return;
+      stan = "koniec";
+      var G = gra, vs = G.gracze.length > 1, w = G.wynik.wynik;
+      var moje = G.historia.filter(function (h) { return h.kto === "gracz"; });
+      var zadane = moje.length, bledy = zadane - G.dobre;
+      var liczby = vs
+        ? [{ etyk: T.lPunktyTy, wart: wstaw(T.punktyWartKoniec, { n: G.gracze[0].punkty }) },
+           { etyk: T.lPunktyKomp, wart: wstaw(T.punktyWartKoniec, { n: G.gracze[1].punkty }) }]
+        : [{ etyk: T.lPunkty, wart: wstaw(T.punktyWartKoniec, { n: G.gracze[0].punkty }) },
+           { etyk: T.lKolejki, wart: wstaw(T.kolejkaWart, { n: G.kolejki }) }];
+      liczby.push({ etyk: T.lPoprawne, wart: wstaw(T.poprawneWart, { n: G.dobre, ile: zadane }) });
+      var hasla = G.kolejnoscHasel.map(function (i) {
+        var h = H[i];
+        return { mocne: h.haslo, tekst: h.podpowiedz, dalej: wstaw(T.lZrodlo, { zrodlo: zrodloPelne(h) }) };
+      });
+      var o = {
+        naglowek: vs ? (w === "gracz" ? T.podWygrana : (w === "komputer" ? T.podPrzegrana : T.podRemis)) : T.podSolo,
+        info: [wstaw(T.infoTryb, { tryb: trybDane(G.tryb).nazwa })].concat(vs ? [G.kto === "gracz" ? T.infoPierwszyGracz : T.infoPierwszyKomputer] : []),
+        liczby: liczby,
+        sekcje: [{ tytul: G.rundy > 1 ? T.hasloHWiele : T.hasloH, lid: T.hasloLid, lista: hasla },
+          { tytul: T.lPytaniaH, lid: T.lPytaniaLid,
+            lista: G.historia.map(function (h) {
+              var q = P[h.idx];
+              var tw = h.kto === "komputer" ? wstaw(T.lKomp, { odp: h.wybrana, ocena: h.dobrze ? T.lDobrze : T.lZle })
+                : (h.rezygnacja ? T.lBrak : wstaw(T.lTwoja, { odp: h.wybrana, ocena: h.dobrze ? T.lDobrze : T.lZle }));
+              return { mocne: q.tresc, tekst: tw, dalej: wstaw(T.lPoprawna, { odp: h.poprawna }) + " " + q.wyjasnienie + zrodloZdanie(q) };
+            }) }],
+        wnioskiTytul: T.wnH,
+        wnioski: c.wniosek(T.wn, { wynik: w, bledy: bledy, dobre: G.dobre, zadane: zadane, tryb: G.tryb }),
+        przyciski: [{ tekst: T.jeszcze || c.napis("jeszcze"), fn: function (wsk) { zacznij(wsk); } }]
+      };
+      if (TRYBY.length > 1) {
+        o.przyciski.push({ tekst: T.zmien, cichy: true, fn: function () {
+          ekranStart();
+          var r = c.ekran.querySelector('input[type="radio"]:checked');
+          if (r) r.focus();
+        } });
+      }
+      ui = null;
+      c.podsumowanie(o);
+    }
+
+    /* ——— klawiatura: tylko wewnątrz ćwiczenia (2.1.4) ——— */
+    c.klawisze(function (e) {
+      if (stan !== "gra" || !gra || !ui) return;
+      var k = e.key;
+      if (k === "Escape" || k === "Esc") {
+        if (gra.faza === "pytanie" && !ui.sprawdzone) { e.preventDefault(); rezygnujPytania(); }
+        else if (gra.faza === "spolgloska") { e.preventDefault(); rezygnujLitery(); }
+        else if (gra.faza === "samogloska") { e.preventDefault(); anulujZakup(); }
+        return;
+      }
+      var b = ui.lit && ui.lit.indexOf(e.target) >= 0 ? e.target : null;
+      if (!b || e.shiftKey) return;
+      var cel = null;
+      if (k === "ArrowRight" || k === "Right") cel = sasiadLitery(b, 1, 0);
+      else if (k === "ArrowLeft" || k === "Left") cel = sasiadLitery(b, -1, 0);
+      else if (k === "ArrowDown" || k === "Down") cel = sasiadLitery(b, 0, 1);
+      else if (k === "ArrowUp" || k === "Up") cel = sasiadLitery(b, 0, -1);
+      else if (k === "Home") cel = ui.lit[0];
+      else if (k === "End") cel = ui.lit[ui.lit.length - 1];
+      else if ((k === "Enter" || k === " " || k === "Spacebar") && e.repeat) { e.preventDefault(); return; }
+      if (cel) { e.preventDefault(); ustawRovingLit(cel); cel.focus({ preventScroll: true }); }
+    });
+    /* litera z klawiatury fizycznej (także AltGr+litera z polskiego układu): działa tylko, gdy fokus jest w grze i trwa wskazywanie litery */
+    korzen.addEventListener("keydown", function (e) {
+      if (stan !== "gra" || !gra || !ui || !ui.klaw || e.metaKey) return;
+      if (e.ctrlKey && !e.altKey) return;
+      var k = e.key;
+      if (!k || k.length !== 1) return;
+      var l = k.toUpperCase();
+      if (!Model.litera(l)) return;
+      e.preventDefault();
+      literaWybrana(l);
+    });
+
+    /* ——— start gry ——— */
+    function zacznij(wskaznik) {
+      c.wyczysc();
+      animuje = false; obrot = 0;
+      gra = Model.nowaGra(D, los, { tryb: tryb, zuzyte: zuzyteId, zuzyteHasla: zuzyteHasla });
+      zuzyteHasla = gra.zuzyteHasla.slice();
+      zapisz(KLUCZ_H, PODPIS_H, zuzyteHasla);
+      stan = "gra";
+      budujEkranGry();
+      if (gra.gracze.length === 1) {
+        pokazWybor(T.losowanieSolo);
+        ustawStan(T.stanWybor);
+      } else if (gra.kto === "gracz") {
+        pokazWybor(T.losowanieGracz);
+        ustawStan(T.losowanieGracz);
+      } else {
+        ustawStan(T.losowanieKomputer);
+        pustyPanel();
+        var blok = el("div", "gm-kf__dialog");
+        ui.panel.appendChild(blok);
+        c.informacja(blok, { tekst: T.losowanieKomputer, dalej: T.dalej, naDalej: krokKomputera });
+      }
+    }
+
+    /* Uchwyt dla testów (B11): stan z modelu, wstrzykiwanie generatora losowego i wymuszenie sektora. Widok z niego nie korzysta. */
+    korzen.__widok = {
+      stan: function () {
+        return gra ? { ekran: stan, faza: gra.faza, tryb: gra.tryb, kolej: gra.gracze[gra.kolej].id, kto: gra.kto, runda: gra.runda, rundy: gra.rundy,
+                       punktyRundy: gra.gracze.map(function (g) { return g.punktyRundy; }), punkty: gra.gracze.map(function (g) { return g.punkty; }),
+                       dobre: gra.dobre, zadane: gra.historia.length, kolejki: gra.kolejki, resetPuli: gra.resetPuli, animuje: animuje,
+                       wynik: gra.wynik ? gra.wynik.wynik : null }
+                   : { ekran: stan, tryb: tryb };
+      },
+      ustawRng: function (fn) { rng = fn; },
+      wymusSektor: function (ktory) {
+        if (ktory == null) { wymus = null; return; }
+        if (typeof ktory === "number") { wymus = ktory; return; }
+        wymus = null;
+        SEK.forEach(function (s, i) { if (s.id === ktory && wymus === null) wymus = i; });
+      },
+      zuzyte: function () { return zuzyteId.slice(); },
+      zuzyteHasla: function () { return zuzyteHasla.slice(); }
+    };
+
+    /* wersja tekstowa w widgecie Strony — ta sama treść i kolejność co pozycje_wersji_tekstowej() generatora */
+    var pozycje = H.map(function (h) {
+      var pelne = zrodloPelne(h);
+      return [h.haslo, "Podpowiedź: " + kropka(h.podpowiedz) + (pelne ? " Źródło: " + pelne + "." : "")];
+    }).concat(P.map(function (q) {
+      var popr = "", bledne = [];
+      q.odpowiedzi.forEach(function (o) { if (o.poprawna) popr = o.tekst; else bledne.push(o.tekst); });
+      var pelne = zrodloPelne(q);
+      return [q.tresc, "Poprawna odpowiedź: " + kropka(popr) + " Błędne odpowiedzi: " + kropka(bledne.join("; ")) + " " + q.wyjasnienie +
+                       (pelne ? " Źródło: " + pelne + "." : "")];
+    }));
+    c.wersjaTekstowa(pozycje);
+
+    ekranStart();
+    return c;
+  }
+
+  Cw.zarejestruj("kolo-fortuny", uruchom);
+})(window);
+
+</script>
+</body>
+</html>

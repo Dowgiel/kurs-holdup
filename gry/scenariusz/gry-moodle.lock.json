@@ -1,0 +1,38 @@
+{
+  "plugin": "gry-moodle",
+  "wersja": "0.9.0",
+  "pliki": {
+    "index.html#rdzen.css": {
+      "zrodlo": "rdzen/rdzen.css",
+      "sha256": "e0be428abba38e1172a75f2c0c18d4bca7147b59724c2058a0c32f2d165e3ed1"
+    },
+    "index.html#strona.css": {
+      "zrodlo": "formaty/wspolne/strona.css",
+      "sha256": "c39d7442dee178e346b90ac548e5cfdf3939ac3c5a203d94914ff7e421b3ad43"
+    },
+    "index.html#cwiczenie.css": {
+      "zrodlo": "cwiczenia/cwiczenie.css",
+      "sha256": "f2a99ad04b1c2b1c3bae9324e3a927f027585744e7ed11a770f9f2e99e6c3985"
+    },
+    "index.html#scenariusz.css": {
+      "zrodlo": "mechaniki/scenariusz/scenariusz.css",
+      "sha256": "54258427c4e2be51ab7aeec0b33b11551af7acc7a7e8a0433b29db0163cb4a8c"
+    },
+    "index.html#rdzen.js": {
+      "zrodlo": "rdzen/rdzen.js",
+      "sha256": "ac7a3cc5eb41f50e438db44c760e0d5d9dd45df334114be8d311322915f1dda5"
+    },
+    "index.html#cwiczenie.js": {
+      "zrodlo": "cwiczenia/cwiczenie.js",
+      "sha256": "c3c823e6367e4afd3b5340fe32c1c5640f47b65e0115eb5ca54d57e1a99472be"
+    },
+    "index.html#scenariusz-model.js": {
+      "zrodlo": "mechaniki/scenariusz/model.js",
+      "sha256": "a33c9cb080178320f9bbcf8b268e65ce077e2b1fdb981e6669586f4abdefc21d"
+    },
+    "index.html#scenariusz-cwiczenie.js": {
+      "zrodlo": "mechaniki/scenariusz/cwiczenie.js",
+      "sha256": "7ce99d98420fb0844a84573beb09cae6dbc445c4169b21e6aaf21a60291a4128"
+    }
+  }
+}
